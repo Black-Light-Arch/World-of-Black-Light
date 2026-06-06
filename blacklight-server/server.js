@@ -28,6 +28,27 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../blacklight-chat')));   // serve the website
 
+// ── Debug Path Route ──────────────────────────────────────────
+app.get('/api/debug-paths', (req, res) => {
+    const fs = require('fs');
+    const serverDir = __dirname;
+    const parentDir = path.join(__dirname, '..');
+    try {
+        res.json({
+            __dirname: serverDir,
+            serverContents: fs.readdirSync(serverDir),
+            parentDir: parentDir,
+            parentContents: fs.readdirSync(parentDir),
+            staticPathExists: fs.existsSync(path.join(__dirname, '../blacklight-chat')),
+            staticContents: fs.existsSync(path.join(__dirname, '../blacklight-chat')) 
+                ? fs.readdirSync(path.join(__dirname, '../blacklight-chat')) 
+                : []
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // ── MongoDB Atlas Connection ─────────────────────────────────
 const MONGO_URI   = process.env.MONGO_URI || 'mongodb+srv://<user>:<pass>@cluster.mongodb.net/blacklight?retryWrites=true&w=majority';
 const JWT_SECRET  = process.env.JWT_SECRET || 'blacklight_secret_key_change_in_prod';
