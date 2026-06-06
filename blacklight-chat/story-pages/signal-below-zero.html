@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Signal Below Zero | BlackLight Archive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<header class="navbar">
+    <div class="nav-logo">BlackLight</div>
+    <nav>
+        <a href="../index.html">Home</a>
+        <a href="../games.html">Games</a>
+        <a href="../stories.html">Stories</a>
+        <a href="../devlog.html">DevLog</a>
+        <a href="../about.html">About</a>
+        <div id="nav-auth"></div>
+    </nav>
+</header>
+
+<section class="story-header">
+    <img src="../assets/images/covers/story2.jpg" alt="Signal Below Zero" style="width:220px;border-radius:10px;margin-bottom:28px;border:1px solid rgba(0,150,200,0.3);">
+    <h1>SIGNAL BELOW ZERO</h1>
+    <p>Archive Entry 02 &mdash; Deep-Sea Anomaly Record</p>
+</section>
+
+<section class="story-content reveal">
+
+<p>The deep-sea research station <strong>Nereus-12</strong> was never meant to be manned long-term.</p>
+<p>It was designed for 6-month rotations. Six scientists. Depth: 4,900 meters below sea level.</p>
+<p>No windows. No natural light. No night or day. Just steel walls. Water pressure. And darkness pressing from every direction.</p>
+<p><strong>The first anomaly was audio.</strong></p>
+<p>A low rhythmic pulse began broadcasting through every communication channel. Submarine frequency. Too structured to be tectonic. Too clean to be natural. It repeated every 12 minutes.</p>
+<p>A pattern resembling Morse &mdash; but wrong.</p>
+<p>Engineers tried to trace it. The source was always detected as &ldquo;below station.&rdquo; Which was impossible. There is no &ldquo;below&rdquo; at that depth. Only ocean floor.</p>
+<p>On week 11, crew member <strong>Dr. Hara</strong> stops sleeping.</p>
+<p>She claims the pulses are responding to their conversations. Not in language. In timing. When they whisper, it pulses softer. When they argue, it intensifies. When one crew member cries, it stops completely.</p>
+<p><em>As if listening.</em></p>
+<p>Then the cameras malfunction. Every corridor feed shows condensation forming on interior walls &mdash; from the inside. Water droplets gathering as though something cold walks past. But the temperature remains stable. No leaks. No cracks.</p>
+<p>They send a rover downward. It descends 40 meters beneath the station, drilling toward where the signal should originate. The video feed turns to static at exactly 117 meters below.</p>
+<p>Before cutting, one clear frame is transmitted.</p>
+<p>The ocean floor is not flat. It is <strong>carved</strong>. Spirals. Massive geometric formations too large to be natural erosion. And in the center &mdash; a dark vertical line. Not a trench. A seam. Like something has been split open before.</p>
+<p>The pulse stops the same day. Station systems shut down simultaneously. Not damaged. Simply turned off. Internal logs show manual shutdown commands were executed. Signed by Dr. Hara. She denies touching anything.</p>
+<p>When questioned, she replies calmly: <em>&ldquo;It reached zero.&rdquo;</em></p>
+<p>No one knows what that means.</p>
+<p>Nereus-12 was decommissioned quietly. No public explanation. Satellite imagery later revealed something impossible: the ocean surface above the station ripples in perfect circles every 12 minutes. No storms. No ships. Just circular waves expanding outward.</p>
+<p><em>As if something deep below is breathing.</em></p>
+<p><strong>File Status: &ensp;&#9888; Active monitoring required.</strong></p>
+
+</section>
+
+<div style="text-align:center; padding: 20px 0 60px;">
+    <a href="../stories.html" style="color:#9F73FF;text-decoration:none;font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;">&larr; Return to Archive</a>
+</div>
+
+<footer><p>&copy; 2026 World of BlackLight</p></footer>
+
+<script src="../js/animations.js"></script>
+<script src="../js/particles.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/nav.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!Auth.isLoggedIn()) window.location.href = "../stories.html";
+    });
+</script>
+
+<script src="../js/chatbot-widget.js"></script>
+</body>
+</html>

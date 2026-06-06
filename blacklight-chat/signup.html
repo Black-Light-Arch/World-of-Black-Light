@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up | World of BlackLight</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/forms.css">
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="nav-logo">BlackLight</div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="stories.html">Stories</a>
+        <a href="devlog.html">DevLog</a>
+        <a href="about.html">About</a>
+        <div id="nav-auth"></div>
+    </nav>
+</header>
+
+<!-- SIGNUP SECTION -->
+<section class="form-section">
+
+    <h2>Create Account</h2>
+    <p class="form-subtitle">Join the World of BlackLight</p>
+
+    <div class="form-divider"></div>
+
+    <form id="signupForm" novalidate>
+
+        <!-- Name Row -->
+        <div class="name-row">
+            <div class="input-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" placeholder="First" autocomplete="given-name">
+                <small class="error"></small>
+            </div>
+
+            <div class="input-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" placeholder="Last" autocomplete="family-name">
+                <small class="error"></small>
+            </div>
+        </div>
+
+        <!-- Age -->
+        <div class="input-group">
+            <label for="age">Age</label>
+            <input type="number" id="age" placeholder="Your age" min="13" max="120">
+            <small class="error"></small>
+        </div>
+
+        <!-- Email -->
+        <div class="input-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+            <small id="emailMessage"></small>
+        </div>
+
+        <!-- Password -->
+        <div class="input-group">
+            <label for="password">Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Create a password" autocomplete="new-password">
+                <button type="button" id="togglePassword" class="toggle-btn" aria-label="Show password">🙈</button>
+            </div>
+            <div class="strength-bar">
+                <div id="strengthFill"></div>
+            </div>
+            <ul class="pwd-checklist" id="pwdChecklist">
+                <li id="chk-length"   class="chk-item">Minimum 8 characters</li>
+                <li id="chk-upper"    class="chk-item">At least 1 uppercase letter</li>
+                <li id="chk-lower"    class="chk-item">At least 1 lowercase letter</li>
+                <li id="chk-number"   class="chk-item">At least 1 number</li>
+                <li id="chk-special"  class="chk-item">At least 1 special character</li>
+            </ul>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="input-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="confirmPassword" placeholder="Repeat your password" autocomplete="new-password">
+                <button type="button" id="toggleConfirm" class="toggle-btn" aria-label="Show password">🙈</button>
+            </div>
+            <small class="error" id="confirmError"></small>
+        </div>
+
+
+        <!-- Emoji Profile Picker -->
+        <div class="input-group emoji-picker-group">
+            <label>Choose Your Profile Icon</label>
+            <div class="emoji-grid" id="emojiGrid">
+                <button type="button" class="emoji-option" data-emoji="👁️">👁️</button>
+                <button type="button" class="emoji-option" data-emoji="💀">💀</button>
+                <button type="button" class="emoji-option" data-emoji="🌑">🌑</button>
+                <button type="button" class="emoji-option" data-emoji="👤">👤</button>
+                <button type="button" class="emoji-option" data-emoji="🎮">🎮</button>
+                <button type="button" class="emoji-option" data-emoji="🔮">🔮</button>
+                <button type="button" class="emoji-option" data-emoji="☠️">☠️</button>
+                <button type="button" class="emoji-option" data-emoji="🐺">🐺</button>
+                <button type="button" class="emoji-option" data-emoji="🕷️">🕷️</button>
+                <button type="button" class="emoji-option" data-emoji="🧿">🧿</button>
+                <button type="button" class="emoji-option" data-emoji="🌿">🌿</button>
+                <button type="button" class="emoji-option" data-emoji="🔥">🔥</button>
+            </div>
+            <input type="hidden" id="selectedEmoji" value="">
+            <small class="error" id="emojiError"></small>
+        </div>
+
+        <button type="submit">Create Account</button>
+
+        <p id="successMessage"></p>
+
+    </form>
+
+    <p class="form-footer">
+        Already have an account? <a href="login.html">Sign in &rarr;</a>
+    </p>
+
+</section>
+
+
+<footer>
+    <p>&copy; 2026 World of BlackLight</p>
+</footer>
+
+<script src="js/particles.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/signup.js"></script>
+
+    <script src="js/auth.js"></script>
+    <script src="js/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The City Without Shadows | BlackLight Archive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<header class="navbar">
+    <div class="nav-logo">BlackLight</div>
+    <nav>
+        <a href="../index.html">Home</a>
+        <a href="../games.html">Games</a>
+        <a href="../stories.html">Stories</a>
+        <a href="../devlog.html">DevLog</a>
+        <a href="../about.html">About</a>
+        <div id="nav-auth"></div>
+    </nav>
+</header>
+
+<section class="story-header">
+    <img src="../assets/images/covers/story3.jpg" alt="The City Without Shadows" style="width:220px;border-radius:10px;margin-bottom:28px;border:1px solid rgba(140,80,200,0.3);">
+    <h1>THE CITY WITHOUT SHADOWS</h1>
+    <p>Archive Entry 03 &mdash; Dimensional Inversion Event</p>
+</section>
+
+<section class="story-content reveal">
+
+<p>The phenomenon was first noticed during a solar eclipse. Not because of the darkness. Because of what was missing.</p>
+<p><strong>Shadows.</strong></p>
+<p>For 4 minutes and 21 seconds, nothing cast one. Buildings stood under blocked sunlight. Cars, people, trees &mdash; all without silhouettes. As if light existed but refused to project depth.</p>
+<p>The city reported dizziness and nausea. Many described feeling &ldquo;flat.&rdquo; Like something dimensional had shifted.</p>
+<p>Photographers rushed to capture images. Every photo taken during that window came out overexposed &mdash; white silhouettes where shadows should define shape.</p>
+<p>Except for one.</p>
+<p>A street-level shot taken by a tourist. It shows something different. Instead of shadows beneath people&hellip; dark forms stand <em>behind</em> them. Not attached. Not mimicking. Just positioned.</p>
+<p>After the eclipse ended, shadows returned. But inconsistently. Some citizens reported noticing their shadows move slightly out of sync. A half-second delay. A tilt of the head not mirrored. A wave of an arm unacknowledged. Most dismissed it as imagination.</p>
+<p>Until the disappearances.</p>
+<p>Eleven residents vanished over six weeks. No traces. No crime evidence. But security footage reveals a disturbing pattern: before each disappearance, the person&rsquo;s shadow becomes more defined than their body. Sharper. Darker. Almost dimensional. Then, in the final recorded frame &mdash; the person flickers. And only the shadow remains. Still standing. Solid. Like it has mass.</p>
+<p>A child survivor described it best. When asked what she saw before her father disappeared, she said:</p>
+<p><em>&ldquo;His shadow stepped forward.&rdquo;</em></p>
+<p>The city attempted a complete blackout for one night. Power grid shutdown. No artificial lighting. They believed without light, shadows would not exist.</p>
+<p>At midnight, emergency calls flooded in. Reports of dark figures moving independently through streets. Not attached to anything. Formless yet upright.</p>
+<p>By morning, 37 more were gone. This time, no shadows anywhere. Even under sunlight.</p>
+<p>The city now exists under a strange rule: nothing casts one. Scientists cannot explain it.</p>
+<p><strong>World of BlackLight classifies it as:</strong></p>
+<p><em>Dimensional inversion event. Probability of spread: Unknown.</em></p>
+
+</section>
+
+<div style="text-align:center; padding: 20px 0 60px;">
+    <a href="../stories.html" style="color:#9F73FF;text-decoration:none;font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;">&larr; Return to Archive</a>
+</div>
+
+<footer><p>&copy; 2026 World of BlackLight</p></footer>
+
+<script src="../js/animations.js"></script>
+<script src="../js/particles.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/nav.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!Auth.isLoggedIn()) window.location.href = "../stories.html";
+    });
+</script>
+
+<script src="../js/chatbot-widget.js"></script>
+</body>
+</html>

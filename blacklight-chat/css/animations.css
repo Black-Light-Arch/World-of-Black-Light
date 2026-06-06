@@ -1,0 +1,26 @@
+/* BASE HIDDEN STATE */
+.reveal {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: all 1s ease;
+}
+
+/* WHEN VISIBLE */
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* HERO FADE IN */
+.hero-content {
+    opacity: 0;
+    transform: translateY(40px);
+    animation: heroFade 2s ease forwards;
+}
+
+@keyframes heroFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

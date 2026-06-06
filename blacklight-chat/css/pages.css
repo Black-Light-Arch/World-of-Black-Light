@@ -1,0 +1,32 @@
+/* ===== GAME PAGE ===== */
+
+.game-details {
+  display: flex;
+  gap: 50px;
+  padding: 80px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.game-main-img {
+  width: 500px;
+  border-radius: 10px;
+}
+
+.game-text {
+  max-width: 500px;
+}
+
+.game-text h2 {
+  color: #ff1a1a;
+}
+
+.download-btn {
+  margin-top: 20px;
+  padding: 12px 30px;
+  background: #ff1a1a;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | World of BlackLight</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/forms.css">
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="nav-logo">BlackLight</div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="stories.html">Stories</a>
+        <a href="devlog.html">DevLog</a>
+        <a href="about.html">About</a>
+        <div id="nav-auth"></div>
+    </nav>
+</header>
+
+<!-- LOGIN SECTION -->
+<section class="form-section">
+
+    <h2>Enter</h2>
+    <p class="form-subtitle">Access the BlackLight archive</p>
+
+    <div class="form-divider"></div>
+
+    <form id="loginForm" novalidate>
+
+        <div class="input-group">
+            <label for="loginEmail">Username or Email</label>
+            <input type="text" id="loginEmail" placeholder="username or email" autocomplete="username">
+            <small class="error"></small>
+        </div>
+
+        <div class="input-group">
+            <label for="loginPassword">Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password">
+                <button type="button" id="togglePassword" class="toggle-btn" aria-label="Show password">🙈</button>
+            </div>
+            <small class="error"></small>
+        </div>
+
+        <button type="submit">Enter the Dark</button>
+
+        <p id="loginMessage"></p>
+
+    </form>
+
+    <p class="form-footer">
+        No account yet? <a href="signup.html">Create one &rarr;</a>
+    </p>
+
+</section>
+
+
+<footer>
+    <p>&copy; 2026 World of BlackLight</p>
+</footer>
+
+<script src="js/particles.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/login.js"></script>
+
+    <script src="js/auth.js"></script>
+    <script src="js/nav.js"></script>
+</body>
+</html>

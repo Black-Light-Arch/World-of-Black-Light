@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat | World of BlackLight</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        /* â”€â”€ CHAT LAYOUT â”€â”€ */
+        .chat-wrapper {
+            display: flex;
+            height: calc(100vh - 60px);
+            margin-top: 60px;
+            background: #000;
+            overflow: hidden;
+        }
+
+        /* â”€â”€ SIDEBAR â”€â”€ */
+        .chat-sidebar {
+            width: 300px;
+            min-width: 300px;
+            background: #080808;
+            border-right: 1px solid #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 18px 16px 12px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .sidebar-header h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            color: #9F73FF;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #222;
+            background: transparent;
+            color: #666;
+            font-size: 0.72rem;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+
+        .tab-btn.active {
+            background: #9F73FF22;
+            border-color: #9F73FF;
+            color: #9F73FF;
+        }
+
+        .tab-btn:hover:not(.active) { border-color: #333; color: #aaa; }
+
+        .room-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .room-list::-webkit-scrollbar { width: 3px; }
+        .room-list::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+        .room-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .room-item:hover { background: #0f0f0f; }
+        .room-item.active { background: #110e1a; border-left-color: #9F73FF; }
+
+        .room-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .room-icon.ai     { background: #1a0a2e; border: 1px solid #9F73FF44; }
+        .room-icon.group  { background: #0a1a0a; border: 1px solid #44aa4444; }
+        .room-icon.private{ background: #1a1a0a; border: 1px solid #aaaa4444; }
+
+        .room-info { flex: 1; overflow: hidden; }
+        .room-name { font-size: 0.85rem; color: #ddd; font-family: 'Cinzel', serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .room-preview { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+        .unread-badge {
+            background: #9F73FF;
+            color: #fff;
+            font-size: 0.65rem;
+            border-radius: 10px;
+            padding: 1px 6px;
+            font-family: monospace;
+        }
+
+        .new-room-btn {
+            margin: 8px 12px;
+            padding: 8px;
+            background: #9F73FF11;
+            border: 1px dashed #9F73FF44;
+            color: #9F73FF88;
+            font-size: 0.75rem;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .new-room-btn:hover { background: #9F73FF22; color: #9F73FF; border-color: #9F73FF; }
+
+        /* â”€â”€ MAIN CHAT AREA â”€â”€ */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: #060606;
+            border-bottom: 1px solid #1a1a1a;
+            min-height: 60px;
+        }
+
+        .chat-topbar-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            background: #1a0a2e;
+            border: 1px solid #9F73FF33;
+        }
+
+        .chat-topbar-info { flex: 1; }
+        .chat-topbar-name { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #ddd; }
+        .chat-topbar-sub  { font-size: 0.7rem; color: #555; margin-top: 1px; }
+
+        .admin-badge {
+            background: #9F73FF22;
+            border: 1px solid #9F73FF44;
+            color: #9F73FF;
+            font-size: 0.65rem;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* â”€â”€ MESSAGES â”€â”€ */
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .messages-area::-webkit-scrollbar { width: 3px; }
+        .messages-area::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 2px; }
+
+        .message-row {
+            display: flex;
+            gap: 8px;
+            max-width: 70%;
+        }
+
+        .message-row.mine { align-self: flex-end; flex-direction: row-reverse; }
+        .message-row.theirs { align-self: flex-start; }
+        .message-row.ai-msg { align-self: flex-start; }
+
+        .msg-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+        }
+
+        .msg-bubble-wrap { display: flex; flex-direction: column; gap: 2px; }
+
+        .msg-sender-name {
+            font-size: 0.68rem;
+            color: #9F73FF;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            margin-left: 4px;
+        }
+
+        .message-row.mine .msg-sender-name { text-align: right; margin-right: 4px; margin-left: 0; color: #aaa; }
+
+        .msg-bubble {
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            position: relative;
+            group: message;
+        }
+
+        .mine   .msg-bubble { background: #2a1a4a; border: 1px solid #9F73FF33; border-bottom-right-radius: 3px; color: #e0d4ff; }
+        .theirs .msg-bubble { background: #111; border: 1px solid #222; border-bottom-left-radius: 3px; color: #ccc; }
+        .ai-msg .msg-bubble { background: #0d0a20; border: 1px solid #9F73FF44; border-bottom-left-radius: 3px; color: #c8b8ff; }
+
+        .msg-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .message-row.mine .msg-meta { justify-content: flex-end; }
+
+        .msg-time { font-size: 0.65rem; color: #444; }
+
+        .msg-deleted { font-style: italic; color: #444 !important; font-size: 0.8rem; }
+
+        .delete-btn {
+            opacity: 0;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 0 2px;
+            transition: opacity 0.2s, color 0.2s;
+        }
+
+        .msg-bubble:hover ~ .msg-meta .delete-btn,
+        .msg-meta:hover .delete-btn { opacity: 1; }
+        .delete-btn:hover { color: #ff4444; }
+
+        .admin-view-note {
+            font-size: 0.6rem;
+            color: #9F73FF66;
+            font-style: italic;
+            margin-left: 4px;
+        }
+
+        /* â”€â”€ TYPING INDICATOR â”€â”€ */
+        .typing-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+            min-height: 24px;
+        }
+
+        .typing-dots { display: flex; gap: 3px; }
+        .typing-dots span {
+            width: 5px; height: 5px;
+            background: #9F73FF66;
+            border-radius: 50%;
+            animation: typingPulse 1.2s infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingPulse {
+            0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+
+        .typing-text { font-size: 0.72rem; color: #555; font-style: italic; }
+
+        /* â”€â”€ INPUT AREA â”€â”€ */
+        .chat-input-area {
+            padding: 12px 20px;
+            border-top: 1px solid #1a1a1a;
+            background: #060606;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #0f0f0f;
+            border: 1px solid #222;
+            border-radius: 20px;
+            padding: 10px 16px;
+            color: #eee;
+            font-family: 'Crimson Text', serif;
+            font-size: 0.95rem;
+            resize: none;
+            max-height: 120px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input:focus { border-color: #9F73FF44; }
+        .chat-input::placeholder { color: #333; }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #9F73FF;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .send-btn:hover { background: #7a50dd; }
+        .send-btn:active { transform: scale(0.95); }
+
+        /* â”€â”€ EMPTY STATE â”€â”€ */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: #333;
+        }
+
+        .empty-icon { font-size: 3rem; opacity: 0.3; }
+        .empty-title { font-family: 'Cinzel', serif; font-size: 1rem; letter-spacing: 3px; }
+        .empty-sub { font-size: 0.85rem; }
+
+        /* â”€â”€ AUTH GATE â”€â”€ */
+        .auth-gate {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-card {
+            background: #080808;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 40px;
+            width: 360px;
+            text-align: center;
+        }
+
+        .auth-card h2 {
+            font-family: 'Cinzel', serif;
+            color: #9F73FF;
+            letter-spacing: 3px;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .auth-card p { color: #555; font-size: 0.85rem; margin-bottom: 28px; }
+
+        .auth-btn {
+            display: inline-block;
+            margin: 6px;
+            padding: 10px 24px;
+            background: #9F73FF;
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .auth-btn:hover { background: #7a50dd; }
+        .auth-btn.secondary { background: transparent; border: 1px solid #333; color: #888; }
+        .auth-btn.secondary:hover { border-color: #555; color: #ccc; }
+
+        /* â”€â”€ MODAL â”€â”€ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: #00000099;
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 10px;
+            padding: 28px;
+            width: 340px;
+        }
+
+        .modal-box h3 { font-family: 'Cinzel', serif; color: #9F73FF; letter-spacing: 2px; font-size: 0.95rem; margin-bottom: 20px; }
+
+        .modal-field { margin-bottom: 14px; }
+        .modal-field label { display: block; font-size: 0.75rem; color: #666; margin-bottom: 5px; font-family: 'Cinzel', serif; letter-spacing: 1px; }
+        .modal-field input, .modal-field select {
+            width: 100%;
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #eee;
+            font-family: 'Crimson Text', serif;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .modal-field input:focus, .modal-field select:focus { border-color: #9F73FF44; }
+
+        .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
+
+        .modal-btn {
+            flex: 1;
+            padding: 9px;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-btn.primary { background: #9F73FF; color: #fff; }
+        .modal-btn.primary:hover { background: #7a50dd; }
+        .modal-btn.cancel { background: #111; border: 1px solid #222; color: #666; }
+        .modal-btn.cancel:hover { color: #aaa; }
+
+        /* â”€â”€ ADMIN PANEL TOGGLE â”€â”€ */
+        .admin-panel-btn {
+            padding: 4px 12px;
+            background: #9F73FF11;
+            border: 1px solid #9F73FF33;
+            border-radius: 4px;
+            color: #9F73FF88;
+            font-size: 0.7rem;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .admin-panel-btn:hover { background: #9F73FF22; color: #9F73FF; }
+
+        /* â”€â”€ ADMIN SIDE PANEL â”€â”€ */
+        .admin-panel {
+            width: 280px;
+            background: #050505;
+            border-left: 1px solid #1a1a1a;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+        }
+
+        .admin-panel.open { display: flex; }
+
+        .admin-panel-header {
+            padding: 14px 16px 0;
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: #9F73FF;
+            flex-shrink: 0;
+        }
+
+        /* Admin panel tabs */
+        .admin-tabs {
+            display: flex;
+            gap: 2px;
+            padding: 10px 10px 0;
+            flex-shrink: 0;
+        }
+        .admin-tab {
+            flex: 1;
+            padding: 5px 4px;
+            border: 1px solid #1a1a1a;
+            background: transparent;
+            color: #444;
+            font-family: 'Cinzel', serif;
+            font-size: 0.58rem;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .admin-tab.active { background: #9F73FF22; border-color: #9F73FF55; color: #9F73FF; }
+        .admin-tab:hover:not(.active) { border-color: #333; color: #888; }
+
+        .admin-tab-content { flex: 1; overflow-y: auto; padding: 10px 14px; }
+        .admin-tab-content::-webkit-scrollbar { width: 2px; }
+        .admin-tab-content::-webkit-scrollbar-thumb { background: #1a1a1a; }
+        .admin-tab-pane { display: none; }
+        .admin-tab-pane.active { display: block; }
+
+        .admin-section { margin-bottom: 14px; }
+        .admin-section h4 { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 2px; color: #444; margin-bottom: 8px; text-transform: uppercase; }
+
+        .online-user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            font-size: 0.78rem;
+            color: #888;
+        }
+
+        .online-dot { width: 6px; height: 6px; border-radius: 50%; background: #44aa44; flex-shrink: 0; }
+
+        /* Admin user list */
+        .admin-user-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-bottom: 3px;
+        }
+        .admin-user-row:hover { background: #0f0f0f; }
+        .admin-user-emoji { font-size: 1rem; width: 24px; text-align: center; flex-shrink: 0; }
+        .admin-user-info { flex: 1; min-width: 0; }
+        .admin-user-name { font-size: 0.8rem; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .admin-user-email { font-size: 0.65rem; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .admin-badge-tag { background: #9F73FF22; border: 1px solid #9F73FF44; color: #9F73FF; font-size: 0.55rem; font-family: 'Cinzel', serif; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
+
+        /* Deleted messages */
+        .del-msg-item {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-left: 3px solid #ff444422;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            font-size: 0.78rem;
+        }
+        .del-msg-meta { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .del-msg-sender { color: #9F73FF88; font-family: 'Cinzel', serif; font-size: 0.65rem; }
+        .del-msg-room { color: #333; font-size: 0.62rem; cursor: pointer; }
+        .del-msg-room:hover { color: #9F73FF; }
+        .del-msg-content { color: #999; font-style: italic; line-height: 1.4; }
+        .del-msg-by { color: #ff444466; font-size: 0.62rem; margin-top: 4px; }
+        .del-msg-time { color: #2a2a2a; font-size: 0.6rem; margin-top: 2px; }
+
+        /* Room list in admin */
+        .admin-room-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 4px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-bottom: 2px;
+        }
+        .admin-room-row:hover { background: #0f0f0f; }
+        .admin-room-icon { font-size: 0.9rem; width: 20px; text-align: center; flex-shrink: 0; }
+        .admin-room-name { flex: 1; font-size: 0.78rem; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .admin-room-type { font-size: 0.6rem; color: #333; flex-shrink: 0; }
+
+        /* Cred form */
+        .cred-form { display: flex; flex-direction: column; gap: 8px; }
+        .cred-input {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 4px;
+            padding: 6px 10px;
+            color: #eee;
+            font-size: 0.8rem;
+            outline: none;
+            width: 100%;
+        }
+        .cred-input:focus { border-color: #9F73FF44; }
+        .cred-save-btn {
+            padding: 6px;
+            background: #9F73FF;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        .cred-msg { font-size: 0.72rem; color: #44aa44; text-align: center; }
+
+        /* Support connect button (for regular users in AI chat) */
+        .support-connect-bar {
+            padding: 8px 16px;
+            background: #060606;
+            border-top: 1px solid #111;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .support-connect-bar span { font-size: 0.72rem; color: #444; flex: 1; }
+        .support-connect-btn {
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #1a2a4a, #0d1a30);
+            border: 1px solid #4488ff44;
+            border-radius: 6px;
+            color: #5599ff;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .support-connect-btn:hover {
+            background: linear-gradient(135deg, #223355, #112244);
+            border-color: #4488ff77;
+            color: #88bbff;
+            box-shadow: 0 2px 12px #4488ff22;
+        }
+
+        /* â”€â”€ DATE SEPARATOR â”€â”€ */
+        .date-sep {
+            text-align: center;
+            font-size: 0.68rem;
+            color: #333;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 2px;
+            padding: 4px 0;
+            position: relative;
+        }
+
+        .date-sep::before, .date-sep::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 35%;
+            height: 1px;
+            background: #1a1a1a;
+        }
+        .date-sep::before { left: 0; }
+        .date-sep::after  { right: 0; }
+
+        /* â”€â”€ RESPONSIVE â”€â”€ */
+        @media (max-width: 600px) {
+            .chat-sidebar { width: 220px; min-width: 220px; }
+            .admin-panel  { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<header class="navbar">
+    <div class="nav-logo">BlackLight</div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="stories.html">Stories</a>
+        <a href="devlog.html">DevLog</a>
+        <a href="about.html">About</a>
+        <div id="nav-auth"></div>
+    </nav>
+</header>
+
+<!-- Auth Gate (shown if not logged in) -->
+<div class="auth-gate" id="authGate">
+    <div class="auth-card">
+        <h2>BLACKLIGHT CHAT</h2>
+        <p>Sign in to enter the darkness</p>
+        <a href="login.html" class="auth-btn">Sign In</a>
+        <a href="signup.html" class="auth-btn secondary">Register</a>
+    </div>
+</div>
+
+<!-- Main Chat UI -->
+<div class="chat-wrapper" id="chatWrapper" style="display:none;">
+
+    <!-- Sidebar -->
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            <h2>Messages</h2>
+            <div class="sidebar-tabs">
+                <button class="tab-btn active" data-tab="all"    onclick="filterTab('all')">All</button>
+                <button class="tab-btn"         data-tab="ai"     onclick="filterTab('ai')">AI</button>
+                <button class="tab-btn"         data-tab="private"onclick="filterTab('private')">Private</button>
+                <button class="tab-btn"         data-tab="group"  onclick="filterTab('group')">Groups</button>
+            </div>
+        </div>
+        <div class="room-list" id="roomList"></div>
+        <button class="new-room-btn" onclick="openNewRoomModal()">+ New Group</button>
+        <button class="new-room-btn" style="border-color:#5E3EA044;color:#5E3EA088;" onclick="openPrivateModal()">+ Private Message</button>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-main">
+        <!-- Top Bar -->
+        <div class="chat-topbar" id="chatTopbar">
+            <div class="empty-state" style="flex-direction:row;gap:12px;color:#333;">
+                <span style="font-size:1.5rem;">ðŸ‘</span>
+                <span style="font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:2px;">SELECT A CONVERSATION</span>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages-area" id="messagesArea">
+            <div class="empty-state">
+                <div class="empty-icon">ðŸŒ‘</div>
+                <div class="empty-title">ENTER THE DARKNESS</div>
+                <div class="empty-sub">Select a conversation to begin</div>
+            </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-row" id="typingRow" style="padding:0 20px 4px;"></div>
+
+        <!-- Support connect bar (shown for regular users in AI chat) -->
+        <div class="support-connect-bar" id="supportConnectBar" style="display:none;">
+            <span>Need help from a real person?</span>
+            <button class="support-connect-btn" onclick="connectToSupport()">ðŸ’¬ Talk to Support</button>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input-area" id="chatInputArea" style="display:none;">
+            <textarea class="chat-input" id="chatInput" placeholder="Messageâ€¦" rows="1"
+                oninput="autoResize(this); emitTyping()"
+                onkeydown="handleKey(event)"></textarea>
+            <button class="send-btn" onclick="sendMessage()">âž¤</button>
+        </div>
+    </div>
+
+    <!-- Admin Side Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-panel-header">âš™ ADMIN PANEL</div>
+
+        <!-- Admin tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="switchAdminTab('online')">Online</button>
+            <button class="admin-tab" onclick="switchAdminTab('users')">Users</button>
+            <button class="admin-tab" onclick="switchAdminTab('rooms')">Rooms</button>
+            <button class="admin-tab" onclick="switchAdminTab('deleted')">Deleted</button>
+            <button class="admin-tab" onclick="switchAdminTab('creds')">Creds</button>
+        </div>
+
+        <div class="admin-tab-content">
+
+            <!-- Online Users -->
+            <div class="admin-tab-pane active" id="apane-online">
+                <div class="admin-section">
+                    <h4>ONLINE NOW</h4>
+                    <div id="onlineUsersList"></div>
+                </div>
+            </div>
+
+            <!-- All Users -->
+            <div class="admin-tab-pane" id="apane-users">
+                <div class="admin-section">
+                    <h4>ALL MEMBERS</h4>
+                    <div id="adminUsersList"></div>
+                </div>
+            </div>
+
+            <!-- All Rooms -->
+            <div class="admin-tab-pane" id="apane-rooms">
+                <div class="admin-section">
+                    <h4>ALL ROOMS</h4>
+                    <div id="adminRoomList"></div>
+                </div>
+            </div>
+
+            <!-- Deleted Messages -->
+            <div class="admin-tab-pane" id="apane-deleted">
+                <div class="admin-section">
+                    <h4>DELETED MESSAGES</h4>
+                    <div style="font-size:0.65rem;color:#333;margin-bottom:8px;font-style:italic;">Original content visible to admin only</div>
+                    <div id="adminDeletedList"><div style="color:#333;font-size:0.75rem;">Loadingâ€¦</div></div>
+                </div>
+            </div>
+
+            <!-- Credentials -->
+            <div class="admin-tab-pane" id="apane-creds">
+                <div class="admin-section">
+                    <h4>CHANGE CREDENTIALS</h4>
+                    <div class="cred-form">
+                        <input class="cred-input" id="newUsername" placeholder="New username">
+                        <input class="cred-input" type="password" id="newPassword" placeholder="New password">
+                        <button class="cred-save-btn" onclick="saveCredentials()">SAVE CHANGES</button>
+                        <div class="cred-msg" id="credMsg"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- New Group Modal -->
+<div class="modal-overlay" id="newRoomModal">
+    <div class="modal-box">
+        <h3>NEW GROUP</h3>
+        <div class="modal-field">
+            <label>Group Name</label>
+            <input id="newRoomName" placeholder="e.g. Horror Fans">
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeModal('newRoomModal')">Cancel</button>
+            <button class="modal-btn primary" onclick="createGroup()">Create</button>
+        </div>
+    </div>
+</div>
+
+<!-- Private Message Modal -->
+<div class="modal-overlay" id="privateModal">
+    <div class="modal-box">
+        <h3>PRIVATE MESSAGE</h3>
+        <div class="modal-field">
+            <label>Username</label>
+            <input id="pmUsername" placeholder="Their username">
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeModal('privateModal')">Cancel</button>
+            <button class="modal-btn primary" onclick="openPrivateChat()">Open Chat</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/particles.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script>
+// â”€â”€ Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const SERVER = window.location.origin;
+
+// â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+let socket        = null;
+let currentRoom   = null;
+let currentUser   = null;
+let jwtToken      = null;
+let aiHistory     = [];
+let rooms         = [];
+let activeFilter  = 'all';
+let typingTimeout = null;
+
+// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+window.addEventListener('DOMContentLoaded', async () => {
+    jwtToken = localStorage.getItem('bl_jwt');
+    const userData = localStorage.getItem('bl_user');
+
+    if (!jwtToken || !userData) {
+        document.getElementById('authGate').style.display = 'flex';
+        document.getElementById('chatWrapper').style.display = 'none';
+        return;
+    }
+
+    currentUser = JSON.parse(userData);
+    document.getElementById('authGate').style.display = 'none';
+    document.getElementById('chatWrapper').style.display = 'flex';
+
+    if (currentUser.isAdmin) {
+        document.getElementById('adminPanel').classList.add('open');
+        loadAdminData();
+    }
+
+    await connectSocket();
+    await loadRooms();
+    renderRooms();
+
+    // Check for ?support=1 (from chatbot widget "Talk to Support")
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('support') === '1') {
+        // Auto-open private chat with admin (shehram)
+        await connectToSupport();
+        // Clean URL
+        window.history.replaceState({}, '', 'chat.html');
+    } else {
+        // Default: open AI chat
+        openRoom({ name: `ai:${currentUser.username}`, type: 'ai', displayName: 'BlackLight AI', icon: 'ðŸ¤–' });
+    }
+});
+
+// â”€â”€ Socket â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function connectSocket() {
+    socket = io(SERVER);
+
+    socket.on('connect', () => {
+        socket.emit('authenticate', { token: jwtToken });
+    });
+
+    socket.on('authenticated', (data) => {
+        console.log('âœ… Authenticated as', data.username);
+    });
+
+    socket.on('new_message', (msg) => {
+        if (currentRoom && msg.room === currentRoom.name) {
+            appendMessage(msg);
+            scrollBottom();
+        }
+        updateRoomPreview(msg.room, msg.content, msg.sender);
+        if (!currentRoom || msg.room !== currentRoom.name) {
+            incrementUnread(msg.room);
+        }
+    });
+
+    socket.on('message_deleted', ({ messageId, deletedBy, room, originalContent }) => {
+        const el = document.querySelector(`[data-msg-id="${messageId}"]`);
+        if (el) {
+            const bubble = el.querySelector('.msg-bubble');
+            if (bubble) {
+                if (currentUser.isAdmin) {
+                    bubble.innerHTML = `<span class="msg-deleted">ðŸ—‘ Deleted by ${escapeHtml(deletedBy)}</span> <span class="admin-view-note">[original: "${escapeHtml(originalContent || 'â€¦')}"]</span>`;
+                } else {
+                    bubble.innerHTML = `<span class="msg-deleted">ðŸ—‘ This message was deleted</span>`;
+                }
+            }
+        }
+    });
+
+    socket.on('user_typing', ({ username, room }) => {
+        if (currentRoom && room === currentRoom.name && username !== currentUser.username) {
+            showTyping(username);
+        }
+    });
+
+    socket.on('online_users', (users) => {
+        updateOnlineUsers(users);
+    });
+}
+
+// â”€â”€ Rooms â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function loadRooms() {
+    try {
+        const res = await fetch(`${SERVER}/api/rooms`, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        rooms = await res.json();
+
+        // Always inject AI room at top
+        const aiRoom = { name: `ai:${currentUser.username}`, type: 'ai', displayName: 'BlackLight AI', icon: 'ðŸ¤–', _synthetic: true };
+        rooms = [aiRoom, ...rooms.filter(r => r.name !== aiRoom.name)];
+
+        if (currentUser.isAdmin) {
+            renderAdminRooms();
+        }
+    } catch (e) { console.error('loadRooms error', e); }
+}
+
+function renderRooms() {
+    const list = document.getElementById('roomList');
+    const filtered = rooms.filter(r => {
+        if (activeFilter === 'all')     return true;
+        if (activeFilter === 'ai')      return r.type === 'ai';
+        if (activeFilter === 'private') return r.type === 'private';
+        if (activeFilter === 'group')   return r.type === 'group';
+    });
+
+    list.innerHTML = filtered.map(r => `
+        <div class="room-item ${currentRoom?.name === r.name ? 'active' : ''}"
+             id="room-${CSS.escape(r.name)}"
+             onclick="openRoom(${JSON.stringify(r).replace(/"/g,"'")})">
+            <div class="room-icon ${r.type || 'ai'}">${roomIcon(r)}</div>
+            <div class="room-info">
+                <div class="room-name">${r.displayName || r.name}</div>
+                <div class="room-preview" id="preview-${CSS.escape(r.name)}">â€”</div>
+            </div>
+            <div class="unread-badge" id="unread-${CSS.escape(r.name)}" style="display:none;"></div>
+        </div>`).join('');
+}
+
+function roomIcon(r) {
+    if (r.icon) return r.icon;
+    if (r.type === 'ai')      return 'ðŸ¤–';
+    if (r.type === 'group')   return 'ðŸ‘¥';
+    if (r.type === 'private') return 'ðŸ’¬';
+    return 'ðŸ’¬';
+}
+
+function filterTab(tab) {
+    activeFilter = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    renderRooms();
+}
+
+// â”€â”€ Open Room â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function openRoom(room) {
+    if (typeof room === 'string') room = JSON.parse(room);
+
+    currentRoom = room;
+    room.displayName = room.displayName || room.name;
+
+    const isAdmin = currentUser.isAdmin;
+    document.getElementById('chatTopbar').innerHTML = `
+        <div class="chat-topbar-icon">${roomIcon(room)}</div>
+        <div class="chat-topbar-info">
+            <div class="chat-topbar-name">${room.displayName || room.name}</div>
+            <div class="chat-topbar-sub">${room.type === 'ai' ? 'AI Assistant' : room.type === 'group' ? 'Group Chat' : 'Private'}</div>
+        </div>
+        ${isAdmin ? `<span class="admin-badge">ADMIN VIEW</span>` : ''}
+        ${isAdmin ? `<button class="admin-panel-btn" onclick="toggleAdminPanel()">âš™ Panel</button>` : ''}
+    `;
+
+    document.getElementById('chatInputArea').style.display = 'flex';
+
+    // Show/hide support button for regular users in AI chat
+    const supportBar = document.getElementById('supportConnectBar');
+    if (supportBar) {
+        supportBar.style.display = (!isAdmin && room.type === 'ai') ? 'flex' : 'none';
+    }
+
+    document.getElementById('messagesArea').innerHTML = '<div style="text-align:center;color:#333;font-size:0.8rem;padding:20px;">Loadingâ€¦</div>';
+
+    const badge = document.getElementById(`unread-${CSS.escape(room.name)}`);
+    if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
+
+    document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
+    const el = document.getElementById(`room-${CSS.escape(room.name)}`);
+    if (el) el.classList.add('active');
+
+    if (socket && room.type !== 'ai') socket.emit('join_room', { room: room.name });
+
+    if (room.type === 'ai') {
+        document.getElementById('messagesArea').innerHTML = '';
+        if (aiHistory.length === 0) {
+            appendSystemMessage('ðŸ‘ BlackLight AI is watching. Ask me anything about the studio, games, or stories.');
+        } else {
+            aiHistory.forEach(m => appendMessage(m, true));
+        }
+    } else {
+        try {
+            const res = await fetch(`${SERVER}/api/messages/${encodeURIComponent(room.name)}`, {
+                headers: { 'Authorization': `Bearer ${jwtToken}` }
+            });
+            const messages = await res.json();
+            document.getElementById('messagesArea').innerHTML = '';
+            if (messages.length === 0) {
+                appendSystemMessage('No messages yet. Be the first to speak into the void.');
+            } else {
+                messages.forEach(m => appendMessage(m));
+            }
+            scrollBottom();
+        } catch(e) { console.error(e); }
+    }
+    scrollBottom();
+}
+
+// â”€â”€ Messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function appendMessage(msg, isAILocal = false) {
+    const area = document.getElementById('messagesArea');
+    const isMine = msg.sender === currentUser.username;
+    const isAI   = msg.sender === 'AI';
+
+    const rowClass   = isMine ? 'mine' : isAI ? 'ai-msg' : 'theirs';
+    const avatarEmoji = isAI ? 'ðŸ¤–' : isMine ? (currentUser.emoji || 'ðŸ‘') : 'ðŸ‘¤';
+    const timeStr    = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const canDelete  = isMine || currentUser.isAdmin;
+
+    const deletedContent = msg.deleted
+        ? (currentUser.isAdmin
+            ? `<span class="msg-deleted">ðŸ—‘ Deleted by ${escapeHtml(msg.deletedBy)}</span> <span class="admin-view-note">[original: "${escapeHtml(msg.originalContent || msg.content || 'â€¦')}"]</span>`
+            : `<span class="msg-deleted">ðŸ—‘ This message was deleted</span>`)
+        : escapeHtml(msg.content);
+
+    const el = document.createElement('div');
+    el.className = `message-row ${rowClass}`;
+    el.dataset.msgId = msg._id || Math.random();
+    el.innerHTML = `
+        <div class="msg-avatar">${avatarEmoji}</div>
+        <div class="msg-bubble-wrap">
+            ${!isMine ? `<div class="msg-sender-name">${isAI ? 'BlackLight AI' : escapeHtml(msg.sender)}</div>` : ''}
+            <div class="msg-bubble">${deletedContent}</div>
+            <div class="msg-meta">
+                <span class="msg-time">${timeStr}</span>
+                ${canDelete && !msg.deleted ? `<button class="delete-btn" onclick="deleteMessage('${msg._id}')">âœ•</button>` : ''}
+            </div>
+        </div>`;
+
+    area.appendChild(el);
+}
+
+function appendSystemMessage(text) {
+    const area = document.getElementById('messagesArea');
+    const el   = document.createElement('div');
+    el.style.cssText = 'text-align:center;color:#333;font-size:0.82rem;padding:16px;font-style:italic;';
+    el.textContent = text;
+    area.appendChild(el);
+}
+
+function updateRoomPreview(roomName, content, sender) {
+    const el = document.getElementById(`preview-${CSS.escape(roomName)}`);
+    if (el) el.textContent = `${sender}: ${content}`.substring(0, 40);
+}
+
+function incrementUnread(roomName) {
+    const badge = document.getElementById(`unread-${CSS.escape(roomName)}`);
+    if (!badge) return;
+    const count = (parseInt(badge.textContent) || 0) + 1;
+    badge.textContent = count;
+    badge.style.display = 'block';
+}
+
+// â”€â”€ Send Message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function sendMessage() {
+    const input   = document.getElementById('chatInput');
+    const content = input.value.trim();
+    if (!content) return;
+    input.value = '';
+    autoResize(input);
+
+    if (!currentRoom) return;
+
+    if (currentRoom.type === 'ai') {
+        const userMsg = { sender: currentUser.username, content, timestamp: new Date(), _id: 'local-' + Date.now() };
+        appendMessage(userMsg);
+        scrollBottom();
+        aiHistory.push({ role: 'user', content });
+
+        const thinking = document.createElement('div');
+        thinking.className = 'message-row ai-msg';
+        thinking.id = 'ai-thinking';
+        thinking.innerHTML = `<div class="msg-avatar">ðŸ¤–</div><div class="msg-bubble-wrap"><div class="msg-bubble" style="color:#555;font-style:italic;">thinking<span class="typing-dots"><span></span><span></span><span></span></span></div></div>`;
+        document.getElementById('messagesArea').appendChild(thinking);
+        scrollBottom();
+
+        try {
+            const res = await fetch(`${SERVER}/api/ai/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: content, history: aiHistory.slice(-10) })
+            });
+            const data  = await res.json();
+            const reply = data.reply || 'The darkness offers no answer.';
+            aiHistory.push({ role: 'assistant', content: reply });
+
+            document.getElementById('ai-thinking')?.remove();
+            appendMessage({ sender: 'AI', content: reply, timestamp: new Date(), _id: 'ai-' + Date.now() });
+            scrollBottom();
+        } catch(e) {
+            document.getElementById('ai-thinking')?.remove();
+            appendMessage({ sender: 'AI', content: 'The signal was lost. Try again.', timestamp: new Date(), _id: 'ai-err' });
+        }
+        return;
+    }
+
+    if (socket) {
+        socket.emit('send_message', { room: currentRoom.name, content });
+    }
+}
+
+async function deleteMessage(messageId) {
+    if (!messageId || messageId.startsWith('local-') || messageId.startsWith('ai-')) return;
+    if (!confirm('Delete this message?')) return;
+    socket.emit('delete_message', { messageId });
+}
+
+// â”€â”€ Connect to Support (for regular users) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function connectToSupport() {
+    // Find admin username â€” default is 'shehram', or fetch from users list
+    let adminUsername = 'shehram';
+    try {
+        const res = await fetch(`${SERVER}/api/users`, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        const users = await res.json();
+        const admin = users.find(u => u.isAdmin && u.username !== currentUser.username);
+        if (admin) adminUsername = admin.username;
+    } catch(e) { /* use default */ }
+
+    const sorted   = [currentUser.username, adminUsername].sort();
+    const roomName = `private:${sorted[0]}:${sorted[1]}`;
+    const display  = `ðŸŽ§ Support (${adminUsername})`;
+
+    const existing = rooms.find(r => r.name === roomName);
+    if (existing) {
+        existing.displayName = display;
+        openRoom(existing);
+        return;
+    }
+
+    try {
+        const res = await fetch(`${SERVER}/api/rooms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
+            body: JSON.stringify({ name: roomName, type: 'private', members: [currentUser.username, adminUsername], displayName: display })
+        });
+        const room = await res.json();
+        room.displayName = display;
+        rooms.push(room);
+        renderRooms();
+        openRoom(room);
+    } catch(e) { alert('Could not connect to support: ' + e.message); }
+}
+
+// â”€â”€ Create Rooms â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function openNewRoomModal() { document.getElementById('newRoomModal').classList.add('open'); }
+function openPrivateModal()  { document.getElementById('privateModal').classList.add('open'); }
+function closeModal(id)      { document.getElementById(id).classList.remove('open'); }
+
+async function createGroup() {
+    const name = document.getElementById('newRoomName').value.trim();
+    if (!name) return;
+    try {
+        const res = await fetch(`${SERVER}/api/rooms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
+            body: JSON.stringify({ name: `group:${name}`, type: 'group', displayName: name })
+        });
+        const room = await res.json();
+        room.displayName = name;
+        rooms.push(room);
+        renderRooms();
+        closeModal('newRoomModal');
+        openRoom(room);
+    } catch(e) { alert('Error creating group: ' + e.message); }
+}
+
+async function openPrivateChat() {
+    const username = document.getElementById('pmUsername').value.trim();
+    if (!username) return;
+    const sorted   = [currentUser.username, username].sort();
+    const roomName = `private:${sorted[0]}:${sorted[1]}`;
+    const display  = `ðŸ’¬ ${username}`;
+
+    const existing = rooms.find(r => r.name === roomName);
+    if (!existing) {
+        try {
+            const res = await fetch(`${SERVER}/api/rooms`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
+                body: JSON.stringify({ name: roomName, type: 'private', members: [currentUser.username, username], displayName: display })
+            });
+            const room = await res.json();
+            room.displayName = display;
+            rooms.push(room);
+            renderRooms();
+            closeModal('privateModal');
+            openRoom(room);
+        } catch(e) { alert('Error: ' + e.message); }
+    } else {
+        closeModal('privateModal');
+        openRoom(existing);
+    }
+}
+
+// â”€â”€ Admin Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function toggleAdminPanel() {
+    document.getElementById('adminPanel').classList.toggle('open');
+}
+
+// Switch admin panel tabs
+function switchAdminTab(tab) {
+    document.querySelectorAll('.admin-tab').forEach((btn, i) => {
+        const tabs = ['online','users','rooms','deleted','creds'];
+        btn.classList.toggle('active', tabs[i] === tab);
+    });
+    document.querySelectorAll('.admin-tab-pane').forEach(p => p.classList.remove('active'));
+    const pane = document.getElementById(`apane-${tab}`);
+    if (pane) pane.classList.add('active');
+
+    // Load data on demand
+    if (tab === 'deleted') loadAdminDeleted();
+    if (tab === 'users')   loadAdminUsers();
+}
+
+// Load all admin data
+async function loadAdminData() {
+    await loadAdminUsers();
+    await loadAdminDeleted();
+}
+
+// Render admin room list
+function renderAdminRooms() {
+    const el = document.getElementById('adminRoomList');
+    if (!el) return;
+    el.innerHTML = rooms.map(r => `
+        <div class="admin-room-row" onclick="openRoom(${JSON.stringify(r).replace(/"/g,"'")})">
+            <div class="admin-room-icon">${roomIcon(r)}</div>
+            <div class="admin-room-name">${r.displayName || r.name}</div>
+            <div class="admin-room-type">${r.type}</div>
+        </div>`).join('') || '<div style="color:#333;font-size:0.72rem;">No rooms yet</div>';
+}
+
+// Load all users for admin panel
+async function loadAdminUsers() {
+    const el = document.getElementById('adminUsersList');
+    if (!el) return;
+    try {
+        const res   = await fetch(`${SERVER}/api/admin/users`, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        const users = await res.json();
+        el.innerHTML = users.map(u => `
+            <div class="admin-user-row" onclick="adminOpenUserChat('${u.username}')">
+                <div class="admin-user-emoji">${u.emoji || 'ðŸ‘¤'}</div>
+                <div class="admin-user-info">
+                    <div class="admin-user-name">${escapeHtml(u.username)}</div>
+                    <div class="admin-user-email">${escapeHtml(u.email)}</div>
+                </div>
+                ${u.isAdmin ? '<div class="admin-badge-tag">ADMIN</div>' : ''}
+            </div>`).join('') || '<div style="color:#333;font-size:0.72rem;">No users</div>';
+    } catch(e) { el.innerHTML = '<div style="color:#555;font-size:0.72rem;">Failed to load</div>'; }
+}
+
+// Admin: click user â†’ open their AI chat or private room
+async function adminOpenUserChat(username) {
+    if (username === currentUser.username) return;
+    const sorted   = [currentUser.username, username].sort();
+    const roomName = `private:${sorted[0]}:${sorted[1]}`;
+    const display  = `ðŸ’¬ ${username}`;
+
+    const existing = rooms.find(r => r.name === roomName);
+    if (existing) {
+        existing.displayName = display;
+        openRoom(existing);
+    } else {
+        try {
+            const res = await fetch(`${SERVER}/api/rooms`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
+                body: JSON.stringify({ name: roomName, type: 'private', members: [currentUser.username, username], displayName: display })
+            });
+            const room = await res.json();
+            room.displayName = display;
+            if (!rooms.find(r => r.name === room.name)) rooms.push(room);
+            renderRooms();
+            renderAdminRooms();
+            openRoom(room);
+        } catch(e) { alert('Error: ' + e.message); }
+    }
+}
+
+// Load deleted messages for admin panel
+async function loadAdminDeleted() {
+    const el = document.getElementById('adminDeletedList');
+    if (!el) return;
+    el.innerHTML = '<div style="color:#333;font-size:0.72rem;">Loadingâ€¦</div>';
+    try {
+        const res = await fetch(`${SERVER}/api/admin/messages/deleted`, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        const msgs = await res.json();
+        if (!msgs.length) {
+            el.innerHTML = '<div style="color:#333;font-size:0.72rem;font-style:italic;">No deleted messages</div>';
+            return;
+        }
+        el.innerHTML = msgs.map(m => {
+            const time = new Date(m.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const original = m.originalContent || m.content || '(empty)';
+            return `
+            <div class="del-msg-item">
+                <div class="del-msg-meta">
+                    <span class="del-msg-sender">${escapeHtml(m.sender)}</span>
+                    <span class="del-msg-room" onclick="adminViewRoom('${m.room}')" title="Jump to room">${m.room.substring(0,20)}â€¦</span>
+                </div>
+                <div class="del-msg-content">"${escapeHtml(original)}"</div>
+                <div class="del-msg-by">ðŸ—‘ Deleted by ${escapeHtml(m.deletedBy || '?')}</div>
+                <div class="del-msg-time">${time}</div>
+            </div>`;
+        }).join('');
+    } catch(e) { el.innerHTML = '<div style="color:#555;font-size:0.72rem;">Failed to load</div>'; }
+}
+
+// Admin: jump to a room from deleted messages list
+function adminViewRoom(roomName) {
+    const room = rooms.find(r => r.name === roomName);
+    if (room) {
+        openRoom(room);
+    }
+}
+
+function updateOnlineUsers(users) {
+    const el = document.getElementById('onlineUsersList');
+    if (!el) return;
+    el.innerHTML = users.map(u => `<div class="online-user-item"><div class="online-dot"></div>${escapeHtml(u)}</div>`).join('')
+        || '<div style="color:#333;font-size:0.72rem;">None online</div>';
+}
+
+async function saveCredentials() {
+    const newUsername = document.getElementById('newUsername').value.trim();
+    const newPassword = document.getElementById('newPassword').value.trim();
+    if (!newUsername && !newPassword) return;
+    try {
+        const res = await fetch(`${SERVER}/api/admin/credentials`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
+            body: JSON.stringify({ newUsername, newPassword })
+        });
+        const data = await res.json();
+        const msg  = document.getElementById('credMsg');
+        if (data.success) {
+            msg.style.color = '#44aa44';
+            msg.textContent = 'âœ“ Saved! Re-login required.';
+            setTimeout(() => {
+                localStorage.removeItem('bl_jwt');
+                localStorage.removeItem('bl_user');
+                window.location.href = 'login.html';
+            }, 1500);
+        } else {
+            msg.style.color = '#ff4444';
+            msg.textContent = data.error;
+        }
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+// â”€â”€ Typing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function emitTyping() {
+    if (!socket || !currentRoom || currentRoom.type === 'ai') return;
+    socket.emit('typing', { room: currentRoom.name });
+}
+
+function showTyping(username) {
+    const row = document.getElementById('typingRow');
+    row.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div><span class="typing-text">${escapeHtml(username)} is typingâ€¦</span>`;
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => { row.innerHTML = ''; }, 2000);
+}
+
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function scrollBottom() {
+    const area = document.getElementById('messagesArea');
+    area.scrollTop = area.scrollHeight;
+}
+
+function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+}
+
+function escapeHtml(text) {
+    return String(text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+</script>
+</body>
+</html>

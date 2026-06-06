@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stories Archive | World of BlackLight</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- LOGIN GATE (shown if not logged in) -->
+<div class="login-gate" id="loginGate" style="display:none;">
+    <div class="login-gate-icon">📁</div>
+    <h2>Classified Archive</h2>
+    <p>These files are restricted. You must be a BlackLight member to access the archive.</p>
+    <div>
+        <a href="login.html" class="gate-btn">Sign In</a>
+        <a href="signup.html" class="gate-btn secondary">Create Account</a>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="nav-logo">BlackLight</div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="stories.html">Stories</a>
+        <a href="devlog.html">DevLog</a>
+        <a href="about.html">About</a>
+        <div id="nav-auth"></div>
+    </nav>
+</header>
+
+
+<!-- HERO -->
+<section class="page-hero">
+    <h1>Archive</h1>
+    <p>Classified Stories and Records</p>
+</section>
+
+
+<!-- STORIES GRID -->
+<section class="stories-grid reveal">
+
+    <a href="story-pages/the-one-who-watches.html" class="story-tile">
+        <img src="assets/images/covers/story1.jpg" alt="The One Who Watches">
+        <div class="story-overlay">
+            <h2>File 001</h2>
+            <p>The One Who Watches</p>
+        </div>
+    </a>
+
+    <a href="story-pages/signal-below-zero.html" class="story-tile">
+        <img src="assets/images/covers/story2.jpg" alt="Signal Below Zero">
+        <div class="story-overlay">
+            <h2>File 002</h2>
+            <p>Signal Below Zero</p>
+        </div>
+    </a>
+
+    <a href="story-pages/the-city-without-shadows.html" class="story-tile">
+        <img src="assets/images/covers/story3.jpg" alt="The City Without Shadows">
+        <div class="story-overlay">
+            <h2>File 003</h2>
+            <p>The City Without Shadows</p>
+        </div>
+    </a>
+
+</section>
+
+
+<footer>
+    <p>&copy; 2026 World of BlackLight</p>
+</footer>
+
+<script src="js/particles.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!Auth.isLoggedIn()) {
+            document.getElementById("loginGate").style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+    });
+</script>
+
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>

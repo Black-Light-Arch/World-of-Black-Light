@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DevLog | World of BlackLight</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- LOGIN GATE -->
+<div class="login-gate" id="loginGate" style="display:none;">
+    <div class="login-gate-icon">🔒</div>
+    <h2>Members Only</h2>
+    <p>Development logs are restricted to BlackLight members. Sign in to access the studio's internal records.</p>
+    <div>
+        <a href="login.html" class="gate-btn">Sign In</a>
+        <a href="signup.html" class="gate-btn secondary">Create Account</a>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="nav-logo">BlackLight</div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="stories.html">Stories</a>
+        <a href="devlog.html">DevLog</a>
+        <a href="about.html">About</a>
+        <div id="nav-auth"></div>
+    </nav>
+</header>
+
+
+<!-- HERO -->
+<section class="page-hero">
+    <h1>Development Log</h1>
+    <p>Behind the creation of BlackLight worlds</p>
+</section>
+
+
+<!-- LOG ENTRIES -->
+<section class="devlog-list reveal">
+
+    <div class="log-entry">
+        <h2>Lighting System Experiments</h2>
+        <span>Jan 2026</span>
+        <img src="assets/images/devlog/devlog1.jpg" alt="Lighting Experiments" class="log-entry-img">
+        <p>
+            Focused on building atmospheric horror lighting using Unreal Engine.
+            Tested dynamic red pulse lights, shadow movement behavior, and environment fog layering.
+            The goal was to create tension through light density rather than darkness alone &mdash;
+            making the player instinctively aware of something present without showing it directly.
+        </p>
+    </div>
+
+    <div class="log-entry">
+        <h2>Hospital Environment Design</h2>
+        <span>Dec 2025</span>
+        <img src="assets/images/devlog/devlog2.jpg" alt="Hospital Layout" class="log-entry-img">
+        <p>
+            Created the abandoned hospital layout, including corridor flow,
+            environmental storytelling props, and tension-based room structure.
+            Blueprint iteration 7 finalized Ward C &mdash; the primary gameplay zone.
+            Each room is designed to guide the player without feeling guided.
+        </p>
+    </div>
+
+    <div class="log-entry">
+        <h2>Creature Presence System</h2>
+        <span>Nov 2025</span>
+        <img src="assets/images/devlog/devlog3.jpg" alt="AI Behavior System" class="log-entry-img">
+        <p>
+            Developed a non-direct AI presence system designed to create psychological fear
+            through sound cues, shadow movement, and environmental reactions.
+            The creature is never shown directly in early encounters &mdash;
+            only its behavioral signature is detectable, making it feel like an idea rather than an entity.
+        </p>
+    </div>
+
+</section>
+
+
+<footer>
+    <p>&copy; 2026 World of BlackLight</p>
+</footer>
+
+
+<script src="js/particles.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!Auth.isLoggedIn()) {
+            document.getElementById("loginGate").style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+    });
+</script>
+
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>
