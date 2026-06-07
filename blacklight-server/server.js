@@ -287,7 +287,7 @@ If asked about contacting the studio, mention studio@worldofblacklight.com or th
                 'Authorization': `Bearer ${NVIDIA_KEY}`
             },
             body: JSON.stringify({
-                model: 'deepseek-ai/deepseek-v4-flash',
+                model: 'meta/llama-3.1-8b-instruct',
                 messages,
                 max_tokens: 400,
                 temperature: 0.7,

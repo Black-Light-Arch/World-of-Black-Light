@@ -27,10 +27,9 @@
         height: 56px;
         border-radius: 50%;
         background: #0d0d0d;
-        border: 1.5px solid #9F73FF55;
-        box-shadow: 0 0 18px #9F73FF33, 0 4px 16px #00000088;
+        border: 1.5px solid #ff333355;
+        box-shadow: 0 0 18px #ff333333, 0 4px 16px #00000088;
         cursor: pointer;
-        font-size: 1.4rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -40,13 +39,13 @@
         outline: none;
     }
     #bl-chatbot-btn:hover {
-        border-color: #9F73FF;
-        box-shadow: 0 0 28px #9F73FF66, 0 4px 20px #00000099;
+        border-color: #ff3333;
+        box-shadow: 0 0 28px #ff333366, 0 4px 20px #00000099;
         transform: scale(1.07);
     }
     @keyframes blPulse {
-        0%,100% { box-shadow: 0 0 14px #9F73FF22, 0 4px 14px #00000066; }
-        50%      { box-shadow: 0 0 26px #9F73FF55, 0 4px 18px #00000099; }
+        0%,100% { box-shadow: 0 0 14px #ff333322, 0 4px 14px #00000066; }
+        50%      { box-shadow: 0 0 26px #ff333355, 0 4px 18px #00000099; }
     }
     #bl-chatbot-panel {
         position: fixed;
@@ -305,7 +304,9 @@
     wrap.id = 'bl-chatbot-btn-wrap';
     wrap.innerHTML = `
         <div id="bl-unread-badge"></div>
-        <button id="bl-chatbot-btn" title="BlackLight Chat" aria-label="Open chat">👁</button>
+        <button id="bl-chatbot-btn" title="BlackLight Chat" aria-label="Open chat">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#ff3333" style="display: block;"><path d="M12 2c1.1 0 2 .9 2 2v1c3.87 0 7 3.13 7 7v7c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-7c0-3.87 3.13-7 7-7V4c0-1.1 .9-2 2-2zM9 13c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm6 0c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm-6 4H7v2h2v-2zm8 0h-2v2h2v-2z"/></svg>
+        </button>
     `;
     document.body.appendChild(wrap);
 
@@ -374,14 +375,43 @@
     const headerName = document.getElementById('bl-header-name');
     const headerSub  = document.getElementById('bl-header-sub');
 
+    // Bot SVG reference
+    const botSvg = `<svg viewBox="0 0 24 24" width="24" height="24" fill="#ff3333" style="display: block;"><path d="M12 2c1.1 0 2 .9 2 2v1c3.87 0 7 3.13 7 7v7c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-7c0-3.87 3.13-7 7-7V4c0-1.1 .9-2 2-2zM9 13c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm6 0c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm-6 4H7v2h2v-2zm8 0h-2v2h2v-2z"/></svg>`;
+
+    // Notification title flashing
+    let titleInterval = null;
+    const originalTitle = document.title;
+
+    function startTitleFlash() {
+        if (document.hasFocus() && isOpen) return;
+        if (titleInterval) return;
+        let showMsg = true;
+        titleInterval = setInterval(() => {
+            document.title = showMsg ? "🔴 New AI Message" : originalTitle;
+            showMsg = !showMsg;
+        }, 1000);
+    }
+
+    function stopTitleFlash() {
+        if (titleInterval) {
+            clearInterval(titleInterval);
+            titleInterval = null;
+        }
+        document.title = originalTitle;
+    }
+
+    // Clear flash on focus or click
+    window.addEventListener('focus', stopTitleFlash);
+
     // ── Toggle panel ──────────────────────────────────────────────
     btn.addEventListener('click', () => {
         isOpen = !isOpen;
         panel.classList.toggle('open', isOpen);
-        btn.textContent = isOpen ? '✕' : '👁';
+        btn.innerHTML = isOpen ? '<span style="color: #ff3333; font-family: sans-serif; font-weight: bold; font-size: 1.2rem; line-height: 1;">✕</span>' : botSvg;
         if (isOpen) {
             unread = 0;
             badge.style.display = 'none';
+            stopTitleFlash();
             if (currentMode === 'ai') {
                 input.focus();
                 if (msgs.children.length === 0) addBotMsg(getGreeting());
@@ -394,7 +424,7 @@
     document.getElementById('bl-close-btn').addEventListener('click', () => {
         isOpen = false;
         panel.classList.remove('open');
-        btn.textContent = '👁';
+        btn.innerHTML = botSvg;
     });
 
     document.getElementById('bl-goto-chat').addEventListener('click', () => {
@@ -542,7 +572,10 @@
         row.innerHTML = `<div class="bl-msg-avatar">🤖</div><div class="bl-msg-bubble">${escHtml(text)}</div>`;
         msgs.appendChild(row);
         msgs.scrollTop = msgs.scrollHeight;
-        if (!silent && !isOpen) showUnread();
+        if (!silent && !isOpen) {
+            showUnread();
+            startTitleFlash();
+        }
     }
 
     function addUserMsg(text, silent = false) {
