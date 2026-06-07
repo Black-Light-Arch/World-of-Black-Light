@@ -511,6 +511,28 @@ footer {
     gap: 0;
 }
 
+.nav-chat-link {
+    color: #ff3333 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-chat-link svg {
+    fill: #ff3333;
+    transition: transform 0.2s ease, fill 0.2s ease, filter 0.2s ease;
+}
+
+.nav-chat-link:hover svg {
+    fill: #ff6666;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 5px rgba(255, 51, 51, 0.6));
+}
+
+.nav-chat-link::after {
+    background: #ff3333 !important;
+}
+
 #nav-auth a {
     margin-left: 30px;
     text-decoration: none;
