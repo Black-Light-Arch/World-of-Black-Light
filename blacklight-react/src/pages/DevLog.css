@@ -1,0 +1,76 @@
+/* ============================================================
+   DEVLOG PAGE CSS
+   ============================================================ */
+.devlog-content {
+  max-width: 800px !important;
+  margin: 0 auto;
+  padding-bottom: 80px;
+}
+
+.devlog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.devlog-entry {
+  padding: 35px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.devlog-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 15px;
+}
+
+.devlog-meta h2 {
+  font-size: 1.6rem;
+  color: var(--primary);
+  text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.devlog-date {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+}
+
+.devlog-img-wrap {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  aspect-ratio: 16/9;
+}
+
+.devlog-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.devlog-body-txt {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #ccc;
+}
+
+@media (max-width: 600px) {
+  .devlog-entry {
+    padding: 20px;
+  }
+  .devlog-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .devlog-meta h2 {
+    font-size: 1.35rem;
+  }
+}

@@ -1,0 +1,293 @@
+/* ============================================================
+   USER PROFILE & THEME SETTINGS CSS
+   ============================================================ */
+.profile-section {
+  padding: 40px 8% 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+}
+
+.profile-card {
+  width: 100%;
+  max-width: 580px;
+  padding: 45px;
+  border-radius: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-avatar-display {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 20px;
+}
+
+.avatar-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  font-size: 3.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.avatar-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--primary);
+  filter: blur(20px);
+  opacity: 0.15;
+  z-index: 1;
+}
+
+.profile-info h1 {
+  font-size: 1.8rem;
+  color: #fff;
+  margin-bottom: 5px;
+}
+
+.profile-email {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.profile-badge-label {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.profile-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 30px 0;
+}
+
+.profile-section-title {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  color: var(--primary);
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.profile-emoji-grid {
+  grid-template-columns: repeat(6, 1fr) !important;
+  margin-bottom: 20px;
+}
+
+.save-emoji-btn {
+  align-self: flex-start;
+  padding: 8px 16px;
+  font-size: 0.72rem;
+}
+
+.save-confirm {
+  font-size: 0.88rem;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.save-confirm.success { color: #50c878; }
+.save-confirm.error { color: #dc5050; }
+
+.theme-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: left;
+  margin-top: -8px;
+  margin-bottom: 15px;
+  font-style: italic;
+}
+
+.theme-switcher {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 0;
+  cursor: pointer;
+  outline: none;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+}
+
+.theme-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.theme-purple-btn .theme-dot { background: #9F73FF; }
+.theme-red-btn .theme-dot { background: #ff3333; }
+.theme-green-btn .theme-dot { background: #44aa44; }
+.theme-amber-btn .theme-dot { background: #ffaa00; }
+
+.theme-purple-btn { color: #9F73FF88; }
+.theme-red-btn { color: #ff333388; }
+.theme-green-btn { color: #44aa4488; }
+.theme-amber-btn { color: #ffaa0088; }
+
+.theme-purple-btn.active-theme { background: rgba(159, 115, 255, 0.15); border-color: #9F73FF; color: #fff; box-shadow: 0 0 10px rgba(159,115,255,0.2); }
+.theme-red-btn.active-theme { background: rgba(255, 51, 51, 0.15); border-color: #ff3333; color: #fff; box-shadow: 0 0 10px rgba(255,51,51,0.2); }
+.theme-green-btn.active-theme { background: rgba(68, 170, 68, 0.15); border-color: #44aa44; color: #fff; box-shadow: 0 0 10px rgba(68,170,68,0.2); }
+.theme-amber-btn.active-theme { background: rgba(255, 170, 0, 0.15); border-color: #ffaa00; color: #fff; box-shadow: 0 0 10px rgba(255,170,0,0.2); }
+
+.theme-btn:hover:not(.active-theme) {
+  border-color: #333;
+}
+
+/* TOURNEY REGISTER LIST */
+.profile-tournaments-list {
+  text-align: left;
+}
+
+.empty-regs-txt {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.profile-tourney-card {
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.01);
+  margin-bottom: 12px;
+}
+
+.profile-tourney-card:last-child {
+  margin-bottom: 0;
+}
+
+.profile-tourney-name {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--primary);
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+.profile-tourney-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.profile-tourney-team {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.payment-paid-tag {
+  color: #50c878;
+  font-weight: bold;
+}
+
+/* STATS */
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-color);
+  padding: 14px 10px;
+  border-radius: 8px;
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--primary);
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.admin-link-panel {
+  margin-bottom: 20px;
+}
+
+.admin-btn-nav {
+  display: block !important;
+  width: 100%;
+  padding: 12px;
+  text-align: center;
+}
+
+.logout-profile-btn {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 51, 51, 0.05) !important;
+  border: 1px solid rgba(255, 51, 51, 0.2) !important;
+  color: #ff3333 !important;
+  box-shadow: none !important;
+}
+
+.logout-profile-btn:hover {
+  background: #ff3333 !important;
+  color: #fff !important;
+  box-shadow: 0 0 15px rgba(255, 51, 51, 0.25) !important;
+}
+
+@media (max-width: 500px) {
+  .profile-card {
+    padding: 24px;
+  }
+  .profile-emoji-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  .theme-switcher {
+    grid-template-columns: 1fr 1fr;
+  }
+}

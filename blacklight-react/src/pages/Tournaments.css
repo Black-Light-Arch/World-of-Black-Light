@@ -1,0 +1,402 @@
+/* ============================================================
+   TOURNAMENTS GRID & MULTI-STEP MODAL
+   ============================================================ */
+.section-title {
+  text-align: center;
+  font-size: 1.8rem;
+  color: var(--primary);
+  margin-bottom: 40px;
+  text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.no-tournaments-txt {
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 1.1rem;
+  padding: 60px 0;
+}
+
+.tournament-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.tournament-card {
+  padding: 30px;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.t-status-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 1.5px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.t-status-open {
+  background: rgba(80, 200, 120, 0.15);
+  border: 1px solid #50c878;
+  color: #50c878;
+}
+
+.t-status-closed {
+  background: rgba(220, 80, 80, 0.15);
+  border: 1px solid #dc5050;
+  color: #dc5050;
+}
+
+.tournament-card h2 {
+  font-size: 1.4rem;
+  color: #fff;
+  margin-bottom: 5px;
+  max-width: 75%;
+}
+
+.t-game-tag {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  color: var(--primary);
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
+
+.t-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 25px;
+  flex: 1;
+}
+
+.t-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 20px;
+  margin-bottom: 20px;
+}
+
+.t-meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.tm-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.tm-val {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  color: #fff;
+}
+
+.t-prize {
+  color: #ffaa00;
+  font-weight: bold;
+}
+
+.t-slots-bar {
+  width: 100%;
+  height: 6px;
+  background: #111;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.t-slots-fill {
+  height: 100%;
+  background: var(--primary);
+  box-shadow: 0 0 10px var(--primary);
+  transition: width 0.5s ease;
+}
+
+.t-slots-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 24px;
+}
+
+.btn-register {
+  width: 100%;
+  padding: 12px;
+}
+
+.btn-register:disabled {
+  background: #111 !important;
+  border: 1px solid var(--border-color) !important;
+  color: #444 !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* MODAL REGISTRATION STRUCTURE */
+.tournament-modal {
+  max-width: 520px !important;
+}
+
+.modal-header-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.trophy-icon {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 10px rgba(255, 170, 0, 0.3));
+}
+
+.modal-game-badge {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  color: var(--primary);
+  letter-spacing: 1px;
+}
+
+.reg-info-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-color);
+  padding: 14px 8px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.reg-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.reg-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.reg-value {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  color: #fff;
+  font-weight: bold;
+}
+
+.reg-value.gold {
+  color: #ffaa00;
+}
+
+.reg-step h3 {
+  font-size: 1.15rem;
+  color: #fff;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.rules-agreement {
+  margin-top: 10px;
+  margin-bottom: 24px;
+}
+
+.agree-checkbox-lbl {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-transform: none !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.95rem !important;
+  color: var(--text-secondary) !important;
+  letter-spacing: 0 !important;
+}
+
+.agree-checkbox-lbl input {
+  width: auto !important;
+  cursor: pointer;
+}
+
+/* Payment Form elements */
+.payment-secure-badge {
+  background: rgba(80, 200, 120, 0.08);
+  border: 1px solid rgba(80, 200, 120, 0.2);
+  color: #50c878;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 1.5px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  align-self: flex-start;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.card-input-wrap {
+  position: relative;
+}
+
+.card-brand-tag {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.card-expiry-cvv-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.payment-amount-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  padding: 14px 20px;
+  border-radius: 6px;
+  margin: 15px 0 25px;
+}
+
+.payment-amount-box span {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+}
+
+.payment-amount-box .amount-value {
+  font-size: 1.3rem;
+  color: #ffaa00;
+  font-weight: bold;
+}
+
+.btn-pay {
+  background: #ffaa00;
+  box-shadow: 0 4px 12px rgba(255, 170, 0, 0.25);
+  margin-bottom: 12px;
+}
+
+.btn-pay:hover {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.btn-back-link {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+
+.btn-back-link:hover {
+  color: var(--primary);
+}
+
+/* STEP 3 SUCCESS */
+.success-step-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.success-animation-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(80, 200, 120, 0.1);
+  border: 2px solid #50c878;
+  color: #50c878;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  box-shadow: 0 0 20px rgba(80, 200, 120, 0.2);
+  animation: popSuccess 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popSuccess {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.success-step-view h2 {
+  font-size: 1.8rem;
+  color: #50c878;
+  margin-bottom: 10px;
+}
+
+.success-step-view p {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+}
+
+.success-details-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  margin: 24px 0 30px;
+  width: 100%;
+  text-align: left;
+}
+
+.success-details-card p {
+  font-size: 0.92rem;
+  margin-bottom: 10px;
+  color: #eee;
+}
+
+.success-details-card p:last-child {
+  margin-bottom: 0;
+}
+
+.success-details-card strong {
+  color: var(--primary);
+}
+
+@media (max-width: 500px) {
+  .reg-info-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 10px;
+  }
+}
