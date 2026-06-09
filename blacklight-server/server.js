@@ -66,6 +66,9 @@ const userSchema = new mongoose.Schema({
     password:  { type: String, required: true },
     isAdmin:   { type: Boolean, default: false },
     emoji:     { type: String, default: '👁️' },
+    friends:   [{ type: String }], // list of friend usernames
+    friendRequestsSent:     [{ type: String }],
+    friendRequestsReceived: [{ type: String }],
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -76,18 +79,20 @@ const messageSchema = new mongoose.Schema({
     originalContent: { type: String, default: null },    // stored before deletion for admin view
     deleted:         { type: Boolean, default: false },
     deletedBy:       { type: String, default: null },
+    readBy:          [{ type: String }],                 // list of users who have read the message
     timestamp:       { type: Date, default: Date.now }
 });
-
 const roomSchema = new mongoose.Schema({
-    name:      { type: String, required: true, unique: true },
-    type:      { type: String, enum: ['ai', 'private', 'group'], required: true },
-    members:   [{ type: String }],           // usernames
-    admins:    [{ type: String }],           // always includes all admins
-    createdBy: { type: String },
-    createdAt: { type: Date, default: Date.now }
+    name:         { type: String, required: true, unique: true },
+    displayName:  { type: String },
+    type:         { type: String, enum: ['ai', 'private', 'group'], required: true },
+    members:      [{ type: String }],           // usernames
+    admins:       [{ type: String }],           // always includes all admins
+    isPrivate:    { type: Boolean, default: false }, // private groups require search to join
+    joinRequests: [{ type: String }],           // pending join requests (usernames)
+    createdBy:    { type: String },
+    createdAt:    { type: Date, default: Date.now }
 });
-
 const User    = mongoose.model('User', userSchema);
 const Message = mongoose.model('Message', messageSchema);
 const Room    = mongoose.model('Room', roomSchema);
@@ -184,13 +189,29 @@ app.get('/api/rooms', authMiddleware, async (req, res) => {
         res.json(rooms);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
+app.get('/api/rooms/:name', authMiddleware, async (req, res) => {
+    try {
+        const name = decodeURIComponent(req.params.name);
+        const room = await Room.findOne({ name });
+        if (!room) return res.status(404).json({ error: 'Room not found' });
+        
+        // Allow creator, admin, or members
+        const isCreator = room.createdBy === req.user.username;
+        const isMember = room.members.includes(req.user.username);
+        if (!req.user.isAdmin && !isMember && !isCreator && room.isPrivate) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+        res.json(room);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 app.post('/api/rooms', authMiddleware, async (req, res) => {
     try {
-        const { name, type, members } = req.body;
+        const { name, type, members, isPrivate, privacy, displayName } = req.body;
+        const finalIsPrivate = isPrivate !== undefined ? !!isPrivate : (privacy === 'private');
         const admins = await User.find({ isAdmin: true }).select('username');
         const adminNames = admins.map(a => a.username);
-        const allMembers = [...new Set([...( members || []), req.user.username, ...adminNames])];
+        const allMembers = [...new Set([...(members || []), req.user.username, ...adminNames])];
 
         // Check if room already exists
         const existing = await Room.findOne({ name });
@@ -198,8 +219,213 @@ app.post('/api/rooms', authMiddleware, async (req, res) => {
             return res.json(existing);
         }
 
-        const room = await Room.create({ name, type, members: allMembers, admins: adminNames, createdBy: req.user.username });
+        const room = await Room.create({ 
+            name, 
+            displayName: displayName || (type === 'group' ? name.replace(/^group:/, '') : name),
+            type, 
+            members: allMembers, 
+            admins: adminNames, 
+            isPrivate: finalIsPrivate,
+            createdBy: req.user.username 
+        });
         res.json(room);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Discover Public Groups
+app.get('/api/groups/discover', authMiddleware, async (req, res) => {
+    try {
+        const rooms = await Room.find({
+            type: 'group',
+            isPrivate: false,
+            members: { $ne: req.user.username },
+            joinRequests: { $ne: req.user.username }
+        });
+        res.json(rooms);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Request to join a group
+app.post('/api/rooms/:name/request-join', authMiddleware, async (req, res) => {
+    try {
+        const name = decodeURIComponent(req.params.name);
+        const room = await Room.findOne({ name });
+        if (!room) return res.status(404).json({ error: 'Group not found' });
+        if (room.members.includes(req.user.username)) {
+            return res.status(400).json({ error: 'Already a member' });
+        }
+        await Room.updateOne({ name }, { $addToSet: { joinRequests: req.user.username } });
+        
+        // Notify creator via socket
+        for (const [sid, info] of onlineUsers.entries()) {
+            if (info.username === room.createdBy) {
+                io.to(sid).emit('join_request', { room: room.name, username: req.user.username });
+            }
+        }
+        res.json({ success: true, message: 'Join request sent' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Search groups by exact name (for private or public groups)
+app.get('/api/rooms/search', authMiddleware, async (req, res) => {
+    try {
+        const queryName = req.query.name;
+        if (!queryName) return res.status(400).json({ error: 'Query name required' });
+        const room = await Room.findOne({ name: { $regex: new RegExp(`^group:${queryName}$`, 'i') } });
+        if (!room) return res.status(404).json({ error: 'Group not found' });
+        res.json({
+            name: room.name,
+            type: room.type,
+            isPrivate: room.isPrivate,
+            createdBy: room.createdBy,
+            isMember: room.members.includes(req.user.username),
+            hasRequested: room.joinRequests.includes(req.user.username)
+        });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Approve join request
+app.post('/api/rooms/:name/approve-request', authMiddleware, async (req, res) => {
+    try {
+        const name = decodeURIComponent(req.params.name);
+        const { username } = req.body;
+        const room = await Room.findOne({ name });
+        if (!room) return res.status(404).json({ error: 'Group not found' });
+        if (room.createdBy !== req.user.username && !req.user.isAdmin) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+        await Room.updateOne({ name }, {
+            $addToSet: { members: username },
+            $pull: { joinRequests: username }
+        });
+        
+        // Notify approved user if online
+        for (const [sid, info] of onlineUsers.entries()) {
+            if (info.username === username) {
+                io.to(sid).emit('join_approved', { room });
+            }
+        }
+        res.json({ success: true, message: 'Request approved' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Reject join request
+app.post('/api/rooms/:name/reject-request', authMiddleware, async (req, res) => {
+    try {
+        const name = decodeURIComponent(req.params.name);
+        const { username } = req.body;
+        const room = await Room.findOne({ name });
+        if (!room) return res.status(404).json({ error: 'Group not found' });
+        if (room.createdBy !== req.user.username && !req.user.isAdmin) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+        await Room.updateOne({ name }, {
+            $pull: { joinRequests: username }
+        });
+        
+        // Notify rejected user if online
+        for (const [sid, info] of onlineUsers.entries()) {
+            if (info.username === username) {
+                io.to(sid).emit('join_rejected', { room: room.name });
+            }
+        }
+        res.json({ success: true, message: 'Request rejected' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── REST: Friend Routes ──────────────────────────────────────
+app.post('/api/friends/request', authMiddleware, async (req, res) => {
+    try {
+        const { username } = req.body;
+        if (username === req.user.username) return res.status(400).json({ error: 'You cannot add yourself' });
+        const targetUser = await User.findOne({ username });
+        if (!targetUser) return res.status(404).json({ error: 'User not found' });
+        const currentUser = await User.findOne({ username: req.user.username });
+        if (currentUser.friends.includes(username)) return res.status(400).json({ error: 'Already friends' });
+        await User.updateOne({ username: req.user.username }, { $addToSet: { friendRequestsSent: username } });
+        await User.updateOne({ username }, { $addToSet: { friendRequestsReceived: req.user.username } });
+        
+        // Notify online user via socket
+        for (const [sid, info] of onlineUsers.entries()) {
+            if (info.username === username) {
+                io.to(sid).emit('friend_request', { from: req.user.username, fromEmoji: currentUser.emoji || '👁️' });
+            }
+        }
+        res.json({ success: true, message: 'Friend request sent' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/friends/accept', authMiddleware, async (req, res) => {
+    try {
+        const { username } = req.body;
+        await User.updateOne({ username: req.user.username }, {
+            $addToSet: { friends: username },
+            $pull: { friendRequestsReceived: username }
+        });
+        await User.updateOne({ username }, {
+            $addToSet: { friends: req.user.username },
+            $pull: { friendRequestsSent: req.user.username }
+        });
+        const sorted = [req.user.username, username].sort();
+        const roomName = `private:${sorted[0]}:${sorted[1]}`;
+        const display = `💬 ${username}`;
+        let room = await Room.findOne({ name: roomName });
+        if (!room) {
+            const admins = await User.find({ isAdmin: true }).select('username');
+            const adminNames = admins.map(a => a.username);
+            const allMembers = [req.user.username, username, ...adminNames];
+            room = await Room.create({ 
+                name: roomName, 
+                displayName: display,
+                type: 'private', 
+                members: allMembers, 
+                admins: adminNames,
+                createdBy: 'system' 
+            });
+        }
+        
+        // Notify online user via socket
+        for (const [sid, info] of onlineUsers.entries()) {
+            if (info.username === username) {
+                io.to(sid).emit('friend_accepted', { from: req.user.username });
+            }
+        }
+        res.json({ success: true, message: 'Friend request accepted' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/friends/reject', authMiddleware, async (req, res) => {
+    try {
+        const { username } = req.body;
+        await User.updateOne({ username: req.user.username }, { $pull: { friendRequestsReceived: username } });
+        await User.updateOne({ username }, { $pull: { friendRequestsSent: req.user.username } });
+        res.json({ success: true, message: 'Friend request rejected' });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+
+app.get('/api/friends', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.user.username });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        const friendsList = await User.find({ username: { $in: user.friends } }).select('-password');
+        const onlineUsernames = new Set([...onlineUsers.values()].map(u => u.username));
+        const friendsWithStatus = friendsList.map(f => ({
+            username: f.username,
+            email: f.email,
+            emoji: f.emoji,
+            isOnline: onlineUsernames.has(f.username)
+        }));
+        res.json(friendsWithStatus);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/friends/requests', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.user.username });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        const pendingList = await User.find({ username: { $in: user.friendRequestsReceived } }).select('username emoji');
+        res.json(pendingList);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -224,6 +450,13 @@ app.get('/api/messages/:room', authMiddleware, async (req, res) => {
                 return res.status(403).json({ error: 'Access denied' });
             }
         }
+        
+        // Mark all messages in this room as read by this user
+        await Message.updateMany(
+            { room, readBy: { $ne: req.user.username } },
+            { $addToSet: { readBy: req.user.username } }
+        );
+        
         const messages = await Message.find({ room }).sort({ timestamp: 1 }).limit(200);
         res.json(messages);
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -377,7 +610,6 @@ io.on('connection', (socket) => {
         socket.join(room);
         socket.emit('room_joined', room);
     });
-
     // Send message
     socket.on('send_message', async ({ room, content }) => {
         if (!socket.username) return;
@@ -386,11 +618,13 @@ io.on('connection', (socket) => {
                 room,
                 sender: socket.username,
                 content,
-                originalContent: content   // store original before any deletion
+                originalContent: content,
+                readBy: [socket.username]
             });
             const payload = {
                 _id: msg._id, room, sender: socket.username,
-                content, timestamp: msg.timestamp, deleted: false
+                content, timestamp: msg.timestamp, deleted: false,
+                readBy: msg.readBy
             };
             io.to(room).emit('new_message', payload);
 
@@ -400,7 +634,6 @@ io.on('connection', (socket) => {
             });
         } catch (e) { console.error('Message save error:', e); }
     });
-
     // Delete message (soft delete — stored as deleted, still visible to admin with original content)
     socket.on('delete_message', async ({ messageId }) => {
         if (!socket.username) return;
@@ -431,6 +664,21 @@ io.on('connection', (socket) => {
     // Typing indicator
     socket.on('typing', ({ room }) => {
         socket.to(room).emit('user_typing', { username: socket.username, room });
+    });
+
+    // Mark messages as read
+    socket.on('mark_read', async ({ room }) => {
+        if (!socket.username) return;
+        try {
+            const result = await Message.updateMany(
+                { room, readBy: { $ne: socket.username } },
+                { $addToSet: { readBy: socket.username } }
+            );
+            if (result.modifiedCount > 0) {
+                // Notify others in the room that this user has read messages
+                socket.to(room).emit('messages_read', { room, username: socket.username });
+            }
+        } catch (e) { console.error('Mark read error:', e); }
     });
 
     // Admin: request all rooms (for admin panel refresh)

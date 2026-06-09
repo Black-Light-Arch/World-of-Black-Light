@@ -1,96 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Profile | World of BlackLight</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/forms.css">
-    <link rel="stylesheet" href="css/profile.css">
+  <meta charset="UTF-8">
+  <title>Profile | World of BlackLight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/profile.css">
 </head>
 <body>
-
 <canvas id="particles"></canvas>
 
 <header class="navbar">
-    <div class="nav-logo">BlackLight</div>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="games.html">Games</a>
-        <a href="stories.html">Stories</a>
-        <a href="devlog.html">DevLog</a>
-        <a href="about.html">About</a>
-        <div id="nav-auth"></div>
-    </nav>
+  <div class="nav-logo">BlackLight</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="players.html">Players</a>
+    <a href="tournament.html">Tournaments</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="contact.html">Contact</a>
+    <div id="nav-auth"></div>
+  </nav>
 </header>
 
 <section class="profile-section">
+  <div class="profile-card reveal">
 
-    <div class="profile-card reveal">
-
-        <!-- Current Avatar -->
-        <div class="profile-avatar-display">
-            <div class="avatar-circle" id="avatarDisplay">👁️</div>
-            <div class="avatar-glow"></div>
-        </div>
-
-        <div class="profile-info">
-            <h1 id="profileName">—</h1>
-            <p id="profileEmail" class="profile-email">—</p>
-            <span class="profile-badge">BlackLight Member</span>
-        </div>
-
-        <div class="profile-divider"></div>
-
-        <!-- Emoji Picker -->
-        <div class="profile-section-title">Choose Profile Icon</div>
-        <div class="emoji-grid profile-emoji-grid" id="profileEmojiGrid">
-            <button type="button" class="emoji-option" data-emoji="👁️">👁️</button>
-            <button type="button" class="emoji-option" data-emoji="💀">💀</button>
-            <button type="button" class="emoji-option" data-emoji="🌑">🌑</button>
-            <button type="button" class="emoji-option" data-emoji="👤">👤</button>
-            <button type="button" class="emoji-option" data-emoji="🎮">🎮</button>
-            <button type="button" class="emoji-option" data-emoji="🔮">🔮</button>
-            <button type="button" class="emoji-option" data-emoji="☠️">☠️</button>
-            <button type="button" class="emoji-option" data-emoji="🐺">🐺</button>
-            <button type="button" class="emoji-option" data-emoji="🕷️">🕷️</button>
-            <button type="button" class="emoji-option" data-emoji="🧿">🧿</button>
-            <button type="button" class="emoji-option" data-emoji="🌿">🌿</button>
-            <button type="button" class="emoji-option" data-emoji="🔥">🔥</button>
-        </div>
-
-        <button class="save-emoji-btn" id="saveEmojiBtn">Save Icon</button>
-        <p class="save-confirm" id="saveConfirm"></p>
-
-        <div class="profile-divider"></div>
-
-        <!-- Stats -->
-        <div class="profile-stats">
-            <div class="stat-block">
-                <span class="stat-number">3</span>
-                <span class="stat-label">Stories Read</span>
-            </div>
-            <div class="stat-block">
-                <span class="stat-number">3</span>
-                <span class="stat-label">Dev Logs</span>
-            </div>
-            <div class="stat-block">
-                <span class="stat-number">1</span>
-                <span class="stat-label">Games</span>
-            </div>
-        </div>
-
-        <div class="profile-divider"></div>
-
-        <button class="logout-profile-btn" id="profileLogout">Leave the Dark</button>
-
+    <!-- Avatar -->
+    <div class="profile-avatar-display">
+      <div class="avatar-circle" id="avatarDisplay">👁️</div>
+      <div class="avatar-glow"></div>
     </div>
 
+    <div class="profile-info">
+      <h1 id="profileName">—</h1>
+      <p id="profileEmail" class="profile-email">—</p>
+      <span class="profile-badge" id="profileBadge">BlackLight Member</span>
+    </div>
+
+    <div class="profile-divider"></div>
+
+    <!-- Emoji Picker -->
+    <div class="profile-section-title">Choose Profile Icon</div>
+    <div class="emoji-grid profile-emoji-grid" id="profileEmojiGrid">
+      <button type="button" class="emoji-option" data-emoji="👁️">👁️</button>
+      <button type="button" class="emoji-option" data-emoji="💀">💀</button>
+      <button type="button" class="emoji-option" data-emoji="🌑">🌑</button>
+      <button type="button" class="emoji-option" data-emoji="👤">👤</button>
+      <button type="button" class="emoji-option" data-emoji="🎮">🎮</button>
+      <button type="button" class="emoji-option" data-emoji="🔮">🔮</button>
+      <button type="button" class="emoji-option" data-emoji="☠️">☠️</button>
+      <button type="button" class="emoji-option" data-emoji="🐺">🐺</button>
+      <button type="button" class="emoji-option" data-emoji="🕷️">🕷️</button>
+      <button type="button" class="emoji-option" data-emoji="🧿">🧿</button>
+      <button type="button" class="emoji-option" data-emoji="🌿">🌿</button>
+      <button type="button" class="emoji-option" data-emoji="🔥">🔥</button>
+    </div>
+    <button class="save-emoji-btn" id="saveEmojiBtn">Save Icon</button>
+    <p class="save-confirm" id="saveConfirm"></p>
+
+    <div class="profile-divider"></div>
+
+    <!-- PERSONALIZED THEME SWITCHER -->
+    <div class="profile-section-title">Personalized Theme</div>
+    <p style="font-size:0.85rem;opacity:0.5;margin-bottom:16px;font-style:italic">Your theme syncs across all devices</p>
+    <div class="theme-switcher" id="themeSwitcher">
+      <button class="theme-btn theme-purple" data-theme="purple" title="Purple (Default)">
+        <span class="theme-dot"></span><span>Void</span>
+      </button>
+      <button class="theme-btn theme-red" data-theme="red" title="Red">
+        <span class="theme-dot"></span><span>Crimson</span>
+      </button>
+      <button class="theme-btn theme-green" data-theme="green" title="Green">
+        <span class="theme-dot"></span><span>Phantom</span>
+      </button>
+      <button class="theme-btn theme-amber" data-theme="amber" title="Amber">
+        <span class="theme-dot"></span><span>Ember</span>
+      </button>
+    </div>
+    <p class="save-confirm" id="themeConfirm"></p>
+
+    <div class="profile-divider"></div>
+
+    <!-- Tournaments -->
+    <div class="profile-section-title">My Tournaments</div>
+    <div id="profileTournaments" style="margin-bottom:20px">
+      <p style="opacity:0.4;font-style:italic;font-size:0.9rem">Loading registrations...</p>
+    </div>
+
+    <div class="profile-divider"></div>
+
+    <!-- Stats -->
+    <div class="profile-stats">
+      <div class="stat-block">
+        <span class="stat-number" id="statScore">—</span>
+        <span class="stat-label">Score</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-number" id="statWins">—</span>
+        <span class="stat-label">Wins</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-number" id="statTournaments">0</span>
+        <span class="stat-label">Tournaments</span>
+      </div>
+    </div>
+
+    <div class="profile-divider"></div>
+
+    <!-- Admin Link -->
+    <div id="adminLinkWrap" style="display:none;margin-bottom:16px;text-align:center">
+      <a href="admin.html" style="color:#9F73FF;font-family:Cinzel,serif;font-size:0.8rem;letter-spacing:2px;text-decoration:none;border:1px solid rgba(159,115,255,0.3);padding:10px 24px;border-radius:6px;display:inline-block">
+        🔐 Admin Panel
+      </a>
+    </div>
+
+    <button class="logout-profile-btn" id="profileLogout">Leave the Dark</button>
+  </div>
 </section>
 
 <footer>
-    <p>&copy; 2026 World of BlackLight</p>
+  <p>&copy; 2026 World of BlackLight</p>
 </footer>
 
 <script src="js/particles.js"></script>
@@ -98,7 +129,6 @@
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/profile.js"></script>
-
 <script src="js/chatbot-widget.js"></script>
 </body>
 </html>

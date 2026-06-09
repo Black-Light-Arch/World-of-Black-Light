@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leaderboard | World of BlackLight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BlackLight Leaderboard — top-ranked players across all games.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/leaderboard.css">
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<header class="navbar">
+  <div class="nav-logo">BlackLight</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="players.html">Players</a>
+    <a href="tournament.html">Tournaments</a>
+    <a href="leaderboard.html" class="active">Leaderboard</a>
+    <a href="contact.html">Contact</a>
+    <div id="nav-auth"></div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="page-hero">
+  <h1>🏅 Leaderboard</h1>
+  <p>The elite ranked by score — glory belongs to the brave</p>
+</section>
+
+<!-- TOP 3 PODIUM -->
+<section class="podium-section" id="podiumSection">
+  <div class="podium-wrap" id="podiumWrap">
+    <!-- Filled dynamically -->
+  </div>
+</section>
+
+<!-- FILTER -->
+<section class="lb-filter-section">
+  <div class="lb-filter-inner">
+    <label for="lbGameFilter">Filter by Game:</label>
+    <select id="lbGameFilter">
+      <option value="">All Games</option>
+      <option value="Battle Royale">Battle Royale</option>
+      <option value="FPS Arena">FPS Arena</option>
+      <option value="Shadow Tactics">Shadow Tactics</option>
+      <option value="Void Runner">Void Runner</option>
+      <option value="Dark Siege">Dark Siege</option>
+    </select>
+  </div>
+</section>
+
+<!-- LEADERBOARD TABLE -->
+<section class="lb-table-section">
+  <div class="lb-table-wrap">
+    <table class="lb-table" id="lbTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>Game</th>
+          <th>Rank</th>
+          <th>Score</th>
+          <th>W / L</th>
+          <th>Score Bar</th>
+        </tr>
+      </thead>
+      <tbody id="lbBody">
+        <tr><td colspan="7" class="lb-loading">
+          <div class="spinner"></div><br>Loading rankings...
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 World of BlackLight — All rights reserved.</p>
+</footer>
+
+<script src="js/particles.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/leaderboard.js"></script>
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>

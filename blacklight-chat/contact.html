@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact | World of BlackLight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact World of BlackLight — reach out for support, partnerships, or inquiries.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/contact.css">
+  <!-- Leaflet.js Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<header class="navbar">
+  <div class="nav-logo">BlackLight</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="players.html">Players</a>
+    <a href="tournament.html">Tournaments</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="contact.html" class="active">Contact</a>
+    <div id="nav-auth"></div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="page-hero">
+  <h1>📡 Contact</h1>
+  <p>Reach the shadow council — we respond within 24 hours</p>
+</section>
+
+<!-- CONTACT LAYOUT -->
+<section class="contact-layout">
+
+  <!-- LEFT: FORM -->
+  <div class="contact-form-side">
+
+    <div class="contact-info-cards">
+      <div class="info-card"><span>📧</span><div><strong>Email</strong><p>support@blacklight.gg</p></div></div>
+      <div class="info-card"><span>💬</span><div><strong>Discord</strong><p>discord.gg/blacklight</p></div></div>
+      <div class="info-card"><span>📍</span><div><strong>HQ</strong><p>Karachi, Pakistan</p></div></div>
+    </div>
+
+    <h2 class="form-heading">Send a Message</h2>
+
+    <form id="contactForm" novalidate>
+      <div class="form-row">
+        <div class="input-group">
+          <label for="cName">Full Name *</label>
+          <input type="text" id="cName" placeholder="Your name" required>
+          <small class="error" id="cNameErr"></small>
+        </div>
+        <div class="input-group">
+          <label for="cEmail">Email *</label>
+          <input type="email" id="cEmail" placeholder="your@email.com" required>
+          <small class="error" id="cEmailErr"></small>
+        </div>
+      </div>
+      <div class="input-group">
+        <label for="cSubject">Subject *</label>
+        <input type="text" id="cSubject" placeholder="What's this about?" required>
+        <small class="error" id="cSubjectErr"></small>
+      </div>
+      <div class="input-group">
+        <label for="cMessage">Message *</label>
+        <textarea id="cMessage" rows="6" placeholder="Write your message here..." required></textarea>
+        <small class="error" id="cMessageErr"></small>
+        <div class="char-counter"><span id="charCount">0</span> / 1000</div>
+      </div>
+      <button type="submit" class="btn-submit" id="contactSubmitBtn">Send Message</button>
+      <div class="contact-response" id="contactResponse"></div>
+    </form>
+  </div>
+
+  <!-- RIGHT: MAP -->
+  <div class="contact-map-side">
+    <h2 class="form-heading">Our HQ</h2>
+    <div id="contactMap"></div>
+    <p class="map-note">📍 BlackLight Studios, Karachi, Pakistan</p>
+  </div>
+
+</section>
+
+<footer>
+  <p>&copy; 2026 World of BlackLight — All rights reserved.</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/contact.js"></script>
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>

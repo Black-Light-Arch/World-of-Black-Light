@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel | World of BlackLight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+<!-- ADMIN NAVBAR -->
+<header class="admin-nav">
+  <div class="admin-brand">
+    <span>👁️</span>
+    <span>BlackLight <strong>Admin</strong></span>
+  </div>
+  <div class="admin-nav-right">
+    <span id="adminUsername" class="admin-user-label">—</span>
+    <a href="index.html" class="admin-back-btn">← Back to Site</a>
+    <button id="adminLogoutBtn" class="admin-logout-btn">Logout</button>
+  </div>
+</header>
+
+<!-- STATS ROW -->
+<div class="admin-stats-row" id="adminStatsRow">
+  <div class="astat-card"><span id="st-users">—</span><label>Users</label></div>
+  <div class="astat-card"><span id="st-players">—</span><label>Players</label></div>
+  <div class="astat-card"><span id="st-tournaments">—</span><label>Tournaments</label></div>
+  <div class="astat-card"><span id="st-registrations">—</span><label>Registrations</label></div>
+  <div class="astat-card"><span id="st-messages">—</span><label>Unread Msgs</label></div>
+  <div class="astat-card"><span id="st-open">—</span><label>Open Tournaments</label></div>
+</div>
+
+<!-- TABS -->
+<div class="admin-tabs">
+  <button class="admin-tab active" data-tab="users">👥 Users</button>
+  <button class="admin-tab" data-tab="players">⚔️ Players</button>
+  <button class="admin-tab" data-tab="tournaments">🏆 Tournaments</button>
+  <button class="admin-tab" data-tab="registrations">📋 Registrations</button>
+  <button class="admin-tab" data-tab="messages">📨 Messages</button>
+</div>
+
+<!-- PANELS -->
+<main class="admin-main">
+
+  <!-- USERS TAB -->
+  <section class="admin-panel active" id="panel-users">
+    <div class="panel-header">
+      <h2>Registered Users</h2>
+    </div>
+    <div class="table-scroll">
+      <table class="admin-table" id="usersTable">
+        <thead>
+          <tr><th>#</th><th>Username</th><th>Name</th><th>Email</th><th>Age</th><th>Theme</th><th>Admin</th><th>Joined</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="usersBody">
+          <tr><td colspan="9" class="tbl-loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PLAYERS TAB -->
+  <section class="admin-panel" id="panel-players">
+    <div class="panel-header">
+      <h2>Player Profiles</h2>
+    </div>
+    <div class="table-scroll">
+      <table class="admin-table" id="playersTable">
+        <thead>
+          <tr><th>#</th><th>Gamer Tag</th><th>User</th><th>Game</th><th>Rank</th><th>Score</th><th>W/L</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="playersBody">
+          <tr><td colspan="8" class="tbl-loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TOURNAMENTS TAB -->
+  <section class="admin-panel" id="panel-tournaments">
+    <div class="panel-header">
+      <h2>Tournaments</h2>
+      <button class="btn-add-admin" id="openAddTournamentBtn">+ Add Tournament</button>
+    </div>
+    <div class="table-scroll">
+      <table class="admin-table" id="tournamentsTable">
+        <thead>
+          <tr><th>#</th><th>Name</th><th>Game</th><th>Prize</th><th>Fee</th><th>Slots</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="tournamentsBody">
+          <tr><td colspan="9" class="tbl-loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- REGISTRATIONS TAB -->
+  <section class="admin-panel" id="panel-registrations">
+    <div class="panel-header">
+      <h2>Tournament Registrations</h2>
+    </div>
+    <div class="table-scroll">
+      <table class="admin-table">
+        <thead>
+          <tr><th>#</th><th>User</th><th>Tournament</th><th>Team</th><th>Game</th><th>Payment</th><th>Registered</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="registrationsBody">
+          <tr><td colspan="8" class="tbl-loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MESSAGES TAB -->
+  <section class="admin-panel" id="panel-messages">
+    <div class="panel-header">
+      <h2>Contact Messages</h2>
+    </div>
+    <div class="table-scroll">
+      <table class="admin-table">
+        <thead>
+          <tr><th>#</th><th>From</th><th>Email</th><th>Subject</th><th>Message</th><th>Status</th><th>Received</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="messagesBody">
+          <tr><td colspan="8" class="tbl-loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="editUserModal" style="display:none">
+  <div class="modal-box">
+    <button class="modal-close" id="closeEditUser">✕</button>
+    <h2>Edit User</h2>
+    <form id="editUserForm">
+      <input type="hidden" id="editUserId">
+      <div class="form-row-2">
+        <div class="input-group"><label>First Name</label><input type="text" id="euFirstName"></div>
+        <div class="input-group"><label>Last Name</label><input type="text" id="euLastName"></div>
+      </div>
+      <div class="input-group"><label>Username</label><input type="text" id="euUsername"></div>
+      <div class="input-group"><label>Email</label><input type="email" id="euEmail"></div>
+      <div class="form-row-2">
+        <div class="input-group"><label>Theme</label>
+          <select id="euTheme">
+            <option value="purple">Purple</option><option value="red">Red</option>
+            <option value="green">Green</option><option value="amber">Amber</option>
+          </select>
+        </div>
+        <div class="input-group"><label>New Password (optional)</label><input type="password" id="euPassword" placeholder="Leave blank to keep"></div>
+      </div>
+      <div class="input-group">
+        <label><input type="checkbox" id="euIsAdmin"> Grant Admin Access</label>
+      </div>
+      <button type="submit" class="btn-submit">Save Changes</button>
+      <p class="form-msg" id="editUserMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT PLAYER MODAL -->
+<div class="modal-overlay" id="editPlayerModal" style="display:none">
+  <div class="modal-box">
+    <button class="modal-close" id="closeEditPlayer">✕</button>
+    <h2>Edit Player</h2>
+    <form id="editPlayerForm">
+      <input type="hidden" id="epPlayerId">
+      <div class="form-row-2">
+        <div class="input-group"><label>Gamer Tag</label><input type="text" id="epGamerTag"></div>
+        <div class="input-group"><label>Game</label>
+          <select id="epGame">
+            <option>Battle Royale</option><option>FPS Arena</option>
+            <option>Shadow Tactics</option><option>Void Runner</option><option>Dark Siege</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div class="input-group"><label>Score</label><input type="number" id="epScore"></div>
+        <div class="input-group"><label>Wins</label><input type="number" id="epWins"></div>
+        <div class="input-group"><label>Losses</label><input type="number" id="epLosses"></div>
+      </div>
+      <div class="input-group"><label>Rank</label>
+        <select id="epRank">
+          <option>Bronze</option><option>Silver</option><option>Gold</option>
+          <option>Platinum</option><option>Diamond</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-submit">Save Changes</button>
+      <p class="form-msg" id="editPlayerMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ADD TOURNAMENT MODAL -->
+<div class="modal-overlay" id="addTournamentModal" style="display:none">
+  <div class="modal-box">
+    <button class="modal-close" id="closeAddTournament">✕</button>
+    <h2>Add Tournament</h2>
+    <form id="addTournamentForm">
+      <div class="input-group"><label>Tournament Name *</label><input type="text" id="atName" required></div>
+      <div class="form-row-2">
+        <div class="input-group"><label>Game *</label>
+          <select id="atGame">
+            <option>Battle Royale</option><option>FPS Arena</option>
+            <option>Shadow Tactics</option><option>Void Runner</option><option>Dark Siege</option>
+          </select>
+        </div>
+        <div class="input-group"><label>Status</label>
+          <select id="atStatus"><option value="open">Open</option><option value="closed">Closed</option></select>
+        </div>
+      </div>
+      <div class="input-group"><label>Description</label><textarea id="atDesc" rows="2"></textarea></div>
+      <div class="form-row-3">
+        <div class="input-group"><label>Prize Pool</label><input type="text" id="atPrize" placeholder="$5,000"></div>
+        <div class="input-group"><label>Max Slots</label><input type="number" id="atSlots" value="32"></div>
+        <div class="input-group"><label>Entry Fee ($)</label><input type="number" id="atFee" value="0"></div>
+      </div>
+      <div class="input-group"><label>Start Date *</label><input type="date" id="atDate" required></div>
+      <button type="submit" class="btn-submit">Create Tournament</button>
+      <p class="form-msg" id="addTournamentMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ACCESS DENIED -->
+<div class="access-denied" id="accessDenied" style="display:none">
+  <div class="access-denied-box">
+    <div style="font-size:3rem">🔒</div>
+    <h2>Access Denied</h2>
+    <p>You must be an admin to access this panel.</p>
+    <a href="login.html" class="btn-submit" style="display:inline-block;text-decoration:none;max-width:200px;margin-top:16px">Sign In</a>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

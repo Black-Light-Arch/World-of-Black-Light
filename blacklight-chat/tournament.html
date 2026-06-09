@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tournaments | World of BlackLight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Join BlackLight tournaments — compete for glory and prize pools.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/tournament.css">
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<header class="navbar">
+  <div class="nav-logo">BlackLight</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="players.html">Players</a>
+    <a href="tournament.html" class="active">Tournaments</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="contact.html">Contact</a>
+    <div id="nav-auth"></div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="page-hero">
+  <h1>🏆 Tournaments</h1>
+  <p>Register, compete, and claim your place in the Hall of Shadows</p>
+</section>
+
+<!-- TOURNAMENT LISTING -->
+<section class="tournaments-section">
+  <h2 class="section-title">Active Tournaments</h2>
+  <div class="tournament-grid" id="tournamentGrid">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading tournaments...</p>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTRATION MODAL -->
+<div class="modal-overlay" id="registerModal" style="display:none">
+  <div class="modal-box tournament-modal">
+    <button class="modal-close" id="closeRegModal">✕</button>
+
+    <div class="modal-header">
+      <div class="trophy-icon">🏆</div>
+      <h2 id="modalTournamentName">Tournament Name</h2>
+      <p id="modalTournamentGame" class="modal-game-badge">Game</p>
+    </div>
+
+    <div class="reg-info-row">
+      <div class="reg-info-item"><span class="reg-label">Prize Pool</span><span id="modalPrize" class="reg-value gold">—</span></div>
+      <div class="reg-info-item"><span class="reg-label">Entry Fee</span><span id="modalFee" class="reg-value">—</span></div>
+      <div class="reg-info-item"><span class="reg-label">Slots Left</span><span id="modalSlots" class="reg-value">—</span></div>
+      <div class="reg-info-item"><span class="reg-label">Start Date</span><span id="modalDate" class="reg-value">—</span></div>
+    </div>
+
+    <!-- STEP 1: REGISTRATION FORM -->
+    <div id="step1" class="reg-step">
+      <h3>Step 1 — Registration Details</h3>
+      <form id="regForm" novalidate>
+        <div class="input-group">
+          <label for="regTeamName">Team / Player Name *</label>
+          <input type="text" id="regTeamName" placeholder="Enter your team or solo handle" required>
+          <small class="error" id="regTeamErr"></small>
+        </div>
+        <div class="input-group">
+          <label for="regEmail">Contact Email *</label>
+          <input type="email" id="regEmail" placeholder="your@email.com" required>
+          <small class="error" id="regEmailErr"></small>
+        </div>
+        <div class="input-group">
+          <label for="regAgree">
+            <input type="checkbox" id="regAgree">
+            I agree to the tournament rules and code of conduct
+          </label>
+          <small class="error" id="regAgreeErr"></small>
+        </div>
+        <button type="submit" class="btn-submit" id="regNextBtn">Continue to Payment →</button>
+      </form>
+    </div>
+
+    <!-- STEP 2: MOCK PAYMENT -->
+    <div id="step2" class="reg-step" style="display:none">
+      <h3>Step 2 — Secure Payment</h3>
+      <div class="payment-secure-badge">🔒 256-bit SSL Encrypted</div>
+      <form id="paymentForm" novalidate>
+        <div class="input-group">
+          <label for="cardName">Cardholder Name *</label>
+          <input type="text" id="cardName" placeholder="Name on card" required>
+          <small class="error" id="cardNameErr"></small>
+        </div>
+        <div class="input-group">
+          <label for="cardNumber">Card Number *</label>
+          <div class="card-input-wrap">
+            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+            <span class="card-brand" id="cardBrand">💳</span>
+          </div>
+          <small class="error" id="cardNumErr"></small>
+        </div>
+        <div class="card-row">
+          <div class="input-group">
+            <label for="cardExpiry">Expiry *</label>
+            <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" required>
+            <small class="error" id="cardExpErr"></small>
+          </div>
+          <div class="input-group">
+            <label for="cardCVV">CVV *</label>
+            <input type="text" id="cardCVV" placeholder="•••" maxlength="4" required>
+            <small class="error" id="cardCVVErr"></small>
+          </div>
+        </div>
+        <div class="payment-amount-box">
+          <span>Total Due</span>
+          <span class="amount-value" id="paymentAmount">$0</span>
+        </div>
+        <button type="submit" class="btn-submit btn-pay" id="payBtn">Pay & Register</button>
+        <button type="button" class="btn-back" id="payBackBtn">← Back</button>
+      </form>
+    </div>
+
+    <!-- STEP 3: SUCCESS -->
+    <div id="step3" class="reg-step" style="display:none">
+      <div class="success-animation">
+        <div class="success-circle">✓</div>
+        <h2>Registered!</h2>
+        <p>You've successfully registered for <strong id="successTournamentName"></strong></p>
+        <div class="success-details">
+          <p>📧 Confirmation sent to your email</p>
+          <p>📅 Tournament begins: <span id="successDate"></span></p>
+        </div>
+        <button class="btn-submit" onclick="document.getElementById('registerModal').style.display='none'">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LOGIN GATE for registration -->
+<div class="login-gate" id="loginGate" style="display:none">
+  <div class="login-gate-icon">🔒</div>
+  <h2>Authentication Required</h2>
+  <p>You must be signed in to register for tournaments.</p>
+  <a href="login.html" class="gate-btn">Sign In</a>
+  <a href="signup.html" class="gate-btn secondary" style="margin-top:10px">Create Account</a>
+</div>
+
+<footer>
+  <p>&copy; 2026 World of BlackLight — All rights reserved.</p>
+</footer>
+
+<script src="js/particles.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/tournament.js"></script>
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>

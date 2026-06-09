@@ -59,9 +59,53 @@
         <h2>Support Our Development</h2>
         <span>MetaMask Donations</span>
         <p>We are a fully independent studio. If you'd like to support our craft, all contributions go directly toward development and keeping the servers running. Please note that all payments go to donation.</p>
-        <p style="margin-top: 14px; font-family: monospace; font-size: 0.95rem; background: #111; padding: 10px 14px; border: 1px dashed #5E17EB; border-radius: 4px; display: inline-block; word-break: break-all; color: #9F73FF;">
-            0x9A5A203102052965E9bc8b94c54bAA82ab3e16F7
-        </p>
+        
+        <style>
+            .quick-donate-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                margin-top: 15px;
+                margin-bottom: 10px;
+            }
+            .quick-donate-btn {
+                background: rgba(159, 115, 255, 0.05);
+                border: 1px solid rgba(159, 115, 255, 0.3);
+                border-radius: 4px;
+                padding: 10px 6px;
+                color: #9F73FF;
+                font-family: 'Cinzel', serif;
+                font-size: 0.72rem;
+                letter-spacing: 1px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                text-align: center;
+            }
+            .quick-donate-btn:hover {
+                background: rgba(159, 115, 255, 0.2);
+                border-color: #9F73FF;
+                box-shadow: 0 0 10px rgba(159, 115, 255, 0.3);
+                color: #fff;
+            }
+        </style>
+
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; max-width: 350px;">
+            <label style="font-family: 'Cinzel', serif; font-size: 0.75rem; color: #888; letter-spacing: 1px;">Quick Donate</label>
+            <div class="quick-donate-grid">
+                <button class="quick-donate-btn" onclick="quickDonate(0.005)">0.005 ETH</button>
+                <button class="quick-donate-btn" onclick="quickDonate(0.01)">0.01 ETH</button>
+                <button class="quick-donate-btn" onclick="quickDonate(0.05)">0.05 ETH</button>
+            </div>
+            
+            <label style="font-family: 'Cinzel', serif; font-size: 0.75rem; color: #888; letter-spacing: 1px; margin-top: 5px;">Or Custom Amount</label>
+            <input type="number" id="ethAmount" step="0.001" min="0.0001" placeholder="Amount in ETH (e.g. 0.02)" 
+                   style="background: #111; border: 1px solid #222; border-radius: 4px; padding: 8px 12px; color: #eee; font-family: 'Crimson Text', serif; font-size: 0.95rem; outline: none; width: 100%;">
+            
+            <button id="donateBtn" style="padding: 10px; background: #9F73FF; border: none; border-radius: 4px; color: #fff; font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; font-weight: bold;">
+                Donate with MetaMask
+            </button>
+            <div id="donationStatus" style="font-size: 0.85rem; color: #888; font-style: italic; margin-top: 5px; word-break: break-all;"></div>
+        </div>
     </div>
 </section>
 
@@ -74,5 +118,72 @@
     <script src="js/auth.js"></script>
     <script src="js/nav.js"></script>
 <script src="js/chatbot-widget.js"></script>
+<script>
+const DESTINATION_ADDRESS = '0x9A5A203102052965E9bc8b94c54bAA82ab3e16F7';
+
+async function performDonation(amount) {
+    const statusEl = document.getElementById('donationStatus');
+    
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+        statusEl.textContent = '❌ Please enter a valid ETH amount.';
+        statusEl.style.color = '#ff4444';
+        return;
+    }
+    
+    const valueInWei = BigInt(Math.round(parseFloat(amount) * 1e18));
+    const hexValue = '0x' + valueInWei.toString(16);
+
+    // If MetaMask is not installed, use deep link redirect
+    if (typeof window.ethereum === 'undefined') {
+        statusEl.textContent = '🔌 Redirecting to MetaMask app/send portal...';
+        statusEl.style.color = '#9F73FF';
+        setTimeout(() => {
+            const deepLink = `https://metamask.app.link/send/${DESTINATION_ADDRESS}?value=${valueInWei.toString()}`;
+            window.open(deepLink, '_blank');
+        }, 1000);
+        return;
+    }
+    
+    try {
+        statusEl.textContent = '🔌 Connecting to MetaMask...';
+        statusEl.style.color = '#9F73FF';
+        
+        // Request account access
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const fromAccount = accounts[0];
+        
+        statusEl.textContent = '⏳ Preparing transaction...';
+        
+        const transactionParameters = {
+            to: DESTINATION_ADDRESS,
+            from: fromAccount,
+            value: hexValue,
+        };
+        
+        statusEl.textContent = '✍️ Please confirm the transaction in MetaMask...';
+        
+        const txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [transactionParameters],
+        });
+        
+        statusEl.textContent = `✅ Submitted! Tx Hash: ${txHash}`;
+        statusEl.style.color = '#44aa44';
+        document.getElementById('ethAmount').value = '';
+    } catch (err) {
+        statusEl.textContent = `❌ Error: ${err.message || 'Transaction rejected'}`;
+        statusEl.style.color = '#ff4444';
+    }
+}
+
+function quickDonate(amount) {
+    performDonation(amount);
+}
+
+document.getElementById('donateBtn').addEventListener('click', () => {
+    const amount = document.getElementById('ethAmount').value.trim();
+    performDonation(amount);
+});
+</script>
 </body>
 </html>

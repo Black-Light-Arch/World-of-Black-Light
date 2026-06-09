@@ -658,29 +658,226 @@
             box-shadow: 0 2px 12px #4488ff22;
         }
 
-        /* â”€â”€ DATE SEPARATOR â”€â”€ */
-        .date-sep {
-            text-align: center;
-            font-size: 0.68rem;
-            color: #333;
+        /* ── ROOMS & FRIENDS PANELS ── */
+        .rooms-panel {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        .friends-panel {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            padding: 12px;
+        }
+        .friend-search-wrap {
+            margin-bottom: 12px;
+        }
+        .friend-search {
+            width: 100%;
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #eee;
+            font-family: 'Crimson Text', serif;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .friend-search:focus { border-color: #9F73FF44; }
+        
+        .friends-section-title {
             font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
             letter-spacing: 2px;
-            padding: 4px 0;
-            position: relative;
+            color: #9F73FF;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #1a1a1a;
+            padding-bottom: 4px;
         }
-
-        .date-sep::before, .date-sep::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 35%;
-            height: 1px;
+        
+        .friends-section-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .friend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 10px;
+            background: #090909;
+            border: 1px solid #111;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        
+        .friend-item:hover {
+            background: #121212;
+            border-color: #9F73FF22;
+        }
+        
+        .friend-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
             background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
         }
-        .date-sep::before { left: 0; }
-        .date-sep::after  { right: 0; }
+        
+        .friend-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .friend-username {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            color: #ddd;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .friend-status-text {
+            font-size: 0.65rem;
+            color: #555;
+            margin-top: 1px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .status-dot.online {
+            background: #44aa44;
+            box-shadow: 0 0 8px #44aa44cc;
+        }
+        .status-dot.offline {
+            background: #444;
+        }
+        
+        .friend-actions {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .friend-action-btn {
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.5px;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #fff;
+            transition: background 0.2s;
+        }
+        .friend-action-btn.accept { background: #44aa44; }
+        .friend-action-btn.accept:hover { background: #338833; }
+        .friend-action-btn.reject { background: #ff4444; }
+        .friend-action-btn.reject:hover { background: #cc3333; }
+        
+        .add-friend-btn {
+            margin-top: 10px;
+            padding: 8px;
+            background: #9F73FF11;
+            border: 1px dashed #9F73FF44;
+            color: #9F73FF88;
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .add-friend-btn:hover {
+            background: #9F73FF22;
+            color: #9F73FF;
+            border-color: #9F73FF;
+        }
+        
+        .friends-empty-msg {
+            font-size: 0.75rem;
+            color: #444;
+            text-align: center;
+            padding: 15px 0;
+            font-style: italic;
+        }
 
-        /* â”€â”€ RESPONSIVE â”€â”€ */
+        /* ── SEEN STATUS ── */
+        .msg-seen-status {
+            font-size: 0.62rem;
+            color: #555;
+            margin-left: 6px;
+            display: inline-block;
+        }
+        .msg-seen-status.seen {
+            color: #9F73FF;
+        }
+
+        /* ── JOIN REQUEST BANNER ── */
+        .join-req-banner {
+            background: rgba(159, 115, 255, 0.08);
+            border-bottom: 1px solid rgba(159, 115, 255, 0.2);
+            padding: 10px 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .join-req-banner.visible {
+            display: flex;
+        }
+        .join-req-text {
+            font-size: 0.8rem;
+            font-family: 'Crimson Text', serif;
+            color: #aaa;
+        }
+        .join-req-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .join-req-btn {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            padding: 4px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .join-req-btn.approve {
+            background: #9F73FF;
+            color: #fff;
+        }
+        .join-req-btn.approve:hover {
+            background: #7a50dd;
+        }
+        .join-req-btn.reject {
+            background: #111;
+            border: 1px solid #333;
+            color: #888;
+        }
+        .join-req-btn.reject:hover {
+            color: #ccc;
+            border-color: #555;
+        }
+
+        /* ── RESPONSIVE ── */
         @media (max-width: 600px) {
             .chat-sidebar { width: 220px; min-width: 220px; }
             .admin-panel  { display: none !important; }
@@ -720,15 +917,29 @@
         <div class="sidebar-header">
             <h2>Messages</h2>
             <div class="sidebar-tabs">
-                <button class="tab-btn active" data-tab="all"    onclick="filterTab('all')">All</button>
-                <button class="tab-btn"         data-tab="ai"     onclick="filterTab('ai')">AI</button>
-                <button class="tab-btn"         data-tab="private"onclick="filterTab('private')">Private</button>
-                <button class="tab-btn"         data-tab="group"  onclick="filterTab('group')">Groups</button>
+                <button class="tab-btn active" data-tab="all"     onclick="switchSideTab('rooms','all')">All</button>
+                <button class="tab-btn"         data-tab="ai"      onclick="switchSideTab('rooms','ai')">AI</button>
+                <button class="tab-btn"         data-tab="private" onclick="switchSideTab('rooms','private')">DMs</button>
+                <button class="tab-btn"         data-tab="group"   onclick="switchSideTab('rooms','group')">Groups</button>
+                <button class="tab-btn"         data-tab="friends" onclick="switchSideTab('friends')">👥</button>
             </div>
         </div>
-        <div class="room-list" id="roomList"></div>
-        <button class="new-room-btn" onclick="openNewRoomModal()">+ New Group</button>
-        <button class="new-room-btn" style="border-color:#5E3EA044;color:#5E3EA088;" onclick="openPrivateModal()">+ Private Message</button>
+
+        <!-- Rooms panel -->
+        <div class="rooms-panel" id="roomsPanel">
+            <div class="room-list" id="roomList"></div>
+            <button class="new-room-btn" onclick="openNewRoomModal()">+ New Group</button>
+            <button class="new-room-btn" style="border-color:#5E3EA044;color:#5E3EA088;" onclick="openPrivateModal()">+ Private Message</button>
+        </div>
+
+        <!-- Friends panel -->
+        <div class="friends-panel" id="friendsPanel">
+            <div class="friend-search-wrap">
+                <input class="friend-search" id="friendSearch" placeholder="Search friends…" oninput="renderFriends(this.value)">
+            </div>
+            <div id="friendsList" style="flex:1;overflow-y:auto;"></div>
+            <button class="add-friend-btn" onclick="openAddFriendModal()">+ Add Friend</button>
+        </div>
     </div>
 
     <!-- Chat Area -->
@@ -841,6 +1052,13 @@
             <label>Group Name</label>
             <input id="newRoomName" placeholder="e.g. Horror Fans">
         </div>
+        <div class="modal-field">
+            <label>Privacy</label>
+            <select id="newRoomPrivacy">
+                <option value="public">🌐 Public — visible to everyone, requires approval to join</option>
+                <option value="private">🔒 Private — hidden, invite by sharing name only</option>
+            </select>
+        </div>
         <div class="modal-actions">
             <button class="modal-btn cancel" onclick="closeModal('newRoomModal')">Cancel</button>
             <button class="modal-btn primary" onclick="createGroup()">Create</button>
@@ -859,6 +1077,36 @@
         <div class="modal-actions">
             <button class="modal-btn cancel" onclick="closeModal('privateModal')">Cancel</button>
             <button class="modal-btn primary" onclick="openPrivateChat()">Open Chat</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Friend Modal -->
+<div class="modal-overlay" id="addFriendModal">
+    <div class="modal-box">
+        <h3>ADD FRIEND</h3>
+        <div class="modal-field">
+            <label>Username</label>
+            <input id="addFriendUsername" placeholder="Their exact username">
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeModal('addFriendModal')">Cancel</button>
+            <button class="modal-btn primary" onclick="sendFriendRequest()">Send Request</button>
+        </div>
+    </div>
+</div>
+
+<!-- Join Private Group Modal -->
+<div class="modal-overlay" id="joinGroupModal">
+    <div class="modal-box">
+        <h3>JOIN PRIVATE GROUP</h3>
+        <div class="modal-field">
+            <label>Group Name (exact)</label>
+            <input id="joinGroupName" placeholder="e.g. Horror Fans">
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeModal('joinGroupModal')">Cancel</button>
+            <button class="modal-btn primary" onclick="requestJoinGroup()">Request to Join</button>
         </div>
     </div>
 </div>
@@ -961,7 +1209,63 @@ async function connectSocket() {
     });
 
     socket.on('online_users', (users) => {
+        onlineSet = new Set(users);
         updateOnlineUsers(users);
+        renderFriends(); // refresh online dots
+    });
+
+    // Seen receipt
+    socket.on('messages_read', ({ room, username }) => {
+        if (currentRoom && room === currentRoom.name) {
+            // Update the last message's seen indicator
+            const seenEls = document.querySelectorAll('.msg-seen');
+            if (seenEls.length > 0) {
+                const last = seenEls[seenEls.length - 1];
+                last.textContent = '✓✓ Seen';
+                last.classList.add('seen');
+            }
+        }
+    });
+
+    // Friend request received
+    socket.on('friend_request', ({ from, fromEmoji }) => {
+        addNotification('👥', `<b>${escapeHtml(from)}</b> sent you a friend request`, () => {
+            if (confirm(`Accept friend request from ${from}?`)) {
+                acceptFriendRequest(from);
+            }
+        });
+    });
+
+    // Friend request accepted
+    socket.on('friend_accepted', ({ from }) => {
+        addNotification('✅', `<b>${escapeHtml(from)}</b> accepted your friend request`, () => {});
+        loadFriends();
+    });
+
+    // Join request (sent to group owner)
+    socket.on('join_request', ({ room, username }) => {
+        pendingJoinReq = { room, username };
+        const banner = document.getElementById('joinRequestBanner');
+        document.getElementById('joinRequestText').textContent =
+            `${username} wants to join "${room.replace('group:','').replace(':private','')}"…`;
+        if (currentRoom && currentRoom.name === room) {
+            banner.classList.add('visible');
+        }
+        addNotification('🚪', `<b>${escapeHtml(username)}</b> wants to join your group`, () => {});
+    });
+
+    // Join approved — add room to sidebar
+    socket.on('join_approved', ({ room }) => {
+        if (!rooms.find(r => r.name === room.name)) {
+            rooms.push(room);
+            renderRooms();
+        }
+        addNotification('✅', `Your request to join was approved`, () => openRoom(room));
+    });
+
+    // Join rejected
+    socket.on('join_rejected', ({ room }) => {
+        addNotification('❌', `Your join request was rejected`, () => {});
     });
 }
 
@@ -1234,19 +1538,31 @@ function openPrivateModal()  { document.getElementById('privateModal').classList
 function closeModal(id)      { document.getElementById(id).classList.remove('open'); }
 
 async function createGroup() {
-    const name = document.getElementById('newRoomName').value.trim();
+    const name    = document.getElementById('newRoomName').value.trim();
+    const privacy = document.getElementById('newRoomPrivacy').value;
     if (!name) return;
+    const suffix = privacy === 'private' ? ':private' : '';
     try {
         const res = await fetch(`${SERVER}/api/rooms`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
-            body: JSON.stringify({ name: `group:${name}`, type: 'group', displayName: name })
+            body: JSON.stringify({
+                name: `group:${name}${suffix}`,
+                type: 'group',
+                displayName: name,
+                privacy,
+                owner: currentUser.username,
+                members: [currentUser.username]
+            })
         });
         const room = await res.json();
         room.displayName = name;
+        room.privacy = privacy;
+        room._member = true;
         rooms.push(room);
         renderRooms();
         closeModal('newRoomModal');
+        document.getElementById('newRoomName').value = '';
         openRoom(room);
     } catch(e) { alert('Error creating group: ' + e.message); }
 }

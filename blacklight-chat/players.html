@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Players | World of BlackLight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse all BlackLight players — search, filter, and discover elite gamers.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/players.css">
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<header class="navbar">
+  <div class="nav-logo">BlackLight</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="players.html" class="active">Players</a>
+    <a href="tournament.html">Tournaments</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="contact.html">Contact</a>
+    <div id="nav-auth"></div>
+  </nav>
+</header>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <h1>⚔️ Players</h1>
+  <p>Meet the elite warriors of the BlackLight universe</p>
+</section>
+
+<!-- SEARCH & FILTER BAR -->
+<section class="players-controls">
+  <div class="controls-inner">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search by gamer tag or name..." autocomplete="off">
+    </div>
+    <div class="filter-row">
+      <select id="gameFilter">
+        <option value="">All Games</option>
+        <option value="Battle Royale">Battle Royale</option>
+        <option value="FPS Arena">FPS Arena</option>
+        <option value="Shadow Tactics">Shadow Tactics</option>
+        <option value="Void Runner">Void Runner</option>
+        <option value="Dark Siege">Dark Siege</option>
+      </select>
+      <select id="sortSelect">
+        <option value="score">Sort: Score</option>
+        <option value="wins">Sort: Wins</option>
+        <option value="rank">Sort: Rank</option>
+      </select>
+      <button class="btn-add-player" id="addPlayerBtn" style="display:none">+ Add My Profile</button>
+    </div>
+  </div>
+</section>
+
+<!-- PLAYERS GRID -->
+<section class="players-section">
+  <div class="players-grid" id="playersGrid">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading players...</p>
+    </div>
+  </div>
+  <p class="no-results" id="noResults" style="display:none">No players found matching your search.</p>
+</section>
+
+<!-- ADD PLAYER MODAL -->
+<div class="modal-overlay" id="addPlayerModal" style="display:none">
+  <div class="modal-box">
+    <button class="modal-close" id="closeAddModal">✕</button>
+    <h2>Create Player Profile</h2>
+    <p class="modal-sub">Set up your competitive profile</p>
+    <form id="addPlayerForm" novalidate>
+      <div class="input-group">
+        <label for="pGamerTag">Gamer Tag *</label>
+        <input type="text" id="pGamerTag" placeholder="e.g. SHADOWBLADE" required>
+        <small class="error" id="pGamerTagErr"></small>
+      </div>
+      <div class="input-group">
+        <label for="pGame">Primary Game *</label>
+        <select id="pGame" required>
+          <option value="">Select game...</option>
+          <option value="Battle Royale">Battle Royale</option>
+          <option value="FPS Arena">FPS Arena</option>
+          <option value="Shadow Tactics">Shadow Tactics</option>
+          <option value="Void Runner">Void Runner</option>
+          <option value="Dark Siege">Dark Siege</option>
+        </select>
+        <small class="error" id="pGameErr"></small>
+      </div>
+      <div class="input-group">
+        <label for="pBio">Bio</label>
+        <textarea id="pBio" placeholder="Describe your playstyle..." rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn-submit">Create Profile</button>
+      <p class="form-msg" id="addPlayerMsg"></p>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2026 World of BlackLight — All rights reserved.</p>
+</footer>
+
+<script src="js/particles.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/players.js"></script>
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>
