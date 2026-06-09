@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import './Games.css';
 
 const Games = () => {
-  const [selectedGame, setSelectedGame] = useState(null);
-
   const gamesList = [
     {
       id: 'watching',
@@ -49,57 +47,59 @@ const Games = () => {
     }
   ];
 
-  return (
-    <div className="page-container fade-in">
-      <section className="page-hero">
-        <h1>⚔️ Games</h1>
-        <p>Step into the terrifying worlds of BlackLight Studio</p>
-      </section>
+  const [selectedGame, setSelectedGame] = useState(gamesList[0]);
 
-      <section className="content-section">
-        <div className="games-grid">
-          {gamesList.map((game) => (
-            <div 
-              key={game.id} 
-              className={`game-tile-card glass-panel glow-hover ${selectedGame?.id === game.id ? 'active' : ''}`}
-              onClick={() => setSelectedGame(game)}
-            >
-              <div className="tile-image-wrap">
-                <img src={game.coverImg} alt={game.title} />
-                {game.comingSoon && <span className="coming-soon-badge">COMING SOON</span>}
-              </div>
-              <div className="tile-info">
-                <h3>{game.title}</h3>
-                <p>{game.tagline}</p>
-                <button className="btn-secondary tile-btn">
-                  {game.comingSoon ? 'Learn More' : 'Enter Void &rarr;'}
-                </button>
+  return (
+    <div className="page-container fade-in" style={{ paddingTop: '80px' }}>
+      <div className="games-layout-wrapper">
+        {/* SIDEBAR FOR GAMES LIST */}
+        <aside className="games-sidebar-panel">
+          <div className="sidebar-games-header">
+            <h2>DEVELOPMENT LOGS</h2>
+            <p>Studio project records</p>
+          </div>
+          <div className="sidebar-games-list">
+            {gamesList.map((game) => (
+              <button
+                key={game.id}
+                className={`sidebar-game-btn ${selectedGame.id === game.id ? 'active' : ''}`}
+                onClick={() => setSelectedGame(game)}
+              >
+                <span className="bullet">⚡</span>
+                <div className="btn-text">
+                  <span className="title">{game.title}</span>
+                  <span className="tag">{game.comingSoon ? 'COMING SOON' : 'ACTIVE BUILD'}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        {/* DETAILS OF SELECTED GAME */}
+        <main className="game-details-viewport">
+          <div className="game-details-content-card glass-panel">
+            <div className="game-banner-cover">
+              <img src={selectedGame.coverImg} alt={selectedGame.title} />
+              {selectedGame.comingSoon && <span className="coming-soon-ribbon">COMING SOON</span>}
+              <div className="banner-title-overlay">
+                <h1>{selectedGame.title}</h1>
+                <p className="details-tagline">{selectedGame.tagline}</p>
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* EXPANDED DETAILS SECTION */}
-        {selectedGame && (
-          <div className="game-details-overlay glass-panel fade-in">
-            <button className="details-close-btn" onClick={() => setSelectedGame(null)}>✕ Close</button>
-            
-            <div className="details-layout">
-              <div className="details-main">
-                <h2>{selectedGame.title}</h2>
-                <p className="details-tagline">{selectedGame.tagline}</p>
-                
-                <div className="details-desc">
+            <div className="details-grid-layout">
+              <div className="details-main-column">
+                <div className="details-desc-box">
                   {selectedGame.description.map((paragraph, idx) => (
                     <p key={idx}>{paragraph}</p>
                   ))}
                 </div>
 
                 {!selectedGame.comingSoon && (
-                  <div className="trailer-wrap">
-                    <h3>Official Trailer</h3>
-                    <div className="video-container">
-                      <video controls preload="metadata">
+                  <div className="trailer-wrap-section">
+                    <h3>OFFICIAL RECORD TRANSMISSION</h3>
+                    <div className="video-container-card">
+                      <video controls preload="metadata" key={selectedGame.id}>
                         <source src={selectedGame.trailerUrl} type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
@@ -107,12 +107,12 @@ const Games = () => {
                   </div>
                 )}
 
-                {selectedGame.screenshots.length > 0 && (
-                  <div className="screenshots-wrap">
-                    <h3>Screenshots</h3>
-                    <div className="screenshots-grid">
+                {selectedGame.screenshots && selectedGame.screenshots.length > 0 && (
+                  <div className="screenshots-wrap-section">
+                    <h3>RECORDED IMAGERY</h3>
+                    <div className="screenshots-flex-grid">
                       {selectedGame.screenshots.map((src, idx) => (
-                        <a key={idx} href={src} target="_blank" rel="noreferrer" className="screenshot-link">
+                        <a key={idx} href={src} target="_blank" rel="noreferrer" className="screenshot-card-link">
                           <img src={src} alt={`Screenshot ${idx + 1}`} />
                         </a>
                       ))}
@@ -121,30 +121,32 @@ const Games = () => {
                 )}
               </div>
 
-              <div className="details-sidebar">
-                <h3>Game Features</h3>
-                <ul className="features-list">
-                  {selectedGame.features.map((feature, idx) => (
-                    <li key={idx}>⚡ {feature}</li>
-                  ))}
-                </ul>
+              <div className="details-sidebar-column">
+                <div className="features-card-box">
+                  <h3>SYSTEM FEATURES</h3>
+                  <ul className="features-card-list">
+                    {selectedGame.features.map((feature, idx) => (
+                      <li key={idx}>💠 {feature}</li>
+                    ))}
+                  </ul>
+                </div>
 
                 {selectedGame.comingSoon ? (
-                  <div className="coming-soon-box">
-                    <h4>Status: In Concept Phase</h4>
-                    <p>Internal pre-production logs are restricted. Check the DevLog tab for engineering journals.</p>
+                  <div className="status-indicator-box coming-soon">
+                    <h4>clearance restricted</h4>
+                    <p>This project is currently in the pre-concept phase. Internal developer logs remain classified.</p>
                   </div>
                 ) : (
-                  <div className="play-status-box">
-                    <h4>Status: Active Alpha</h4>
-                    <p>Register for tournaments to compete on public builds.</p>
+                  <div className="status-indicator-box active-build">
+                    <h4>active combat simulation</h4>
+                    <p>This experience is fully integrated into the competitive system database. Visit the Chat room to coordinate with other operatives.</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
-        )}
-      </section>
+        </main>
+      </div>
     </div>
   );
 };

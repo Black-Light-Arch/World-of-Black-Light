@@ -23,14 +23,9 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
+    { name: 'Chat', path: '/chat' },
     { name: 'Games', path: '/games' },
-    { name: 'Stories', path: '/stories' },
-    { name: 'DevLog', path: '/devlog' },
     { name: 'Players', path: '/players' },
-    { name: 'Tournaments', path: '/tournaments' },
-    { name: 'Leaderboard', path: '/leaderboard' },
-    { name: 'Contact', path: '/contact' },
-    { name: 'About', path: '/about' },
   ];
 
   const isActive = (path) => {
@@ -62,9 +57,6 @@ const Navbar = () => {
         <div className="nav-auth-section">
           {session ? (
             <>
-              <Link to="/chat" className="nav-chat-btn" title="Chat Room">
-                <MessageSquare size={18} />
-              </Link>
               <Link to="/profile" className="nav-profile-badge" title="Profile">
                 <span className="nav-profile-emoji">{session.emoji || '👁️'}</span>
                 <span className="nav-profile-name">{session.firstName}</span>
@@ -103,9 +95,6 @@ const Navbar = () => {
         <div className="mobile-auth-footer">
           {session ? (
             <>
-              <Link to="/chat" className="nav-profile-badge" style={{ justifyContent: 'center' }} onClick={() => setIsOpen(false)}>
-                <MessageSquare size={16} style={{ marginRight: '6px' }} /> Chat Room
-              </Link>
               <Link to="/profile" className="nav-profile-badge" style={{ justifyContent: 'center' }} onClick={() => setIsOpen(false)}>
                 <span className="nav-profile-emoji" style={{ marginRight: '6px' }}>{session.emoji || '👁️'}</span>
                 Your Profile ({session.firstName})
