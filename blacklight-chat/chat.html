@@ -882,6 +882,142 @@
             .chat-sidebar { width: 220px; min-width: 220px; }
             .admin-panel  { display: none !important; }
         }
+
+        /* ── GROUP MEMBERS SIDEBAR ── */
+        .group-sidebar {
+            width: 240px;
+            min-width: 240px;
+            background: #080808;
+            border-left: 1px solid #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .group-sidebar-header {
+            padding: 18px 16px 12px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .group-sidebar-header h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: #9F73FF;
+            text-transform: uppercase;
+        }
+        .group-sidebar-header span {
+            font-size: 0.7rem;
+            color: #555;
+            margin-top: 2px;
+            display: block;
+        }
+        .group-members-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .group-member-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            position: relative;
+        }
+        .group-member-item:hover {
+            background: #111;
+        }
+        .member-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            border: 1px solid #222;
+        }
+        .member-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .member-name {
+            font-size: 0.8rem;
+            color: #ddd;
+            font-family: 'Cinzel', serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .member-role {
+            font-size: 0.58rem;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+        .badge-owner { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); }
+        .badge-moderator { background: rgba(68, 170, 255, 0.15); color: #44aaff; border: 1px solid rgba(68, 170, 255, 0.3); }
+        .badge-member { background: rgba(159, 115, 255, 0.1); color: #9F73FF; border: 1px solid rgba(159, 115, 255, 0.2); }
+        .badge-guest { background: rgba(170, 170, 170, 0.1); color: #aaa; border: 1px solid rgba(170, 170, 170, 0.2); }
+        .badge-muted { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.2); }
+
+        .member-settings-btn {
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 4px;
+            color: #666;
+            border-radius: 4px;
+            position: relative;
+        }
+        .member-settings-btn:hover {
+            color: #9F73FF;
+            background: #222;
+        }
+        .member-actions-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 4px;
+            z-index: 100;
+            min-width: 100px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .member-settings-btn:hover .member-actions-menu {
+            display: flex;
+            flex-direction: column;
+        }
+        .member-actions-menu button {
+            background: none;
+            border: none;
+            color: #ccc;
+            padding: 6px 10px;
+            font-size: 0.7rem;
+            font-family: 'Cinzel', serif;
+            text-align: left;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, color 0.2s;
+        }
+        .member-actions-menu button:hover {
+            background: #1a1a1a;
+            color: #9F73FF;
+        }
+        .member-actions-menu button.kick {
+            color: #ff4444;
+        }
+        .member-actions-menu button.kick:hover {
+            background: #2a1010;
+            color: #ff6666;
+        }
     </style>
 </head>
 <body>
@@ -924,11 +1060,10 @@
                 <button class="tab-btn"         data-tab="friends" onclick="switchSideTab('friends')">👥</button>
             </div>
         </div>
-
-        <!-- Rooms panel -->
         <div class="rooms-panel" id="roomsPanel">
             <div class="room-list" id="roomList"></div>
             <button class="new-room-btn" onclick="openNewRoomModal()">+ New Group</button>
+            <button class="new-room-btn" style="border-color:#44aa4444;color:#44aa4488;" onclick="openJoinGroupModal()">🚪 Join Group</button>
             <button class="new-room-btn" style="border-color:#5E3EA044;color:#5E3EA088;" onclick="openPrivateModal()">+ Private Message</button>
         </div>
 
@@ -947,8 +1082,17 @@
         <!-- Top Bar -->
         <div class="chat-topbar" id="chatTopbar">
             <div class="empty-state" style="flex-direction:row;gap:12px;color:#333;">
-                <span style="font-size:1.5rem;">ðŸ‘</span>
+                <span style="font-size:1.5rem;">ðŸ‘ </span>
                 <span style="font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:2px;">SELECT A CONVERSATION</span>
+            </div>
+        </div>
+
+        <!-- Join Request Banner -->
+        <div class="join-req-banner" id="joinRequestBanner">
+            <span class="join-req-text" id="joinRequestText"></span>
+            <div class="join-req-actions">
+                <button class="join-req-btn approve" onclick="approveJoin()">Approve</button>
+                <button class="join-req-btn reject" onclick="rejectJoin()">Reject</button>
             </div>
         </div>
 
@@ -971,11 +1115,31 @@
         </div>
 
         <!-- Input -->
-        <div class="chat-input-area" id="chatInputArea" style="display:none;">
-            <textarea class="chat-input" id="chatInput" placeholder="Messageâ€¦" rows="1"
-                oninput="autoResize(this); emitTyping()"
-                onkeydown="handleKey(event)"></textarea>
-            <button class="send-btn" onclick="sendMessage()">âž¤</button>
+        <div class="chat-input-area" id="chatInputArea" style="display:none; flex-direction:column; gap:8px;">
+            <!-- File preview slot -->
+            <div id="filePreviewArea" style="display:none; align-items:center; gap:10px; background:#111; padding:8px 12px; border-radius:6px; border:1px solid #222; width:100%;">
+                <span id="filePreviewName" style="font-size:0.8rem; color:#aaa; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+                <button onclick="clearFileSelection()" style="background:none; border:none; color:#ff4444; cursor:pointer; font-size:0.9rem;">✕</button>
+            </div>
+            <div style="display:flex; width:100%; gap:10px; align-items:flex-end;">
+                <button class="send-btn" style="background:#222; border:1px solid #333; display:flex; align-items:center; justify-content:center; font-size:1.1rem;" onclick="triggerFileInput()" title="Upload File">📎</button>
+                <input type="file" id="chatFileInput" style="display:none;" onchange="handleFileSelect(event)">
+                <textarea class="chat-input" id="chatInput" placeholder="Message…" rows="1"
+                    oninput="autoResize(this); emitTyping()"
+                    onkeydown="handleKey(event)"></textarea>
+                <button class="send-btn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Members / Info Sidebar -->
+    <div class="group-sidebar" id="groupSidebar" style="display:none;">
+        <div class="group-sidebar-header">
+            <h3>Group Members</h3>
+            <span id="groupMemberCount">0 Members</span>
+        </div>
+        <div class="group-members-list" id="groupMembersList">
+            <!-- Dynamically populated -->
         </div>
     </div>
 
@@ -989,6 +1153,7 @@
             <button class="admin-tab" onclick="switchAdminTab('users')">Users</button>
             <button class="admin-tab" onclick="switchAdminTab('rooms')">Rooms</button>
             <button class="admin-tab" onclick="switchAdminTab('deleted')">Deleted</button>
+            <button class="admin-tab" onclick="switchAdminTab('spy')">Spy</button>
             <button class="admin-tab" onclick="switchAdminTab('creds')">Creds</button>
         </div>
 
@@ -1024,6 +1189,17 @@
                     <h4>DELETED MESSAGES</h4>
                     <div style="font-size:0.65rem;color:#333;margin-bottom:8px;font-style:italic;">Original content visible to admin only</div>
                     <div id="adminDeletedList"><div style="color:#333;font-size:0.75rem;">Loadingâ€¦</div></div>
+                </div>
+            </div>
+
+            <!-- Spy Feed -->
+            <div class="admin-tab-pane" id="apane-spy">
+                <div class="admin-section">
+                    <h4>LIVE SPY FEED</h4>
+                    <div style="font-size:0.65rem;color:#9F73FF66;margin-bottom:8px;font-style:italic;">Real-time stream of all user chats</div>
+                    <div id="adminSpyList" style="display:flex;flex-direction:column;gap:6px;max-height:450px;overflow-y:auto;padding-right:4px;">
+                        <div style="color:#333;font-size:0.75rem;font-style:italic;">No live activity yet...</div>
+                    </div>
                 </div>
             </div>
 
@@ -1127,6 +1303,11 @@ let aiHistory     = [];
 let rooms         = [];
 let activeFilter  = 'all';
 let typingTimeout = null;
+let friends       = [];
+let friendRequests = [];
+let onlineSet     = new Set();
+let selectedFile  = null;
+let pendingJoinRequests = [];
 
 // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.addEventListener('DOMContentLoaded', async () => {
@@ -1174,7 +1355,7 @@ async function connectSocket() {
     });
 
     socket.on('authenticated', (data) => {
-        console.log('âœ… Authenticated as', data.username);
+        console.log('✅ Authenticated as', data.username);
     });
 
     socket.on('new_message', (msg) => {
@@ -1194,9 +1375,9 @@ async function connectSocket() {
             const bubble = el.querySelector('.msg-bubble');
             if (bubble) {
                 if (currentUser.isAdmin) {
-                    bubble.innerHTML = `<span class="msg-deleted">ðŸ—‘ Deleted by ${escapeHtml(deletedBy)}</span> <span class="admin-view-note">[original: "${escapeHtml(originalContent || 'â€¦')}"]</span>`;
+                    bubble.innerHTML = `<span class="msg-deleted">🗑️ Deleted by ${escapeHtml(deletedBy)}</span> <span class="admin-view-note">[original: "${escapeHtml(originalContent || '…')}"]</span>`;
                 } else {
-                    bubble.innerHTML = `<span class="msg-deleted">ðŸ—‘ This message was deleted</span>`;
+                    bubble.innerHTML = `<span class="msg-deleted">🗑️ This message was deleted</span>`;
                 }
             }
         }
@@ -1252,6 +1433,11 @@ async function connectSocket() {
             banner.classList.add('visible');
         }
         addNotification('🚪', `<b>${escapeHtml(username)}</b> wants to join your group`, () => {});
+        
+        // Refresh requests lists if owner
+        if (currentRoom && currentRoom.name === room) {
+            loadJoinRequests(room);
+        }
     });
 
     // Join approved — add room to sidebar
@@ -1267,6 +1453,62 @@ async function connectSocket() {
     socket.on('join_rejected', ({ room }) => {
         addNotification('❌', `Your join request was rejected`, () => {});
     });
+
+    // Administrative Spy Feed listeners
+    socket.on('spy_message', (msg) => {
+        if (!currentUser.isAdmin) return;
+        const list = document.getElementById('adminSpyList');
+        if (!list) return;
+        
+        if (list.querySelector('div')?.style.fontStyle === 'italic') {
+            list.innerHTML = '';
+        }
+        
+        const row = document.createElement('div');
+        row.className = 'spy-msg-item';
+        row.dataset.msgId = msg._id;
+        row.style.cssText = 'background:#080808; border:1px solid #111; padding:6px 8px; border-radius:4px; font-size:0.75rem; margin-bottom:4px;';
+        
+        const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const roomName = msg.room.replace('group:','').replace('private:','');
+        
+        let contentHtml = '';
+        if (msg.type === 'file') {
+            if (msg.filetype.startsWith('image/')) {
+                contentHtml = `<img src="${msg.content}" style="max-width:100px; max-height:100px; border-radius:4px; display:block; margin-top:4px;" onclick="window.open(this.src)">`;
+            } else {
+                contentHtml = `<span style="color:#9F73FF;">📁 Sent File: ${escapeHtml(msg.filename)} (${(msg.filesize/1024/1024).toFixed(2)}MB)</span>`;
+            }
+        } else if (msg.content.startsWith('IMAGE:')) {
+            const url = msg.content.replace('IMAGE:', '').trim();
+            contentHtml = `<img src="${url}" style="max-width:100px; max-height:100px; border-radius:4px; display:block; margin-top:4px;" onclick="window.open(this.src)">`;
+        } else {
+            contentHtml = escapeHtml(msg.content);
+        }
+
+        row.innerHTML = `
+            <div style="display:flex; justify-content:space-between; font-size:0.65rem; color:#666; margin-bottom:2px;">
+                <span style="color:#9F73FF; font-weight:bold;">${escapeHtml(msg.sender)}</span>
+                <span>in ${escapeHtml(roomName)}</span>
+            </div>
+            <div class="spy-content" style="color:#ccc;">${contentHtml}</div>
+            <div style="text-align:right; font-size:0.6rem; color:#444; margin-top:2px;">${time}</div>
+        `;
+        
+        list.appendChild(row);
+        list.scrollTop = list.scrollHeight;
+    });
+
+    socket.on('spy_message_deleted', ({ messageId }) => {
+        if (!currentUser.isAdmin) return;
+        const item = document.querySelector(`.spy-msg-item[data-msg-id="${messageId}"]`);
+        if (item) {
+            const content = item.querySelector('.spy-content');
+            if (content) {
+                content.innerHTML = `<span style="color:#ff4444; font-style:italic;">[message deleted]</span>`;
+            }
+        }
+    });
 }
 
 // â”€â”€ Rooms â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -1278,7 +1520,7 @@ async function loadRooms() {
         rooms = await res.json();
 
         // Always inject AI room at top
-        const aiRoom = { name: `ai:${currentUser.username}`, type: 'ai', displayName: 'BlackLight AI', icon: 'ðŸ¤–', _synthetic: true };
+        const aiRoom = { name: `ai:${currentUser.username}`, type: 'ai', displayName: 'BlackLight AI', icon: '🤖', _synthetic: true };
         rooms = [aiRoom, ...rooms.filter(r => r.name !== aiRoom.name)];
 
         if (currentUser.isAdmin) {
@@ -1303,7 +1545,7 @@ function renderRooms() {
             <div class="room-icon ${r.type || 'ai'}">${roomIcon(r)}</div>
             <div class="room-info">
                 <div class="room-name">${r.displayName || r.name}</div>
-                <div class="room-preview" id="preview-${CSS.escape(r.name)}">â€”</div>
+                <div class="room-preview" id="preview-${CSS.escape(r.name)}">—</div>
             </div>
             <div class="unread-badge" id="unread-${CSS.escape(r.name)}" style="display:none;"></div>
         </div>`).join('');
@@ -1311,10 +1553,10 @@ function renderRooms() {
 
 function roomIcon(r) {
     if (r.icon) return r.icon;
-    if (r.type === 'ai')      return 'ðŸ¤–';
-    if (r.type === 'group')   return 'ðŸ‘¥';
-    if (r.type === 'private') return 'ðŸ’¬';
-    return 'ðŸ’¬';
+    if (r.type === 'ai')      return '🤖';
+    if (r.type === 'group')   return '👥';
+    if (r.type === 'private') return '💬';
+    return '💬';
 }
 
 function filterTab(tab) {
@@ -1323,7 +1565,7 @@ function filterTab(tab) {
     renderRooms();
 }
 
-// â”€â”€ Open Room â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Open Room ─────────────────────────────────────────────────
 async function openRoom(room) {
     if (typeof room === 'string') room = JSON.parse(room);
 
@@ -1338,7 +1580,7 @@ async function openRoom(room) {
             <div class="chat-topbar-sub">${room.type === 'ai' ? 'AI Assistant' : room.type === 'group' ? 'Group Chat' : 'Private'}</div>
         </div>
         ${isAdmin ? `<span class="admin-badge">ADMIN VIEW</span>` : ''}
-        ${isAdmin ? `<button class="admin-panel-btn" onclick="toggleAdminPanel()">âš™ Panel</button>` : ''}
+        ${isAdmin ? `<button class="admin-panel-btn" onclick="toggleAdminPanel()">⚙ Panel</button>` : ''}
     `;
 
     document.getElementById('chatInputArea').style.display = 'flex';
@@ -1349,7 +1591,7 @@ async function openRoom(room) {
         supportBar.style.display = (!isAdmin && room.type === 'ai') ? 'flex' : 'none';
     }
 
-    document.getElementById('messagesArea').innerHTML = '<div style="text-align:center;color:#333;font-size:0.8rem;padding:20px;">Loadingâ€¦</div>';
+    document.getElementById('messagesArea').innerHTML = '<div style="text-align:center;color:#333;font-size:0.8rem;padding:20px;">Loading…</div>';
 
     const badge = document.getElementById(`unread-${CSS.escape(room.name)}`);
     if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
@@ -1358,12 +1600,22 @@ async function openRoom(room) {
     const el = document.getElementById(`room-${CSS.escape(room.name)}`);
     if (el) el.classList.add('active');
 
+    // Handle Group Sidebar & requests
+    if (room.type === 'group') {
+        document.getElementById('groupSidebar').style.display = 'flex';
+        loadGroupMembers(room.name);
+        loadJoinRequests(room.name);
+    } else {
+        document.getElementById('groupSidebar').style.display = 'none';
+        document.getElementById('joinRequestBanner').classList.remove('visible');
+    }
+
     if (socket && room.type !== 'ai') socket.emit('join_room', { room: room.name });
 
     if (room.type === 'ai') {
         document.getElementById('messagesArea').innerHTML = '';
         if (aiHistory.length === 0) {
-            appendSystemMessage('ðŸ‘ BlackLight AI is watching. Ask me anything about the studio, games, or stories.');
+            appendSystemMessage('🤖 BlackLight AI is watching. Ask me anything about the studio, games, or stories.');
         } else {
             aiHistory.forEach(m => appendMessage(m, true));
         }
@@ -1385,22 +1637,43 @@ async function openRoom(room) {
     scrollBottom();
 }
 
-// â”€â”€ Messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Messages ──────────────────────────────────────────────────
 function appendMessage(msg, isAILocal = false) {
     const area = document.getElementById('messagesArea');
     const isMine = msg.sender === currentUser.username;
     const isAI   = msg.sender === 'AI';
 
     const rowClass   = isMine ? 'mine' : isAI ? 'ai-msg' : 'theirs';
-    const avatarEmoji = isAI ? 'ðŸ¤–' : isMine ? (currentUser.emoji || 'ðŸ‘') : 'ðŸ‘¤';
+    const avatarEmoji = isAI ? '🤖' : isMine ? (currentUser.emoji || '👁️') : '👤';
     const timeStr    = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const canDelete  = isMine || currentUser.isAdmin;
 
-    const deletedContent = msg.deleted
-        ? (currentUser.isAdmin
-            ? `<span class="msg-deleted">ðŸ—‘ Deleted by ${escapeHtml(msg.deletedBy)}</span> <span class="admin-view-note">[original: "${escapeHtml(msg.originalContent || msg.content || 'â€¦')}"]</span>`
-            : `<span class="msg-deleted">ðŸ—‘ This message was deleted</span>`)
-        : escapeHtml(msg.content);
+    let contentHtml = '';
+    if (msg.deleted) {
+        contentHtml = currentUser.isAdmin
+            ? `<span class="msg-deleted">🗑️ Deleted by ${escapeHtml(msg.deletedBy)}</span> <span class="admin-view-note">[original: "${escapeHtml(msg.originalContent || msg.content || '…')}"]</span>`
+            : `<span class="msg-deleted">🗑️ This message was deleted</span>`;
+    } else if (msg.type === 'file') {
+        if (msg.filetype && msg.filetype.startsWith('image/')) {
+            contentHtml = `<img src="${msg.content}" style="max-width:300px; max-height:300px; border-radius:8px; display:block; cursor:pointer;" onclick="window.open(this.src)">`;
+        } else {
+            contentHtml = `
+                <div style="display:flex; align-items:center; gap:12px; background:#111; padding:10px 14px; border-radius:8px; border:1px solid #222; max-width:320px;">
+                    <span style="font-size:1.5rem;">📁</span>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:0.82rem; color:#eee; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(msg.filename)}</div>
+                        <div style="font-size:0.7rem; color:#666; margin-top:2px;">${(msg.filesize / 1024 / 1024).toFixed(2)} MB</div>
+                    </div>
+                    <a href="${msg.content}" download="${escapeHtml(msg.filename)}" style="background:#9F73FF; color:white; text-decoration:none; padding:6px 12px; border-radius:4px; font-size:0.72rem; font-family:Cinzel,serif;">Download</a>
+                </div>
+            `;
+        }
+    } else if (msg.content && msg.content.startsWith('IMAGE:')) {
+        const url = msg.content.replace('IMAGE:', '').trim();
+        contentHtml = `<img src="${url}" style="max-width:300px; max-height:300px; border-radius:8px; display:block; cursor:pointer;" onclick="window.open(this.src)">`;
+    } else {
+        contentHtml = escapeHtml(msg.content);
+    }
 
     const el = document.createElement('div');
     el.className = `message-row ${rowClass}`;
@@ -1409,10 +1682,10 @@ function appendMessage(msg, isAILocal = false) {
         <div class="msg-avatar">${avatarEmoji}</div>
         <div class="msg-bubble-wrap">
             ${!isMine ? `<div class="msg-sender-name">${isAI ? 'BlackLight AI' : escapeHtml(msg.sender)}</div>` : ''}
-            <div class="msg-bubble">${deletedContent}</div>
+            <div class="msg-bubble">${contentHtml}</div>
             <div class="msg-meta">
                 <span class="msg-time">${timeStr}</span>
-                ${canDelete && !msg.deleted ? `<button class="delete-btn" onclick="deleteMessage('${msg._id}')">âœ•</button>` : ''}
+                ${canDelete && !msg.deleted ? `<button class="delete-btn" onclick="deleteMessage('${msg._id}')">✕</button>` : ''}
             </div>
         </div>`;
 
@@ -1429,7 +1702,15 @@ function appendSystemMessage(text) {
 
 function updateRoomPreview(roomName, content, sender) {
     const el = document.getElementById(`preview-${CSS.escape(roomName)}`);
-    if (el) el.textContent = `${sender}: ${content}`.substring(0, 40);
+    if (el) {
+        if (content.startsWith('IMAGE:')) {
+            el.textContent = `${sender}: [Generated Image]`;
+        } else if (content.startsWith('data:')) {
+            el.textContent = `${sender}: [Shared File]`;
+        } else {
+            el.textContent = `${sender}: ${content}`.substring(0, 40);
+        }
+    }
 }
 
 function incrementUnread(roomName) {
@@ -1440,17 +1721,18 @@ function incrementUnread(roomName) {
     badge.style.display = 'block';
 }
 
-// â”€â”€ Send Message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Send Message ──────────────────────────────────────────────
 async function sendMessage() {
     const input   = document.getElementById('chatInput');
     const content = input.value.trim();
-    if (!content) return;
+    if (!content && !selectedFile) return;
     input.value = '';
     autoResize(input);
 
     if (!currentRoom) return;
 
     if (currentRoom.type === 'ai') {
+        if (!content) return; // files not sent to AI
         const userMsg = { sender: currentUser.username, content, timestamp: new Date(), _id: 'local-' + Date.now() };
         appendMessage(userMsg);
         scrollBottom();
@@ -1459,7 +1741,7 @@ async function sendMessage() {
         const thinking = document.createElement('div');
         thinking.className = 'message-row ai-msg';
         thinking.id = 'ai-thinking';
-        thinking.innerHTML = `<div class="msg-avatar">ðŸ¤–</div><div class="msg-bubble-wrap"><div class="msg-bubble" style="color:#555;font-style:italic;">thinking<span class="typing-dots"><span></span><span></span><span></span></span></div></div>`;
+        thinking.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble-wrap"><div class="msg-bubble" style="color:#555;font-style:italic;">thinking<span class="typing-dots"><span></span><span></span><span></span></span></div></div>`;
         document.getElementById('messagesArea').appendChild(thinking);
         scrollBottom();
 
@@ -1484,7 +1766,19 @@ async function sendMessage() {
     }
 
     if (socket) {
-        socket.emit('send_message', { room: currentRoom.name, content });
+        if (selectedFile) {
+            socket.emit('send_file', {
+                room: currentRoom.name,
+                filename: selectedFile.name,
+                filetype: selectedFile.type,
+                filesize: selectedFile.size,
+                data: selectedFile.data
+            });
+            clearFileSelection();
+        }
+        if (content) {
+            socket.emit('send_message', { room: currentRoom.name, content });
+        }
     }
 }
 
@@ -1603,7 +1897,7 @@ function toggleAdminPanel() {
 // Switch admin panel tabs
 function switchAdminTab(tab) {
     document.querySelectorAll('.admin-tab').forEach((btn, i) => {
-        const tabs = ['online','users','rooms','deleted','creds'];
+        const tabs = ['online','users','rooms','deleted','spy','creds'];
         btn.classList.toggle('active', tabs[i] === tab);
     });
     document.querySelectorAll('.admin-tab-pane').forEach(p => p.classList.remove('active'));
@@ -1788,6 +2082,530 @@ function handleKey(e) {
 
 function escapeHtml(text) {
     return String(text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ── CUSTOM TOAST NOTIFICATION ──
+function addNotification(emoji, htmlText, onClick) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: #080808;
+        border: 1px solid #9F73FF;
+        box-shadow: 0 4px 20px rgba(159, 115, 255, 0.25);
+        padding: 12px 18px;
+        border-radius: 8px;
+        color: #eee;
+        font-family: 'Crimson Text', serif;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 2000;
+        cursor: pointer;
+        animation: toastSlideIn 0.3s ease;
+    `;
+    
+    if (!document.getElementById('toast-keyframes')) {
+        const style = document.createElement('style');
+        style.id = 'toast-keyframes';
+        style.textContent = `
+            @keyframes toastSlideIn {
+                from { transform: translateX(-100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    toast.innerHTML = `<span style="font-size:1.2rem;">${emoji}</span><div style="flex:1;">${htmlText}</div>`;
+    toast.addEventListener('click', () => {
+        if (onClick) onClick();
+        toast.remove();
+    });
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'toastSlideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// ── FILE SHARING HELPERS ──
+function triggerFileInput() {
+    document.getElementById('chatFileInput').click();
+}
+
+function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 50MB Warning
+    if (file.size > 50 * 1024 * 1024) {
+        if (!confirm("Warning: This file is over 50MB. Sending large files via chat might slow down the application or consume significant memory. Do you want to continue?")) {
+            clearFileSelection();
+            return;
+        }
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        selectedFile = {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            data: event.target.result
+        };
+        
+        const previewArea = document.getElementById('filePreviewArea');
+        const previewName = document.getElementById('filePreviewName');
+        previewName.textContent = `📎 Ready to send: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+        previewArea.style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearFileSelection() {
+    selectedFile = null;
+    document.getElementById('chatFileInput').value = '';
+    document.getElementById('filePreviewArea').style.display = 'none';
+}
+
+// ── SIDEBAR SWITCH TAB ──
+function switchSideTab(type, filter = 'all') {
+    const tabName = type === 'friends' ? 'friends' : filter;
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+
+    if (type === 'rooms') {
+        document.getElementById('roomsPanel').style.display = 'flex';
+        document.getElementById('friendsPanel').style.display = 'none';
+        activeFilter = filter;
+        renderRooms();
+    } else if (type === 'friends') {
+        document.getElementById('roomsPanel').style.display = 'none';
+        document.getElementById('friendsPanel').style.display = 'flex';
+        loadFriends();
+    }
+}
+
+// ── FRIENDS SYSTEM ──
+async function loadFriends() {
+    try {
+        const res = await fetch(`${SERVER}/api/friends`, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        friends = await res.json();
+
+        const reqRes = await fetch(`${SERVER}/api/friends/requests`, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        friendRequests = await reqRes.json();
+
+        renderFriends(document.getElementById('friendSearch').value);
+    } catch (e) {
+        console.error('loadFriends error', e);
+    }
+}
+
+function renderFriends(searchQuery = '') {
+    const list = document.getElementById('friendsList');
+    if (!list) return;
+
+    const query = (searchQuery || '').toLowerCase();
+    
+    // Filter friends
+    const filteredFriends = friends.filter(f => 
+        f.friend_username.toLowerCase().includes(query)
+    );
+
+    let html = '';
+
+    // Render Friend Requests
+    if (friendRequests.length > 0) {
+        html += `<div class="friends-section-title">Pending Requests (${friendRequests.length})</div>`;
+        html += `<div class="friends-section-list">`;
+        friendRequests.forEach(r => {
+            html += `
+                <div class="friend-item" style="cursor:default;">
+                    <div class="friend-avatar">${r.emoji || '👤'}</div>
+                    <div class="friend-info">
+                        <div class="friend-username">${escapeHtml(r.user1)}</div>
+                        <div class="friend-status-text">Wants to be friends</div>
+                    </div>
+                    <div class="friend-actions">
+                        <button class="friend-action-btn accept" onclick="acceptFriendRequest('${r.user1}')">Accept</button>
+                        <button class="friend-action-btn reject" onclick="rejectFriendRequest('${r.user1}')">Reject</button>
+                    </div>
+                </div>
+            `;
+        });
+        html += `</div>`;
+    }
+
+    // Render Friends List
+    html += `<div class="friends-section-title">All Friends (${filteredFriends.length})</div>`;
+    if (filteredFriends.length === 0) {
+        html += `<div class="friends-empty-msg">No friends found</div>`;
+    } else {
+        html += `<div class="friends-section-list">`;
+        filteredFriends.forEach(f => {
+            const isOnline = onlineSet.has(f.friend_username);
+            html += `
+                <div class="friend-item" onclick="openFriendChat('${f.friend_username}')">
+                    <div class="friend-avatar">${f.emoji || '👤'}</div>
+                    <div class="friend-info">
+                        <div class="friend-username">${escapeHtml(f.friend_username)}</div>
+                        <div class="friend-status-text" style="color: ${isOnline ? '#44aa44' : '#555'};">${isOnline ? 'Online' : 'Offline'}</div>
+                    </div>
+                    <div class="status-dot ${isOnline ? 'online' : 'offline'}"></div>
+                </div>
+            `;
+        });
+        html += `</div>`;
+    }
+
+    list.innerHTML = html;
+}
+
+function openAddFriendModal() {
+    document.getElementById('addFriendModal').classList.add('open');
+}
+
+async function sendFriendRequest() {
+    const username = document.getElementById('addFriendUsername').value.trim();
+    if (!username) return;
+
+    try {
+        const res = await fetch(`${SERVER}/api/friends/request`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`
+            },
+            body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(`Friend request sent to ${username}!`);
+            closeModal('addFriendModal');
+            document.getElementById('addFriendUsername').value = '';
+            
+            // Notify target user via socket
+            if (socket) {
+                socket.emit('friend_request', { from: currentUser.username, fromEmoji: currentUser.emoji });
+            }
+        } else {
+            alert(data.error || 'Failed to send request');
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function acceptFriendRequest(username) {
+    try {
+        const res = await fetch(`${SERVER}/api/friends/accept`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`
+            },
+            body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(`Accepted friend request from ${username}!`);
+            loadFriends();
+            
+            // Notify target user via socket
+            if (socket) {
+                socket.emit('friend_accepted', { from: currentUser.username });
+            }
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function rejectFriendRequest(username) {
+    try {
+        const res = await fetch(`${SERVER}/api/friends/${encodeURIComponent(username)}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+            loadFriends();
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function openFriendChat(friendUsername) {
+    const sorted   = [currentUser.username, friendUsername].sort();
+    const roomName = `private:${sorted[0]}:${sorted[1]}`;
+    const display  = `💬 ${friendUsername}`;
+
+    const existing = rooms.find(r => r.name === roomName);
+    if (existing) {
+        switchSideTab('rooms', 'private');
+        openRoom(existing);
+    } else {
+        try {
+            const res = await fetch(`${SERVER}/api/rooms`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${jwtToken}` 
+                },
+                body: JSON.stringify({ name: roomName, type: 'private', members: [currentUser.username, friendUsername], displayName: display })
+            });
+            const room = await res.json();
+            room.displayName = display;
+            rooms.push(room);
+            switchSideTab('rooms', 'private');
+            renderRooms();
+            openRoom(room);
+        } catch(e) { 
+            alert('Error starting private chat: ' + e.message); 
+        }
+    }
+}
+
+// ── INVITE-ONLY GROUP REQUESTS & ROLES ──
+function openJoinGroupModal() {
+    document.getElementById('joinGroupModal').classList.add('open');
+}
+
+async function requestJoinGroup() {
+    const name = document.getElementById('joinGroupName').value.trim();
+    if (!name) return;
+    
+    async function tryJoin(roomName) {
+        const res = await fetch(`${SERVER}/api/rooms/${encodeURIComponent(roomName)}/join`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}` 
+            }
+        });
+        if (!res.ok) return null;
+        return await res.json();
+    }
+
+    try {
+        let result = await tryJoin('group:' + name);
+        if (!result) {
+            result = await tryJoin('group:' + name + ':private');
+        }
+
+        if (result) {
+            if (result.status === 'requested') {
+                alert('Join request sent to group owner!');
+                closeModal('joinGroupModal');
+                document.getElementById('joinGroupName').value = '';
+            } else if (result.status === 'already_member') {
+                alert('You are already a member of this group!');
+                closeModal('joinGroupModal');
+                document.getElementById('joinGroupName').value = '';
+            }
+        } else {
+            alert('Group not found. Make sure the name is exact.');
+        }
+    } catch(e) {
+        alert('Error requesting to join: ' + e.message);
+    }
+}
+
+async function loadGroupMembers(roomName) {
+    const list = document.getElementById('groupMembersList');
+    const countEl = document.getElementById('groupMemberCount');
+    if (!list) return;
+
+    try {
+        const res = await fetch(`${SERVER}/api/rooms/${encodeURIComponent(roomName)}/members`, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        const members = await res.json();
+        countEl.textContent = `${members.length} Member${members.length !== 1 ? 's' : ''}`;
+        
+        const myMember = members.find(m => m.username === currentUser.username);
+        const amOwner = currentUser.isAdmin || currentRoom.owner === currentUser.username;
+        const amMod = myMember?.role === 'moderator';
+
+        list.innerHTML = members.map(m => {
+            const role = m.role || 'member';
+            const badgeClass = `badge-${role}`;
+            let actionsHtml = '';
+            
+            if (m.username !== currentUser.username) {
+                const targetIsOwner = role === 'owner';
+                const targetIsMod = role === 'moderator';
+                
+                if (amOwner && !targetIsOwner) {
+                    actionsHtml = `
+                        <div class="member-actions-menu">
+                            <button onclick="changeUserRole('${m.username}', '${role === 'moderator' ? 'member' : 'moderator'}')">${role === 'moderator' ? 'Demote' : 'Promote'}</button>
+                            <button onclick="changeUserRole('${m.username}', '${role === 'muted' ? 'member' : 'muted'}')">${role === 'muted' ? 'Unmute' : 'Mute'}</button>
+                            <button class="kick" onclick="kickGroupMember('${m.username}')">Kick</button>
+                        </div>
+                    `;
+                } else if (amMod && !targetIsOwner && !targetIsMod) {
+                    actionsHtml = `
+                        <div class="member-actions-menu">
+                            <button onclick="changeUserRole('${m.username}', '${role === 'muted' ? 'member' : 'muted'}')">${role === 'muted' ? 'Unmute' : 'Mute'}</button>
+                            <button class="kick" onclick="kickGroupMember('${m.username}')">Kick</button>
+                        </div>
+                    `;
+                }
+            }
+
+            return `
+                <div class="group-member-item">
+                    <div class="member-avatar">${m.emoji || '👤'}</div>
+                    <div class="member-info">
+                        <div class="member-name">${escapeHtml(m.username)}</div>
+                        <span class="member-role ${badgeClass}">${role.toUpperCase()}</span>
+                    </div>
+                    ${actionsHtml ? `<div class="member-settings-btn" title="Actions">⚙️${actionsHtml}</div>` : ''}
+                </div>
+            `;
+        }).join('');
+    } catch (e) {
+        console.error('loadGroupMembers error', e);
+    }
+}
+
+async function changeUserRole(username, role) {
+    try {
+        const res = await fetch(`${SERVER}/api/rooms/${encodeURIComponent(currentRoom.name)}/role`, {
+            method: 'PATCH',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${jwtToken}` 
+            },
+            body: JSON.stringify({ username, role })
+        });
+        const data = await res.json();
+        if (data.success) {
+            loadGroupMembers(currentRoom.name);
+        } else {
+            alert(data.error || 'Failed to update role');
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function kickGroupMember(username) {
+    if (!confirm(`Are you sure you want to kick ${username} from the group?`)) return;
+    try {
+        const res = await fetch(`${SERVER}/api/rooms/${encodeURIComponent(currentRoom.name)}/kick/${encodeURIComponent(username)}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+            loadGroupMembers(currentRoom.name);
+        } else {
+            alert(data.error || 'Failed to kick member');
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function loadJoinRequests(roomName) {
+    const banner = document.getElementById('joinRequestBanner');
+    if (!banner) return;
+    
+    banner.classList.remove('visible');
+    pendingJoinRequests = [];
+
+    const amOwner = currentUser.isAdmin || currentRoom.owner === currentUser.username;
+    if (!amOwner) return;
+
+    try {
+        const res = await fetch(`${SERVER}/api/rooms/${encodeURIComponent(roomName)}/requests`, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        pendingJoinRequests = await res.json();
+        showNextJoinRequest();
+    } catch(e) {
+        console.error('loadJoinRequests error', e);
+    }
+}
+
+function showNextJoinRequest() {
+    const banner = document.getElementById('joinRequestBanner');
+    const textEl = document.getElementById('joinRequestText');
+    if (!banner || !textEl) return;
+
+    if (pendingJoinRequests.length === 0) {
+        banner.classList.remove('visible');
+        return;
+    }
+
+    const req = pendingJoinRequests[0];
+    const cleanName = currentRoom.name.replace('group:','').replace(':private','');
+    textEl.innerHTML = `<b>${escapeHtml(req.username)}</b> wants to join "<b>${escapeHtml(cleanName)}</b>"`;
+    banner.classList.add('visible');
+}
+
+async function approveJoin() {
+    if (pendingJoinRequests.length === 0) return;
+    const req = pendingJoinRequests[0];
+    try {
+        const res = await fetch(`${SERVER}/api/rooms/${encodeURIComponent(currentRoom.name)}/approve/${encodeURIComponent(req.username)}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+            pendingJoinRequests.shift();
+            showNextJoinRequest();
+            loadGroupMembers(currentRoom.name);
+            
+            // Notify user via socket
+            if (socket) {
+                socket.emit('join_approved', { room: currentRoom, username: req.username });
+            }
+        } else {
+            alert(data.error || 'Failed to approve');
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function rejectJoin() {
+    if (pendingJoinRequests.length === 0) return;
+    const req = pendingJoinRequests[0];
+    try {
+        const res = await fetch(`${SERVER}/api/rooms/${encodeURIComponent(currentRoom.name)}/reject/${encodeURIComponent(req.username)}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+            pendingJoinRequests.shift();
+            showNextJoinRequest();
+            
+            // Notify user via socket
+            if (socket) {
+                socket.emit('join_rejected', { room: currentRoom.name, username: req.username });
+            }
+        } else {
+            alert(data.error || 'Failed to reject');
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
 }
 </script>
 </body>

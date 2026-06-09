@@ -569,7 +569,16 @@
     function addBotMsg(text, silent = false) {
         const row = document.createElement('div');
         row.className = 'bl-msg bot';
-        row.innerHTML = `<div class="bl-msg-avatar">🤖</div><div class="bl-msg-bubble">${escHtml(text)}</div>`;
+        
+        let contentHtml = '';
+        if (text.startsWith('IMAGE:')) {
+            const url = text.replace('IMAGE:', '').trim();
+            contentHtml = `<img src="${url}" style="max-width:100%; border-radius:8px; display:block; margin-top:2px; cursor:pointer;" onclick="window.open(this.src)">`;
+        } else {
+            contentHtml = escHtml(text);
+        }
+
+        row.innerHTML = `<div class="bl-msg-avatar">🤖</div><div class="bl-msg-bubble">${contentHtml}</div>`;
         msgs.appendChild(row);
         msgs.scrollTop = msgs.scrollHeight;
         if (!silent && !isOpen) {
