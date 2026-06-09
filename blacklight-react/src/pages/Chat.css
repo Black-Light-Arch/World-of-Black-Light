@@ -1095,3 +1095,60 @@
 .spy-creds-form .input-group {
   margin-bottom: 0;
 }
+
+/* Restricted Group Access Overlay styles */
+.restricted-group-overlay {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+  background: #020202;
+}
+
+.restricted-group-overlay .shield-icon {
+  color: #ff3333;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 10px rgba(255, 51, 51, 0.4));
+  animation: pulseShield 2s infinite alternate;
+}
+
+@keyframes pulseShield {
+  0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 51, 51, 0.3)); }
+  100% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(255, 51, 51, 0.6)); }
+}
+
+.restricted-group-overlay h3 {
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+  font-family: var(--font-display);
+}
+
+.restricted-group-overlay p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 400px;
+  margin-bottom: 25px;
+}
+
+.pending-status-box {
+  background: rgba(255, 170, 0, 0.08);
+  border: 1px solid rgba(255, 170, 0, 0.25);
+  color: #ffaa00;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+}
+
+.join-request-btn {
+  padding: 12px 30px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+

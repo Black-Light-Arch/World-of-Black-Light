@@ -292,7 +292,14 @@ const Chat = () => {
       });
 
       socket.on('join_approved', ({ room }) => {
-        loadRooms(Auth.getSession());
+        const activeUser = Auth.getSession();
+        loadRooms(activeUser);
+        setCurrentRoom((prevRoom) => {
+          if (prevRoom && prevRoom.name === room.name) {
+            return { ...prevRoom, _member: true, _requested: false };
+          }
+          return prevRoom;
+        });
         alert(`✅ Approved: You were approved to join ${room.displayName || room.name}`);
       });
 
@@ -326,6 +333,14 @@ const Chat = () => {
   // Load messages when current room changes
   useEffect(() => {
     if (!currentRoom) return;
+
+    const isMember = currentRoom._member || session?.isAdmin || currentRoom.type === 'ai' || currentRoom.type === 'private';
+    
+    if (!isMember) {
+      setMessages([]);
+      return;
+    }
+
     loadRoomMessages(currentRoom);
 
     // Join room on Socket.IO
@@ -539,6 +554,38 @@ const Chat = () => {
       }
     } catch (err) {
       alert('Error joining: ' + err.message);
+    }
+  };
+
+  const handleJoinGroupDirect = async (roomName) => {
+    try {
+      const res = await fetch(`/api/rooms/${encodeURIComponent(roomName)}/join`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        }
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      
+      if (data.status === 'requested') {
+        alert('Join request sent to group owner/moderators!');
+        setRooms((prev) => 
+          prev.map(r => r.name === roomName ? { ...r, _requested: true } : r)
+        );
+        setCurrentRoom((prev) => {
+          if (prev && prev.name === roomName) {
+            return { ...prev, _requested: true };
+          }
+          return prev;
+        });
+      } else if (data.status === 'already_member') {
+        alert('You are already a member of this group.');
+        loadRooms(session);
+      }
+    } catch (err) {
+      alert('Failed to send join request.');
     }
   };
 
@@ -897,134 +944,156 @@ const Chat = () => {
                 )}
               </header>
 
-              {/* MESSAGES VIEW */}
-              <div className="messages-area">
-                {messages.length === 0 && currentRoom.type !== 'ai' && (
-                  <p className="empty-void-txt">Empty log stream. Speak into the void.</p>
-                )}
-                {messages.map((msg) => {
-                  const isMine = msg.sender === session.username;
-                  const isAI = msg.sender === 'AI';
-                  const alignment = isMine ? 'mine' : isAI ? 'ai-msg' : 'theirs';
-                  
-                  let contentHtml = '';
-                  if (msg.deleted) {
-                    contentHtml = session.isAdmin 
-                      ? `🗑️ Deleted by admin. [original: "${msg.originalContent}"]`
-                      : `🗑️ This signal was intercepted and deleted.`;
-                  } else if (msg.type === 'file') {
-                    if (msg.filetype && msg.filetype.startsWith('image/')) {
-                      contentHtml = <img src={msg.content} className="chat-img-embed" alt="attachment" onClick={() => window.open(msg.content)} />;
-                    } else {
-                      contentHtml = (
-                        <div className="file-sharing-msg-card">
-                          <span className="file-icon">📁</span>
-                          <div className="file-details">
-                            <span className="name">{msg.filename}</span>
-                            <span className="size">{(msg.filesize / 1024 / 1024).toFixed(2)} MB</span>
+              {currentRoom.type === 'group' && !currentRoom._member && !session?.isAdmin ? (
+                <div className="restricted-group-overlay">
+                  <Shield size={48} className="shield-icon" />
+                  <h3>Access Restricted</h3>
+                  <p>You are not a member of the group <strong>{currentRoom.displayName || currentRoom.name.replace('group:', '')}</strong>.</p>
+                  {currentRoom._requested ? (
+                    <div className="pending-status-box">
+                      <span>Access request pending owner/moderator approval...</span>
+                    </div>
+                  ) : (
+                    <button 
+                      className="btn-primary join-request-btn"
+                      onClick={() => handleJoinGroupDirect(currentRoom.name)}
+                    >
+                      Request Access to Group
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {/* MESSAGES VIEW */}
+                  <div className="messages-area">
+                    {messages.length === 0 && currentRoom.type !== 'ai' && (
+                      <p className="empty-void-txt">Empty log stream. Speak into the void.</p>
+                    )}
+                    {messages.map((msg) => {
+                      const isMine = msg.sender === session.username;
+                      const isAI = msg.sender === 'AI';
+                      const alignment = isMine ? 'mine' : isAI ? 'ai-msg' : 'theirs';
+                      
+                      let contentHtml = '';
+                      if (msg.deleted) {
+                        contentHtml = session.isAdmin 
+                          ? `🗑️ Deleted by admin. [original: "${msg.originalContent}"]`
+                          : `🗑️ This signal was intercepted and deleted.`;
+                      } else if (msg.type === 'file') {
+                        if (msg.filetype && msg.filetype.startsWith('image/')) {
+                          contentHtml = <img src={msg.content} className="chat-img-embed" alt="attachment" onClick={() => window.open(msg.content)} />;
+                        } else {
+                          contentHtml = (
+                            <div className="file-sharing-msg-card">
+                              <span className="file-icon">📁</span>
+                              <div className="file-details">
+                                <span className="name">{msg.filename}</span>
+                                <span className="size">{(msg.filesize / 1024 / 1024).toFixed(2)} MB</span>
+                              </div>
+                              <a href={msg.content} download={msg.filename} className="btn-primary file-dl-btn">Download</a>
+                            </div>
+                          );
+                        }
+                      } else if (msg.content && msg.content.startsWith('IMAGE:')) {
+                        const url = msg.content.replace('IMAGE:', '').trim();
+                        contentHtml = <img src={url} className="chat-img-embed" alt="AI Generated" onClick={() => window.open(url)} />;
+                      } else if (msg.isThinking) {
+                        contentHtml = <span style={{ color: '#555', fontStyle: 'italic' }}>thinking...</span>;
+                      } else {
+                        contentHtml = msg.content;
+                      }
+
+                      return (
+                        <div key={msg._id} className={`message-row ${alignment}`}>
+                          <div className="msg-user-avatar">{isAI ? '🤖' : isMine ? (session.emoji || '👁️') : '👤'}</div>
+                          <div className="msg-contents-wrap">
+                            {!isMine && <span className="sender-username-tag">{isAI ? 'BlackLight AI' : msg.sender}</span>}
+                            <div className="msg-bubble-card">{contentHtml}</div>
+                            <div className="msg-meta-row">
+                              <span className="msg-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              {(isMine || session.isAdmin) && !msg.deleted && !isAI && (
+                                <button className="msg-delete-action-btn" onClick={() => handleDeleteMessage(msg._id)}><Trash2 size={12} /></button>
+                              )}
+                            </div>
                           </div>
-                          <a href={msg.content} download={msg.filename} className="btn-primary file-dl-btn">Download</a>
                         </div>
                       );
-                    }
-                  } else if (msg.content && msg.content.startsWith('IMAGE:')) {
-                    const url = msg.content.replace('IMAGE:', '').trim();
-                    contentHtml = <img src={url} className="chat-img-embed" alt="AI Generated" onClick={() => window.open(url)} />;
-                  } else if (msg.isThinking) {
-                    contentHtml = <span style={{ color: '#555', fontStyle: 'italic' }}>thinking...</span>;
-                  } else {
-                    contentHtml = msg.content;
-                  }
+                    })}
 
-                  return (
-                    <div key={msg._id} className={`message-row ${alignment}`}>
-                      <div className="msg-user-avatar">{isAI ? '🤖' : isMine ? (session.emoji || '👁️') : '👤'}</div>
-                      <div className="msg-contents-wrap">
-                        {!isMine && <span className="sender-username-tag">{isAI ? 'BlackLight AI' : msg.sender}</span>}
-                        <div className="msg-bubble-card">{contentHtml}</div>
-                        <div className="msg-meta-row">
-                          <span className="msg-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                          {(isMine || session.isAdmin) && !msg.deleted && !isAI && (
-                            <button className="msg-delete-action-btn" onClick={() => handleDeleteMessage(msg._id)}><Trash2 size={12} /></button>
-                          )}
+                    {/* Typing Indicator */}
+                    {typingUsers[currentRoom.name] && typingUsers[currentRoom.name] !== session.username && (
+                      <div className="message-row theirs">
+                        <div className="msg-user-avatar">👤</div>
+                        <div className="msg-contents-wrap">
+                          <span className="sender-username-tag">{typingUsers[currentRoom.name]}</span>
+                          <div className="msg-bubble-card typing-bubble">
+                            <div className="typing-dots"><span></span><span></span><span></span></div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    )}
+                    
+                    <div ref={messagesEndRef} />
+                  </div>
 
-                {/* Typing Indicator */}
-                {typingUsers[currentRoom.name] && typingUsers[currentRoom.name] !== session.username && (
-                  <div className="message-row theirs">
-                    <div className="msg-user-avatar">👤</div>
-                    <div className="msg-contents-wrap">
-                      <span className="sender-username-tag">{typingUsers[currentRoom.name]}</span>
-                      <div className="msg-bubble-card typing-bubble">
-                        <div className="typing-dots"><span></span><span></span><span></span></div>
+                  {/* INPUT BAR */}
+                  <div className="chat-input-container">
+                    {/* File Preview */}
+                    {selectedFile && (
+                      <div className="selected-file-preview-strip">
+                        <span>📎 Ready to dispatch: <strong>{selectedFile.name}</strong> ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+                        <button className="clear-file-btn" onClick={() => setSelectedFile(null)}><X size={14} /></button>
                       </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div ref={messagesEndRef} />
-              </div>
+                    )}
+                    
+                    {/* AI help connector bar (for users inside AI room) */}
+                    {currentRoom.type === 'ai' && !session.isAdmin && (
+                      <div className="support-connect-helper-bar">
+                        <span>Stuck or experiencing issues?</span>
+                        <button 
+                          className="btn-secondary support-btn"
+                          onClick={async () => {
+                            // Locate admin username and start private DM
+                            let adminUser = 'shehram';
+                            try {
+                              const res = await fetch('/api/users');
+                              const users = await res.json();
+                              const found = users.find(u => u.isAdmin);
+                              if (found) adminUser = found.username;
+                            } catch {}
+                            const sorted = [session.username, adminUser].sort();
+                            setCurrentRoom({
+                              name: `private:${sorted[0]}:${sorted[1]}`,
+                              type: 'private',
+                              displayName: `🎧 Support (${adminUser})`
+                            });
+                          }}
+                        >
+                          🎧 Connect to Support Agent
+                        </button>
+                      </div>
+                    )}
 
-              {/* INPUT BAR */}
-              <div className="chat-input-container">
-                {/* File Preview */}
-                {selectedFile && (
-                  <div className="selected-file-preview-strip">
-                    <span>📎 Ready to dispatch: <strong>{selectedFile.name}</strong> ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</span>
-                    <button className="clear-file-btn" onClick={() => setSelectedFile(null)}><X size={14} /></button>
+                    <form className="chat-input-form" onSubmit={handleSendMessage}>
+                      {currentRoom.type !== 'ai' && (
+                        <>
+                          <button type="button" className="attach-file-btn" onClick={() => fileInputRef.current?.click()} title="Send File attachment">
+                            <Paperclip size={18} />
+                          </button>
+                          <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
+                        </>
+                      )}
+                      <input 
+                        type="text" 
+                        placeholder="Enter cryptographic message..." 
+                        value={messageInput}
+                        onChange={handleInputChange}
+                      />
+                      <button type="submit" className="send-msg-btn btn-primary"><Send size={16} /></button>
+                    </form>
                   </div>
-                )}
-                
-                {/* AI help connector bar (for users inside AI room) */}
-                {currentRoom.type === 'ai' && !session.isAdmin && (
-                  <div className="support-connect-helper-bar">
-                    <span>Stuck or experiencing issues?</span>
-                    <button 
-                      className="btn-secondary support-btn"
-                      onClick={async () => {
-                        // Locate admin username and start private DM
-                        let adminUser = 'shehram';
-                        try {
-                          const res = await fetch('/api/users');
-                          const users = await res.json();
-                          const found = users.find(u => u.isAdmin);
-                          if (found) adminUser = found.username;
-                        } catch {}
-                        const sorted = [session.username, adminUser].sort();
-                        setCurrentRoom({
-                          name: `private:${sorted[0]}:${sorted[1]}`,
-                          type: 'private',
-                          displayName: `🎧 Support (${adminUser})`
-                        });
-                      }}
-                    >
-                      🎧 Connect to Support Agent
-                    </button>
-                  </div>
-                )}
-
-                <form className="chat-input-form" onSubmit={handleSendMessage}>
-                  {currentRoom.type !== 'ai' && (
-                    <>
-                      <button type="button" className="attach-file-btn" onClick={() => fileInputRef.current?.click()} title="Send File attachment">
-                        <Paperclip size={18} />
-                      </button>
-                      <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
-                    </>
-                  )}
-                  <input 
-                    type="text" 
-                    placeholder="Enter cryptographic message..." 
-                    value={messageInput}
-                    onChange={handleInputChange}
-                  />
-                  <button type="submit" className="send-msg-btn btn-primary"><Send size={16} /></button>
-                </form>
-              </div>
+                </>
+              )}
             </>
           ) : (
             <div className="no-room-selected-screen">
@@ -1036,7 +1105,7 @@ const Chat = () => {
         </main>
 
         {/* GROUP INFO PANEL (RIGHT PANEL) */}
-        {currentRoom?.type === 'group' && (
+        {currentRoom?.type === 'group' && (currentRoom._member || session?.isAdmin) && (
           <aside className="group-sidebar-right">
             
             {/* JOIN REQUESTS FOR OWNER */}
