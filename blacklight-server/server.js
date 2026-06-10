@@ -33,7 +33,24 @@ app.use(express.json({ limit: '100mb' })); // support large base64 file transfer
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // ── SERVE STATIC FRONTEND ────────────────────────────────────
+const fs = require('fs');
 const FRONTEND = path.join(__dirname, '..', 'World of Black Light', 'blacklight-react', 'dist');
+
+if (!fs.existsSync(path.join(FRONTEND, 'index.html'))) {
+  console.log('⚠️ Frontend build artifacts missing. Triggering dynamic compilation...');
+  try {
+    const { execSync } = require('child_process');
+    const reactPath = path.join(__dirname, '..', 'World of Black Light', 'blacklight-react');
+    console.log(`📡 Installing frontend dependencies in: ${reactPath}`);
+    execSync('npm install', { cwd: reactPath, stdio: 'inherit' });
+    console.log('⚙️ Compiling Vite production assets...');
+    execSync('npm run build', { cwd: reactPath, stdio: 'inherit' });
+    console.log('✓ Dynamic compilation completed successfully!');
+  } catch (err) {
+    console.error('❌ Failed to compile frontend dynamically:', err);
+  }
+}
+
 app.use(express.static(FRONTEND));
 
 // ── API ROUTES ───────────────────────────────────────────────
