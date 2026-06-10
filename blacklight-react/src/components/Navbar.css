@@ -241,3 +241,86 @@
   border-color: #10B981 !important;
 }
 
+/* DESKTOP VERTICAL SIDEBAR STYLES (>= 1080px) */
+@media (min-width: 1080px) {
+  .navbar-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 40px 24px;
+    background: rgba(6, 6, 6, 0.98);
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: none;
+    z-index: 1000;
+  }
+
+  .nav-logo {
+    font-size: 1.65rem;
+    margin-bottom: 40px;
+    text-align: center;
+    letter-spacing: 4px;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+
+  .navbar-links a {
+    font-size: 0.8rem;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    display: block;
+    text-align: left;
+  }
+
+  .navbar-links a:hover,
+  .navbar-links a.active {
+    background: rgba(159, 115, 255, 0.05);
+    border-color: rgba(159, 115, 255, 0.15);
+    padding-left: 18px;
+  }
+
+  .navbar-links a::after {
+    display: none !important;
+  }
+
+  .nav-auth-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: auto; /* Push auth options to the bottom */
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .nav-profile-badge {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+  }
+
+  .nav-logout-icon-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid rgba(255, 68, 68, 0.15);
+    border-radius: 6px;
+    background: rgba(255, 68, 68, 0.02);
+  }
+  
+  .nav-logout-icon-btn:hover {
+    background: rgba(255, 68, 68, 0.08);
+  }
+}
+
+

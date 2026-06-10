@@ -686,3 +686,314 @@ footer {
     border: 1px solid rgba(94,23,235,0.2);
     display: block;
 }
+
+/* ============================================================
+   DESKTOP SIDEBAR & MOBILE RESPONSIVE LAYOUT
+   ============================================================ */
+
+/* Mobile Toggle Button */
+.mobile-nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #9F73FF;
+    font-size: 1.8rem;
+    cursor: pointer;
+    z-index: 1100;
+    transition: transform 0.2s ease;
+    outline: none;
+}
+
+/* Mobile Drawer Overlay */
+.mobile-menu-drawer {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: rgba(10, 10, 10, 0.98);
+    border-left: 1px solid rgba(159, 115, 255, 0.15);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    padding: 80px 30px 40px;
+    gap: 20px;
+    z-index: 1050;
+    transition: right 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.mobile-menu-drawer.open {
+    right: 0;
+}
+
+.mobile-menu-drawer a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    color: #aaaaaa;
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s;
+}
+
+.mobile-menu-drawer a:hover,
+.mobile-menu-drawer a.active {
+    color: #9F73FF;
+    border-bottom-color: rgba(159, 115, 255, 0.4);
+    padding-left: 5px;
+}
+
+/* Auth area inside mobile drawer */
+.mobile-menu-drawer #nav-auth {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 25px;
+}
+
+.mobile-menu-drawer #nav-auth a {
+    text-align: center;
+    border: 1px solid rgba(159, 115, 255, 0.3);
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 0.85rem;
+}
+
+.mobile-menu-drawer #nav-auth a:hover {
+    background: rgba(159, 115, 255, 0.1);
+    border-color: #9F73FF;
+}
+
+/* Specific Chat link styling on mobile drawer */
+.mobile-menu-drawer .nav-chat-link {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #ff3333 !important;
+    border-color: rgba(255, 51, 51, 0.3) !important;
+}
+
+.mobile-menu-drawer .nav-chat-link:hover {
+    background: rgba(255, 51, 51, 0.1) !important;
+    border-color: #ff3333 !important;
+}
+
+.mobile-menu-drawer .nav-profile {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* DESKTOP SIDEBAR NAVIGATION (>= 1080px) */
+@media (min-width: 1080px) {
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 260px;
+        height: 100vh;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 40px 24px;
+        background: rgba(6, 6, 6, 0.98);
+        border-right: 1px solid rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: none;
+    }
+    
+    .nav-logo {
+        font-size: 1.6rem;
+        margin-bottom: 40px;
+        text-align: center;
+        letter-spacing: 4px;
+    }
+    
+    .navbar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        align-items: stretch;
+        margin-left: 0;
+    }
+    
+    .navbar nav a {
+        margin-left: 0 !important;
+        padding: 10px 15px;
+        font-size: 0.8rem;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 1.5px;
+        display: block;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        transition: all 0.3s;
+    }
+    
+    .navbar nav a:hover {
+        background: rgba(159, 115, 255, 0.05);
+        border-color: rgba(159, 115, 255, 0.15);
+        padding-left: 18px;
+    }
+    
+    .navbar nav a::after {
+        display: none !important;
+    }
+    
+    #nav-auth {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        margin-left: 0 !important;
+        margin-top: auto !important; /* Push authorization options to bottom */
+        padding-top: 25px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    #nav-auth a {
+        margin-left: 0 !important;
+        width: 100%;
+        display: block;
+        text-align: center;
+        padding: 8px 12px !important;
+    }
+    
+    .nav-profile {
+        margin-left: 0 !important;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .nav-logout-btn {
+        margin-left: 0 !important;
+        text-align: center;
+    }
+
+    /* Shift all content sections to clear the left sidebar */
+    section, footer, .form-section, .story-header, .story-content, .devlog-list, .games-grid, .stories-grid {
+        margin-left: 260px;
+        width: calc(100% - 260px);
+    }
+    
+    .chat-wrapper {
+        margin-left: 260px !important;
+        width: calc(100% - 260px) !important;
+        margin-top: 0 !important;
+        height: 100vh !important;
+    }
+}
+
+/* MOBILE RESPONSIVE OVERRIDES (< 1080px) */
+@media (max-width: 1079px) {
+    .navbar {
+        padding: 15px 5%;
+        height: 70px;
+    }
+    
+    .navbar nav {
+        display: none !important; /* Hide standard nav container on mobile */
+    }
+    
+    .mobile-nav-toggle {
+        display: block;
+    }
+    
+    /* Make h1 and other headings scale down for phone screen readability */
+    h1, .logo {
+        font-size: 2.2rem !important;
+        letter-spacing: 2px !important;
+    }
+    h2 {
+        font-size: 1.8rem !important;
+    }
+    h3 {
+        font-size: 1.3rem !important;
+    }
+    
+    .tagline {
+        font-size: 1rem !important;
+    }
+    
+    /* Reduce large section paddings to prevent squeezed container look */
+    section {
+        padding: 60px 6% !important;
+    }
+    
+    /* Featured Game Card responsiveness */
+    .game-card {
+        flex-direction: column !important;
+        gap: 25px !important;
+        text-align: center;
+    }
+    
+    .game-image {
+        width: 100% !important;
+    }
+    
+    .game-image img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    
+    /* Story Grid responsiveness */
+    .story-grid {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 25px !important;
+    }
+    
+    .story-card {
+        width: 100% !important;
+        max-width: 260px !important;
+    }
+    
+    /* Games and Stories Grid pages */
+    .games-grid, .stories-grid {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 30px !important;
+        padding: 60px 6% !important;
+    }
+    
+    .game-tile, .story-tile {
+        width: 100% !important;
+        max-width: 340px !important;
+    }
+    
+    /* Story reader page text content readability */
+    .story-header {
+        padding: 90px 6% 30px !important;
+    }
+    .story-header h1 {
+        font-size: 2.2rem !important;
+    }
+    
+    .story-content {
+        padding: 20px 6% !important;
+        font-size: 1.05rem !important;
+        line-height: 1.75 !important;
+    }
+    
+    /* Devlog page */
+    .devlog-list {
+        padding: 40px 6% !important;
+    }
+    
+    /* Footer layout on mobile */
+    footer {
+        padding: 30px 6% !important;
+    }
+}
+

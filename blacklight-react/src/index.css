@@ -235,3 +235,56 @@ a {
   font-size: 0.7rem;
   letter-spacing: 1px;
 }
+
+/* ============================================================
+   RESPONSIVE DESIGN SYSTEM OVERRIDES (Mobile Readability)
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Scale down huge headers dynamically */
+  h1, .page-hero h1 {
+    font-size: 2.2rem !important;
+    letter-spacing: 2px !important;
+  }
+  
+  h2 {
+    font-size: 1.7rem !important;
+  }
+  
+  h3 {
+    font-size: 1.3rem !important;
+  }
+
+  body {
+    font-size: 16px; /* standard minimum readable text size on mobile */
+  }
+
+  /* Reduce large layout paddings */
+  .content-section {
+    padding: 40px 5% !important;
+  }
+
+  .page-hero {
+    padding: 60px 5% 30px !important;
+  }
+
+  .page-hero p {
+    font-size: 1rem !important;
+  }
+
+  /* Ensure all layout wrappers prevent horizontal scroll */
+  main {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Prevent text scaling problems */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  /* Make sure footers scale well */
+  .app-footer {
+    padding: 30px 5% !important;
+  }
+}
+

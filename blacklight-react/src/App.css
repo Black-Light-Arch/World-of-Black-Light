@@ -1,1 +1,14 @@
-/* Clear default Vite template styles */
+/* App Layout Wrapper */
+.app-main-layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+@media (min-width: 1080px) {
+  .app-main-layout-wrapper {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
+}
