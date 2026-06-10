@@ -792,103 +792,109 @@ footer {
     gap: 8px;
 }
 
-/* DESKTOP SIDEBAR NAVIGATION (>= 1080px) */
+/* DESKTOP HOVER-REVEAL TOP NAVIGATION (>= 1080px) */
 @media (min-width: 1080px) {
     .navbar {
         position: fixed;
-        top: 0;
+        top: -76px; /* hide most of the 80px height navbar */
         left: 0;
-        bottom: 0;
-        width: 260px;
-        height: 100vh;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: stretch;
-        padding: 40px 24px;
-        background: rgba(6, 6, 6, 0.98);
-        border-right: 1px solid rgba(255, 255, 255, 0.04);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-bottom: none;
+        width: 100%;
+        height: 80px;
+        padding: 0 10%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(4, 4, 4, 0.96);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-bottom: 4px solid #9F73FF; /* Sleek glowing line at the top */
+        box-shadow: 0 0 15px rgba(159, 115, 255, 0.3);
+        z-index: 1000;
+        transition: top 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+    
+    /* Invisible hover trigger zone extending below navbar */
+    .navbar::after {
+        content: '';
+        position: absolute;
+        bottom: -25px;
+        left: 0;
+        width: 100%;
+        height: 25px;
+        background: transparent;
+        pointer-events: auto;
+    }
+    
+    .navbar:hover {
+        top: 0;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(159, 115, 255, 0.3);
     }
     
     .nav-logo {
-        font-size: 1.6rem;
-        margin-bottom: 40px;
-        text-align: center;
-        letter-spacing: 4px;
+        font-size: 1.25rem;
+        letter-spacing: 2px;
+        color: #9F73FF;
+        font-weight: bold;
     }
     
     .navbar nav {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        width: 100%;
-        align-items: stretch;
-        margin-left: 0;
+        display: flex !important;
+        align-items: center;
+        gap: 25px;
+        margin-left: 30px;
     }
     
     .navbar nav a {
-        margin-left: 0 !important;
-        padding: 10px 15px;
-        font-size: 0.8rem;
-        font-family: 'Cinzel', serif;
-        letter-spacing: 1.5px;
-        display: block;
-        border-radius: 6px;
-        border: 1px solid transparent;
-        transition: all 0.3s;
+        text-decoration: none;
+        color: #EAEAEA;
+        position: relative;
+        transition: 0.3s;
+        font-size: 0.85rem;
     }
     
     .navbar nav a:hover {
-        background: rgba(159, 115, 255, 0.05);
-        border-color: rgba(159, 115, 255, 0.15);
-        padding-left: 18px;
+        color: #9F73FF;
     }
     
     .navbar nav a::after {
-        display: none !important;
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        width: 0;
+        height: 2px;
+        background: #9F73FF;
+        transition: 0.3s;
     }
     
+    .navbar nav a:hover::after,
+    .navbar nav a.active::after {
+        width: 100%;
+    }
+
     #nav-auth {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-        margin-left: 0 !important;
-        margin-top: auto !important; /* Push authorization options to bottom */
-        padding-top: 25px;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 15px !important;
+        margin-left: 30px !important;
     }
     
     #nav-auth a {
         margin-left: 0 !important;
-        width: 100%;
-        display: block;
-        text-align: center;
-        padding: 8px 12px !important;
-    }
-    
-    .nav-profile {
-        margin-left: 0 !important;
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .nav-logout-btn {
-        margin-left: 0 !important;
-        text-align: center;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
     }
 
-    /* Shift all content sections to clear the left sidebar */
+    /* Shift all content sections back to normal full width */
     section, footer, .form-section, .story-header, .story-content, .devlog-list, .games-grid, .stories-grid {
-        margin-left: 260px;
-        width: calc(100% - 260px);
+        margin-left: 0;
+        width: 100%;
     }
     
     .chat-wrapper {
-        margin-left: 260px !important;
-        width: calc(100% - 260px) !important;
+        margin-left: 0 !important;
+        width: 100% !important;
         margin-top: 0 !important;
         height: 100vh !important;
     }
