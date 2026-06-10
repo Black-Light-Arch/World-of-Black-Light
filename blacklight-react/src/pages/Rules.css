@@ -1,0 +1,242 @@
+/* ============================================================
+   CYBERPUNK RULES PAGE CSS (BLUE/CYAN HUD)
+   ============================================================ */
+
+.rules-viewport {
+  --cyan-neon: #00E5FF;
+  --cyan-glow: rgba(0, 229, 255, 0.4);
+  --cyan-border: rgba(0, 229, 255, 0.15);
+  --font-mono: 'Courier New', Courier, monospace;
+
+  background-color: #050505;
+}
+
+.neon-text-cyan {
+  color: var(--cyan-neon) !important;
+  text-shadow: 0 0 15px var(--cyan-glow) !important;
+}
+
+.rules-hero {
+  border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0, 229, 255, 0.02) 100%);
+  padding: 100px 8% 50px !important;
+}
+
+.rules-content {
+  padding: 40px 8% 80px !important;
+}
+
+.rules-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 30px;
+  align-items: start;
+}
+
+.rules-main-terms.glass-panel {
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid var(--cyan-border);
+  position: relative;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  padding: 40px;
+}
+
+.cyber-bracket {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--cyan-neon);
+  pointer-events: none;
+}
+
+.cyber-bracket.top-left { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+.cyber-bracket.top-right { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+.cyber-bracket.bottom-left { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+.cyber-bracket.bottom-right { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+.rules-section {
+  margin-bottom: 35px;
+}
+
+.rules-section:last-child {
+  margin-bottom: 0;
+}
+
+.rules-section h2 {
+  font-size: 1.15rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--cyan-neon);
+  padding-left: 12px;
+}
+
+.rules-section p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* Warnings and Surveillance styles */
+.warning-section h2 {
+  border-left-color: #EF4444;
+  color: #EF4444;
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.warning-notice-box {
+  background: rgba(239, 68, 68, 0.04);
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  border-radius: 6px;
+  padding: 24px;
+  box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.05);
+}
+
+.notice-tag {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 2.5px;
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+.warning-notice-box p {
+  color: #E2E8F0;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.warning-notice-box p strong {
+  color: #EF4444;
+}
+
+.warning-notice-box ul {
+  padding-left: 20px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.warning-notice-box li {
+  font-size: 0.9rem;
+  color: #D1D5DB;
+}
+
+.warning-notice-box p:last-child {
+  margin-bottom: 0;
+  font-style: italic;
+  color: #9CA3AF;
+  font-size: 0.88rem;
+}
+
+/* SIDEBAR CHECKLIST HUD */
+.rules-checklist-hud.glass-panel {
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid var(--cyan-border);
+  padding: 24px 20px;
+  border-radius: 8px;
+}
+
+.rules-checklist-hud h3 {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 2px;
+  color: #fff;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-weight: 700;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+}
+
+.checklist-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: #9CA3AF;
+}
+
+.check-item .box {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--cyan-border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: transparent;
+  background: rgba(0, 0, 0, 0.4);
+  font-weight: bold;
+}
+
+.check-item.checked {
+  color: #E2E8F0;
+}
+
+.check-item.checked .box {
+  color: var(--cyan-neon);
+  border-color: var(--cyan-neon);
+  background: rgba(0, 229, 255, 0.05);
+  box-shadow: 0 0 5px var(--cyan-glow);
+}
+
+.compliance-stamp {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  background: rgba(0, 229, 255, 0.03);
+  border: 1.5px dashed var(--cyan-border);
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.compliance-stamp .stamp-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  color: var(--cyan-neon);
+}
+
+.compliance-stamp .stamp-hash {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+/* Responsive Rules */
+@media (max-width: 1080px) {
+  .rules-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .rules-main-terms.glass-panel {
+    padding: 24px 18px;
+  }
+  .warning-notice-box {
+    padding: 16px;
+  }
+}

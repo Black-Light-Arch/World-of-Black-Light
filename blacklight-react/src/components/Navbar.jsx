@@ -26,6 +26,8 @@ const Navbar = () => {
     { name: 'Chat', path: '/chat' },
     { name: 'Games', path: '/games' },
     { name: 'Players', path: '/players' },
+    { name: 'Rules', path: '/rules' },
+    { name: 'Donate', path: '/donation', specialClass: 'nav-donate-green' },
   ];
 
   const isActive = (path) => {
@@ -46,7 +48,7 @@ const Navbar = () => {
             <Link
               key={link.name}
               to={link.path}
-              className={isActive(link.path) ? 'active' : ''}
+              className={`${isActive(link.path) ? 'active' : ''} ${link.specialClass || ''}`}
             >
               {link.name}
             </Link>
@@ -85,7 +87,7 @@ const Navbar = () => {
           <Link
             key={link.name}
             to={link.path}
-            className={isActive(link.path) ? 'active' : ''}
+            className={`${isActive(link.path) ? 'active' : ''} ${link.specialClass || ''}`}
             onClick={() => setIsOpen(false)}
           >
             {link.name}

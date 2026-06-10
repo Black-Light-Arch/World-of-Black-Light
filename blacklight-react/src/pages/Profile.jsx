@@ -9,6 +9,9 @@ const Profile = () => {
   const [user, setUser] = useState(null);
   const [selectedEmoji, setSelectedEmoji] = useState('👁️');
   const [selectedTheme, setSelectedTheme] = useState('purple');
+  const [selectedSkin, setSelectedSkin] = useState('default');
+  const [legendaryUnlocked, setLegendaryUnlocked] = useState(localStorage.getItem('legendary_skin_unlocked') === 'true');
+  const [skinMsg, setSkinMsg] = useState({ text: '', type: '' });
   const [registrations, setRegistrations] = useState([]);
   const [stats, setStats] = useState({ score: '—', wins: '—' });
   const [loading, setLoading] = useState(true);
@@ -36,6 +39,7 @@ const Profile = () => {
       setUser(data);
       setSelectedEmoji(data.emoji || '👁️');
       setSelectedTheme(data.theme || 'purple');
+      setSelectedSkin(data.skin || 'default');
       setRegistrations(data.registrations || []);
       
       if (data.player) {
@@ -134,6 +138,90 @@ const Profile = () => {
     }
   };
 
+  const handleUnlockLegendary = async () => {
+    if (typeof window.ethereum === 'undefined') {
+      setSkinMsg({ text: '🔌 MetaMask Web3 not detected. Please install it to unlock Legendary clearance.', type: 'error' });
+      return;
+    }
+    try {
+      setSkinMsg({ text: '📡 Connecting MetaMask wallet...', type: 'info' });
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const from = accounts[0];
+
+      setSkinMsg({ text: '⏳ Staging transaction payload...', type: 'info' });
+      const transactionParameters = {
+        to: '0x9A5A203102052965E9bc8b94c54bAA82ab3e16F7',
+        from: from,
+        value: '0x11c37937e08000', // 0.005 ETH in hex wei
+      };
+
+      setSkinMsg({ text: '✍️ Confirm the 0.005 ETH signature in MetaMask...', type: 'info' });
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+      });
+
+      setSkinMsg({ text: '📡 Writing skin token to database...', type: 'info' });
+      const token = Auth.getToken();
+      const res = await fetch('/api/me/skin', {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ skin: 'legendary' })
+      });
+      if (!res.ok) throw new Error('Database link failed.');
+
+      localStorage.setItem('legendary_skin_unlocked', 'true');
+      setLegendaryUnlocked(true);
+      setSelectedSkin('legendary');
+
+      const session = Auth.getSession();
+      if (session) {
+        session.skin = 'legendary';
+        localStorage.setItem('bl_user', JSON.stringify(session));
+      }
+
+      setSkinMsg({ text: `🎉 Legendary Skin unlocked! Hash: ${txHash.substring(0, 10)}...`, type: 'success' });
+      setTimeout(() => setSkinMsg({ text: '', type: '' }), 4000);
+    } catch (err) {
+      setSkinMsg({ text: `❌ Web3 Error: ${err.message || 'Signature rejected'}`, type: 'error' });
+    }
+  };
+
+  const handleSaveSkin = async (skinName) => {
+    if (skinName === 'legendary' && !legendaryUnlocked) {
+      handleUnlockLegendary();
+      return;
+    }
+    setSkinMsg({ text: '', type: '' });
+    try {
+      const token = Auth.getToken();
+      const res = await fetch('/api/me/skin', {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ skin: skinName })
+      });
+      if (!res.ok) throw new Error();
+
+      const session = Auth.getSession();
+      if (session) {
+        session.skin = skinName;
+        localStorage.setItem('bl_user', JSON.stringify(session));
+      }
+
+      setSelectedSkin(skinName);
+      setSkinMsg({ text: `✓ Cosmetic skin set to ${skinName}!`, type: 'success' });
+      setTimeout(() => setSkinMsg({ text: '', type: '' }), 2500);
+    } catch (err) {
+      setSkinMsg({ text: '✗ Failed to update skin.', type: 'error' });
+    }
+  };
+
   const handleLogout = () => {
     Auth.logout();
     disconnectSocket();
@@ -223,6 +311,49 @@ const Profile = () => {
           {themeMsg.text && (
             <p className={`save-confirm ${themeMsg.type === 'success' ? 'success' : 'error'}`}>
               {themeMsg.text}
+            </p>
+          )}
+
+          <div className="profile-divider"></div>
+
+          {/* COSMETIC SKINS CUSTOMIZER */}
+          <div className="profile-section-title">Cosmetic Avatar Skins</div>
+          <p className="theme-sub">Skins change name tags look in chat streams</p>
+          <div className="skins-customizer-grid">
+            <button 
+              type="button" 
+              className={`skin-select-btn skin-default ${selectedSkin === 'default' ? 'active-skin' : ''}`}
+              onClick={() => handleSaveSkin('default')}
+            >
+              <span>Default Operator</span>
+            </button>
+            <button 
+              type="button" 
+              className={`skin-select-btn skin-green ${selectedSkin === 'green' ? 'active-skin' : ''}`}
+              onClick={() => handleSaveSkin('green')}
+            >
+              <span className="effect-green">Green Spectre</span>
+            </button>
+            <button 
+              type="button" 
+              className={`skin-select-btn skin-cyan ${selectedSkin === 'cyan' ? 'active-skin' : ''}`}
+              onClick={() => handleSaveSkin('cyan')}
+            >
+              <span className="effect-cyan">Cyan Phantom</span>
+            </button>
+            <button 
+              type="button" 
+              className={`skin-select-btn skin-legendary ${selectedSkin === 'legendary' ? 'active-skin' : ''}`}
+              onClick={() => handleSaveSkin('legendary')}
+            >
+              <span className="effect-legendary">
+                {legendaryUnlocked ? 'Legendary Decryptor' : '👑 Unlock Legendary (0.005 ETH)'}
+              </span>
+            </button>
+          </div>
+          {skinMsg.text && (
+            <p className={`save-confirm ${skinMsg.type === 'success' ? 'success' : skinMsg.type === 'info' ? 'info' : 'error'}`}>
+              {skinMsg.text}
             </p>
           )}
 

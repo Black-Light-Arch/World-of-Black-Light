@@ -23,6 +23,8 @@ import Contact from './pages/Contact';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import Chat from './pages/Chat';
+import Donation from './pages/Donation';
+import Rules from './pages/Rules';
 
 // Global Scroll Reset
 const ScrollToTop = () => {
@@ -76,6 +78,8 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/donation" element={<Donation />} />
+            <Route path="/rules" element={<Rules />} />
           </Routes>
         </main>
 

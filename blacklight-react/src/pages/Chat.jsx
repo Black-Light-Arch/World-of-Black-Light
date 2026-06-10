@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Auth } from '../services/auth';
 import { getSocket } from '../services/socket';
-import { Paperclip, Send, X, Shield, Users, User, ArrowLeft, VolumeX, MessageSquare, Trash2, Settings, UserPlus, Check, HelpCircle } from 'lucide-react';
+import { Paperclip, Send, X, Shield, Users, User, ArrowLeft, VolumeX, MessageSquare, Trash2, Settings, UserPlus, Check, HelpCircle, Menu, Home, Bot } from 'lucide-react';
 import './Chat.css';
 
 const Chat = () => {
@@ -53,17 +53,254 @@ const Chat = () => {
   const [adminNewPassword, setAdminNewPassword] = useState('');
   const [adminCredMsg, setAdminCredMsg] = useState({ text: '', type: '' });
 
+  // Responsive device states
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1200);
+  const [mobileActiveView, setMobileActiveView] = useState('chats'); // chats, groups, chat_window
+  const [showLeftSidebar, setShowLeftSidebar] = useState(true);
+  const [showRightSidebar, setShowRightSidebar] = useState(false);
+  const [showScrollFab, setShowScrollFab] = useState(false);
+
   // Ref helpers
   const messagesEndRef = useRef(null);
+  const messagesAreaRef = useRef(null);
   const aiHistoryRef = useRef([]); // holds assistant history { role, content }
   const socketRef = useRef(null);
 
   const token = Auth.getToken();
 
+  // Voice Chat States
+  const [voiceActive, setVoiceActive] = useState(false);
+  const [voiceMuted, setVoiceMuted] = useState(false);
+  const [roboticFilter, setRoboticFilter] = useState(true);
+
+  // Voice Refs
+  const audioContextRef = useRef(null);
+  const streamRef = useRef(null);
+  const sourceNodeRef = useRef(null);
+  const analyserNodeRef = useRef(null);
+  const filterNodeRef = useRef(null);
+  const delayNodeRef = useRef(null);
+  const feedbackGainNodeRef = useRef(null);
+  const outputGainNodeRef = useRef(null);
+  const voiceCanvasRef = useRef(null);
+  const visualizerFrameId = useRef(null);
+
+  const reconnectAudioNodes = (audioCtx, source, filter, delay, feedback, outputGain, analyser, useRobot, isMuted) => {
+    try {
+      source.disconnect();
+      filter.disconnect();
+      delay.disconnect();
+      feedback.disconnect();
+      outputGain.disconnect();
+      analyser.disconnect();
+
+      outputGain.gain.value = isMuted ? 0 : 1.0;
+      source.connect(analyser);
+
+      if (useRobot) {
+        source.connect(filter);
+        filter.connect(delay);
+        delay.connect(feedback);
+        feedback.connect(delay);
+        filter.connect(outputGain);
+        delay.connect(outputGain);
+      } else {
+        source.connect(outputGain);
+      }
+
+      outputGain.connect(audioCtx.destination);
+    } catch (e) {
+      console.error('Audio reconnection error:', e);
+    }
+  };
+
+  const startVoiceChat = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
+
+      const source = audioContext.createMediaStreamSource(stream);
+      sourceNodeRef.current = source;
+
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyserNodeRef.current = analyser;
+
+      const filter = audioContext.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1000;
+      filterNodeRef.current = filter;
+
+      const delay = audioContext.createDelay();
+      delay.delayTime.value = 0.02;
+      delayNodeRef.current = delay;
+
+      const feedback = audioContext.createGain();
+      feedback.gain.value = 0.6;
+      feedbackGainNodeRef.current = feedback;
+
+      const outputGain = audioContext.createGain();
+      outputGain.gain.value = 1.0;
+      outputGainNodeRef.current = outputGain;
+
+      reconnectAudioNodes(audioContext, source, filter, delay, feedback, outputGain, analyser, roboticFilter, voiceMuted);
+
+      setVoiceActive(true);
+      setVoiceMuted(false);
+    } catch (err) {
+      console.error('Failed to access microphone:', err);
+      alert('❌ Microphone Access Denied: Unable to establish cyber vocoder connection.');
+    }
+  };
+
+  const stopVoiceChat = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    setVoiceActive(false);
+    setVoiceMuted(false);
+  };
+
+  useEffect(() => {
+    if (voiceActive && audioContextRef.current && sourceNodeRef.current) {
+      reconnectAudioNodes(
+        audioContextRef.current,
+        sourceNodeRef.current,
+        filterNodeRef.current,
+        delayNodeRef.current,
+        feedbackGainNodeRef.current,
+        outputGainNodeRef.current,
+        analyserNodeRef.current,
+        roboticFilter,
+        voiceMuted
+      );
+    }
+  }, [roboticFilter, voiceMuted, voiceActive]);
+
+  useEffect(() => {
+    if (voiceActive && analyserNodeRef.current && voiceCanvasRef.current) {
+      const canvas = voiceCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const analyser = analyserNodeRef.current;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const draw = () => {
+        if (!analyserNodeRef.current) return;
+        visualizerFrameId.current = requestAnimationFrame(draw);
+        analyser.getByteTimeDomainData(dataArray);
+
+        ctx.fillStyle = 'rgba(13, 13, 26, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#00e5ff';
+        ctx.beginPath();
+
+        const sliceWidth = canvas.width / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = (v * canvas.height) / 2;
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+
+          x += sliceWidth;
+        }
+
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+      };
+
+      draw();
+    }
+
+    return () => {
+      if (visualizerFrameId.current) {
+        cancelAnimationFrame(visualizerFrameId.current);
+      }
+    };
+  }, [voiceActive]);
+
+  // Clean up audio on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
+
   // Scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const handleMessagesScroll = () => {
+    if (!messagesAreaRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = messagesAreaRef.current;
+    const isScrolledUp = scrollHeight - scrollTop - clientHeight > 300;
+    setShowScrollFab(isScrolledUp);
+  };
+
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    const diffX = e.changedTouches[0].clientX - touchStartX.current;
+    const diffY = e.changedTouches[0].clientY - touchStartY.current;
+    
+    if (Math.abs(diffX) > 80 && Math.abs(diffY) < 50) {
+      if (diffX > 0) {
+        if (showRightSidebar) {
+          setShowRightSidebar(false);
+        } else if (isMobile && mobileActiveView === 'chat_window') {
+          setMobileActiveView('chats');
+        } else if (isTablet && !showLeftSidebar) {
+          setShowLeftSidebar(true);
+        }
+      } else {
+        if (isTablet && showLeftSidebar) {
+          setShowLeftSidebar(false);
+        } else if (currentRoom?.type === 'group' && (isMobile || isTablet) && !showRightSidebar) {
+          setShowRightSidebar(true);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1200);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -794,6 +1031,11 @@ const Chat = () => {
 
   // FILTERED ROOMS
   const filteredRooms = rooms.filter((r) => {
+    if (isMobile) {
+      if (mobileActiveView === 'groups') return r.type === 'group';
+      // Chats view includes DMs and AI chat
+      return r.type === 'private' || r.type === 'ai';
+    }
     if (activeSideTab === 'all') return true;
     if (activeSideTab === 'friends') return false; // Friends loads its own panel
     return r.type === activeSideTab;
@@ -805,49 +1047,68 @@ const Chat = () => {
   );
 
   return (
-    <div className="chat-viewport fade-in">
+    <div className="chat-viewport fade-in" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className="chat-wrapper">
         
         {/* SIDEBAR */}
-        <aside className="chat-sidebar">
-          <div className="sidebar-header">
-            <h2>BlackLight Chat</h2>
-            <div className="sidebar-tabs">
-              <button className={`tab-btn ${activeSideTab === 'all' ? 'active' : ''}`} onClick={() => setActiveSideTab('all')}>All</button>
-              <button className={`tab-btn ${activeSideTab === 'group' ? 'active' : ''}`} onClick={() => setActiveSideTab('group')}>Group</button>
-              <button className={`tab-btn ${activeSideTab === 'private' ? 'active' : ''}`} onClick={() => setActiveSideTab('private')}>DMs</button>
-              <button className={`tab-btn ${activeSideTab === 'friends' ? 'active' : ''}`} onClick={() => { setActiveSideTab('friends'); loadFriendsAndRequests(); }}>Operatives</button>
-            </div>
-          </div>
-
-          {activeSideTab !== 'friends' ? (
-            <div className="room-list">
-              {filteredRooms.map((room) => (
-                <div 
-                  key={room.name} 
-                  className={`room-item ${currentRoom?.name === room.name ? 'active' : ''}`}
-                  onClick={() => setCurrentRoom(room)}
-                >
-                  <div className="room-avatar-icon">
-                    {room.icon || (room.type === 'ai' ? '🤖' : room.type === 'group' ? '👥' : '💬')}
-                  </div>
-                  <div className="room-info-cell">
-                    <div className="room-name-title">{room.displayName || room.name}</div>
-                    <div className="room-preview-text">
-                      {room.lastContent ? `${room.lastSender}: ${room.lastContent}` : '—'}
-                    </div>
-                  </div>
-                  {room._unread > 0 && <span className="unread-badge">{room._unread}</span>}
+        {(!isMobile || mobileActiveView === 'chats' || mobileActiveView === 'groups') && (!isTablet || showLeftSidebar) && (
+          <aside className={`chat-sidebar ${isMobile ? 'mobile-full' : ''} ${isTablet ? 'tablet-overlay' : ''}`}>
+            <div className="sidebar-header">
+              <h2>BlackLight Chat</h2>
+              {!isMobile && (
+                <div className="sidebar-tabs">
+                  <button className={`tab-btn ${activeSideTab === 'all' ? 'active' : ''}`} onClick={() => setActiveSideTab('all')}>All</button>
+                  <button className={`tab-btn ${activeSideTab === 'group' ? 'active' : ''}`} onClick={() => setActiveSideTab('group')}>Group</button>
+                  <button className={`tab-btn ${activeSideTab === 'private' ? 'active' : ''}`} onClick={() => setActiveSideTab('private')}>DMs</button>
+                  <button className={`tab-btn ${activeSideTab === 'friends' ? 'active' : ''}`} onClick={() => { setActiveSideTab('friends'); loadFriendsAndRequests(); }}>Operatives</button>
                 </div>
-              ))}
-              
-              <div className="sidebar-actions-btn-grid">
-                <button className="new-room-btn" onClick={() => setShowNewGroupModal(true)}>+ Create Group</button>
-                <button className="new-room-btn" onClick={() => setShowNewPrivateModal(true)}>+ Start DM</button>
-                <button className="new-room-btn" onClick={() => setShowJoinGroupModal(true)}>🚪 Join Group</button>
-              </div>
+              )}
+              {isMobile && mobileActiveView === 'chats' && (
+                <div className="sidebar-tabs">
+                  <button className={`tab-btn ${activeSideTab !== 'friends' ? 'active' : ''}`} onClick={() => setActiveSideTab('private')}>DMs</button>
+                  <button className={`tab-btn ${activeSideTab === 'friends' ? 'active' : ''}`} onClick={() => { setActiveSideTab('friends'); loadFriendsAndRequests(); }}>Operatives</button>
+                </div>
+              )}
             </div>
-          ) : (
+
+            {activeSideTab !== 'friends' || (isMobile && mobileActiveView === 'groups') ? (
+              <div className="room-list">
+                {filteredRooms.map((room) => (
+                  <div 
+                    key={room.name} 
+                    className={`room-item ${currentRoom?.name === room.name ? 'active' : ''}`}
+                    onClick={() => {
+                      setCurrentRoom(room);
+                      if (isMobile) {
+                        setMobileActiveView('chat_window');
+                      }
+                    }}
+                  >
+                    <div className="room-avatar-icon">
+                      {room.icon || (room.type === 'ai' ? '🤖' : room.type === 'group' ? '👥' : '💬')}
+                    </div>
+                    <div className="room-info-cell">
+                      <div className="room-name-title">{room.displayName || room.name}</div>
+                      <div className="room-preview-text">
+                        {room.lastContent ? `${room.lastSender}: ${room.lastContent}` : '—'}
+                      </div>
+                    </div>
+                    {room._unread > 0 && <span className="unread-badge">{room._unread}</span>}
+                  </div>
+                ))}
+                
+                <div className="sidebar-actions-btn-grid">
+                  {(activeSideTab === 'group' || (isMobile && mobileActiveView === 'groups')) ? (
+                    <>
+                      <button className="new-room-btn" onClick={() => setShowNewGroupModal(true)}>+ Create Group</button>
+                      <button className="new-room-btn" onClick={() => setShowJoinGroupModal(true)}>🚪 Join Group</button>
+                    </>
+                  ) : (
+                    <button className="new-room-btn" onClick={() => setShowNewPrivateModal(true)}>+ Start DM</button>
+                  )}
+                </div>
+              </div>
+            ) : (
             <div className="friends-side-panel">
               <div className="friends-search-box">
                 <input 
@@ -895,8 +1156,12 @@ const Chat = () => {
                           setCurrentRoom({
                             name: `private:${sorted[0]}:${sorted[1]}`,
                             type: 'private',
-                            displayName: `💬 ${f.friend_username}`
+                            displayName: `💬 ${f.friend_username}`,
+                            _member: true // friends DMs always assume membership
                           });
+                          if (isMobile) {
+                            setMobileActiveView('chat_window');
+                          }
                         }}
                       >
                         <span className="emoji">{f.emoji || '👤'}</span>
@@ -919,30 +1184,88 @@ const Chat = () => {
             </div>
           )}
         </aside>
+        )}
 
         {/* MAIN CHAT AREA */}
-        <main className="chat-main">
-          {currentRoom ? (
-            <>
-              {/* TOPBAR */}
-              <header className="chat-topbar">
-                <div className="chat-topbar-icon">
-                  {currentRoom.icon || (currentRoom.type === 'ai' ? '🤖' : currentRoom.type === 'group' ? '👥' : '💬')}
-                </div>
-                <div className="chat-topbar-info">
-                  <div className="chat-topbar-name">{currentRoom.displayName || currentRoom.name}</div>
-                  <div className="chat-topbar-sub">
-                    {currentRoom.type === 'ai' ? 'BlackLight AI Oracle' : currentRoom.type === 'group' ? 'Multi-agent channel' : 'Direct secure channel'}
+        {(!isMobile || mobileActiveView === 'chat_window') && (
+          <main className="chat-main">
+            {currentRoom ? (
+              <>
+                {/* TOPBAR */}
+                <header className="chat-topbar">
+                  {isMobile && (
+                    <button className="mobile-back-btn" onClick={() => setMobileActiveView('chats')} title="Back to Channels">
+                      <ArrowLeft size={20} />
+                    </button>
+                  )}
+                  <div className="chat-topbar-icon">
+                    {currentRoom.icon || (currentRoom.type === 'ai' ? '🤖' : currentRoom.type === 'group' ? '👥' : '💬')}
                   </div>
-                </div>
+                  <div className="chat-topbar-info">
+                    <div className="chat-topbar-name">{currentRoom.displayName || currentRoom.name}</div>
+                    <div className="chat-topbar-sub">
+                      {currentRoom.type === 'ai' ? 'BlackLight AI Oracle' : currentRoom.type === 'group' ? 'Multi-agent channel' : 'Direct secure channel'}
+                    </div>
+                  </div>
 
-                {session?.isAdmin && <span className="admin-status-badge">ADMIN MONITOR</span>}
-                {session?.isAdmin && (
-                  <button className="btn-secondary admin-panel-toggle-btn" onClick={() => setShowAdminPanel(!showAdminPanel)}>
-                    ⚙️ Dashboard
-                  </button>
+                  {/* Tablet Channels Toggle */}
+                  {isTablet && (
+                    <button className="btn-secondary tablet-toggle-btn" onClick={() => setShowLeftSidebar(!showLeftSidebar)} title="Toggle Channels">
+                      <Menu size={16} />
+                    </button>
+                  )}
+
+                  {/* Right Sidebar toggle button for mobile/tablet */}
+                  {currentRoom?.type === 'group' && (isMobile || isTablet) && (
+                    <button className="btn-secondary sidebar-toggle-btn" onClick={() => setShowRightSidebar(!showRightSidebar)} title="Toggle Members">
+                      <Users size={16} />
+                    </button>
+                  )}
+
+                  {currentRoom && currentRoom.type !== 'ai' && (
+                    <button 
+                      className={`voice-channel-toggle-btn ${voiceActive ? 'voice-active' : ''}`}
+                      onClick={voiceActive ? stopVoiceChat : startVoiceChat}
+                      title="Toggle Cyber Vocoder Voice Channel"
+                    >
+                      {voiceActive ? '🔊 Vocoder Connected' : '🎙️ Join Vocoder'}
+                    </button>
+                  )}
+
+                  {session?.isAdmin && <span className="admin-status-badge">ADMIN MONITOR</span>}
+                  {session?.isAdmin && (
+                    <button className="btn-secondary admin-panel-toggle-btn" onClick={() => setShowAdminPanel(!showAdminPanel)}>
+                      ⚙️ Dashboard
+                    </button>
+                  )}
+                </header>
+
+                {voiceActive && (
+                  <div className="voice-status-bar-widget">
+                    <div className="voice-info">
+                      <span className="voice-dot"></span>
+                      <strong>CYBER VOCODER ACTIVE</strong>
+                    </div>
+                    <canvas ref={voiceCanvasRef} width={120} height={24} className="voice-visualizer-canvas" />
+                    <div className="voice-controls-row">
+                      <button 
+                        className={`voice-control-btn ${roboticFilter ? 'active' : ''}`}
+                        onClick={() => setRoboticFilter(!roboticFilter)}
+                      >
+                        🤖 Robot Effect: {roboticFilter ? 'ON' : 'OFF'}
+                      </button>
+                      <button 
+                        className={`voice-control-btn ${voiceMuted ? 'active' : ''}`}
+                        onClick={() => setVoiceMuted(!voiceMuted)}
+                      >
+                        {voiceMuted ? '🔇 Muted' : '🎙️ Mute'}
+                      </button>
+                      <button className="voice-control-btn disconnect-btn" onClick={stopVoiceChat}>
+                        Disconnect
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </header>
 
               {currentRoom.type === 'group' && !currentRoom._member && !session?.isAdmin ? (
                 <div className="restricted-group-overlay">
@@ -965,7 +1288,7 @@ const Chat = () => {
               ) : (
                 <>
                   {/* MESSAGES VIEW */}
-                  <div className="messages-area">
+                  <div className="messages-area" ref={messagesAreaRef} onScroll={handleMessagesScroll}>
                     {messages.length === 0 && currentRoom.type !== 'ai' && (
                       <p className="empty-void-txt">Empty log stream. Speak into the void.</p>
                     )}
@@ -997,6 +1320,23 @@ const Chat = () => {
                       } else if (msg.content && msg.content.startsWith('IMAGE:')) {
                         const url = msg.content.replace('IMAGE:', '').trim();
                         contentHtml = <img src={url} className="chat-img-embed" alt="AI Generated" onClick={() => window.open(url)} />;
+                      } else if (msg.content && msg.content.startsWith('⚔️ GAME_INVITE:')) {
+                        const gameName = msg.content.replace('⚔️ GAME_INVITE:', '').trim();
+                        contentHtml = (
+                          <div className="game-invite-msg-card">
+                            <span className="game-icon">⚔️</span>
+                            <div className="game-invite-details">
+                              <span className="title">OPERATIVE CHALLENGE</span>
+                              <span className="subtitle">Invite to play {gameName}</span>
+                            </div>
+                            <button 
+                              className="btn-primary invite-accept-btn" 
+                              onClick={() => navigate(`/games?mode=${encodeURIComponent(gameName)}`)}
+                            >
+                              Launch Session
+                            </button>
+                          </div>
+                        );
                       } else if (msg.isThinking) {
                         contentHtml = <span style={{ color: '#555', fontStyle: 'italic' }}>thinking...</span>;
                       } else {
@@ -1004,18 +1344,38 @@ const Chat = () => {
                       }
 
                       return (
-                        <div key={msg._id} className={`message-row ${alignment}`}>
-                          <div className="msg-user-avatar">{isAI ? '🤖' : isMine ? (session.emoji || '👁️') : '👤'}</div>
+                        <div key={msg._id} className={`message-row ${alignment} skin-${msg.skin || 'default'}`}>
+                          {alignment !== 'mine' && (
+                            <div className="msg-user-avatar">
+                              {isAI ? '🤖' : msg.sender.substring(0, 2).toUpperCase()}
+                            </div>
+                          )}
                           <div className="msg-contents-wrap">
-                            {!isMine && <span className="sender-username-tag">{isAI ? 'BlackLight AI' : msg.sender}</span>}
+                            {alignment !== 'mine' && (
+                              <span className={`sender-username-tag effect-${msg.skin || 'default'}`}>
+                                {isAI ? 'BlackLight AI' : `@${msg.sender}`}
+                              </span>
+                            )}
                             <div className="msg-bubble-card">{contentHtml}</div>
                             <div className="msg-meta-row">
-                              <span className="msg-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              <span className="msg-timestamp">
+                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              {alignment === 'mine' && (
+                                <span className="msg-read-status" title="Delivered secure transmission">✓✓</span>
+                              )}
                               {(isMine || session.isAdmin) && !msg.deleted && !isAI && (
-                                <button className="msg-delete-action-btn" onClick={() => handleDeleteMessage(msg._id)}><Trash2 size={12} /></button>
+                                <button className="msg-delete-action-btn" onClick={() => handleDeleteMessage(msg._id)} title="Recall signal">
+                                  <Trash2 size={12} />
+                                </button>
                               )}
                             </div>
                           </div>
+                          {alignment === 'mine' && (
+                            <div className="msg-user-avatar sender">
+                              {session.emoji || '👁️'}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -1023,9 +1383,11 @@ const Chat = () => {
                     {/* Typing Indicator */}
                     {typingUsers[currentRoom.name] && typingUsers[currentRoom.name] !== session.username && (
                       <div className="message-row theirs">
-                        <div className="msg-user-avatar">👤</div>
+                        <div className="msg-user-avatar">
+                          {typingUsers[currentRoom.name].substring(0, 2).toUpperCase()}
+                        </div>
                         <div className="msg-contents-wrap">
-                          <span className="sender-username-tag">{typingUsers[currentRoom.name]}</span>
+                          <span className="sender-username-tag">@{typingUsers[currentRoom.name]}</span>
                           <div className="msg-bubble-card typing-bubble">
                             <div className="typing-dots"><span></span><span></span><span></span></div>
                           </div>
@@ -1035,6 +1397,20 @@ const Chat = () => {
                     
                     <div ref={messagesEndRef} />
                   </div>
+
+                  {/* Scroll to Bottom FAB */}
+                  {showScrollFab && (
+                    <button 
+                      className="scroll-to-bottom-fab btn-primary"
+                      onClick={() => {
+                        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                        setShowScrollFab(false);
+                      }}
+                      title="Snap to Live Stream"
+                    >
+                      ↓ LIVE STREAM
+                    </button>
+                  )}
 
                   {/* INPUT BAR */}
                   <div className="chat-input-container">
@@ -1103,10 +1479,18 @@ const Chat = () => {
             </div>
           )}
         </main>
+        )}
 
         {/* GROUP INFO PANEL (RIGHT PANEL) */}
-        {currentRoom?.type === 'group' && (currentRoom._member || session?.isAdmin) && (
-          <aside className="group-sidebar-right">
+        {currentRoom?.type === 'group' && (currentRoom._member || session?.isAdmin) && (!isMobile && !isTablet || showRightSidebar) && (
+          <aside className={`group-sidebar-right ${(isMobile || isTablet) ? 'overlay-drawer' : ''}`}>
+            {(isMobile || isTablet) && (
+              <div className="sidebar-close-header">
+                <button className="close-right-sidebar-btn" onClick={() => setShowRightSidebar(false)} title="Close Panel">
+                  <X size={20} />
+                </button>
+              </div>
+            )}
             
             {/* JOIN REQUESTS FOR OWNER */}
             {pendingJoinRequests.length > 0 && (
@@ -1376,6 +1760,59 @@ const Chat = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* MOBILE BOTTOM NAVIGATION */}
+      {isMobile && (
+        <nav className="mobile-bottom-nav">
+          <button 
+            className="nav-item-btn"
+            onClick={() => navigate('/')}
+          >
+            <Home size={20} />
+            <span>Home</span>
+          </button>
+          <button 
+            className={`nav-item-btn ${mobileActiveView === 'chats' && activeSideTab !== 'friends' ? 'active' : ''}`}
+            onClick={() => {
+              setMobileActiveView('chats');
+              setActiveSideTab('private');
+            }}
+          >
+            <MessageSquare size={20} />
+            <span>Chats</span>
+          </button>
+          <button 
+            className={`nav-item-btn ${currentRoom?.type === 'ai' && mobileActiveView === 'chat_window' ? 'active' : ''}`}
+            onClick={() => {
+              const aiRoom = rooms.find(r => r.type === 'ai');
+              if (aiRoom) {
+                setCurrentRoom(aiRoom);
+                setMobileActiveView('chat_window');
+              }
+            }}
+          >
+            <Bot size={20} />
+            <span>AI</span>
+          </button>
+          <button 
+            className={`nav-item-btn ${mobileActiveView === 'groups' ? 'active' : ''}`}
+            onClick={() => {
+              setMobileActiveView('groups');
+              setActiveSideTab('group');
+            }}
+          >
+            <Users size={20} />
+            <span>Groups</span>
+          </button>
+          <button 
+            className="nav-item-btn"
+            onClick={() => navigate('/profile')}
+          >
+            <User size={20} />
+            <span>Profile</span>
+          </button>
+        </nav>
       )}
 
     </div>

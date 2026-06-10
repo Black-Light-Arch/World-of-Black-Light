@@ -14,6 +14,7 @@ const Signup = () => {
   const [selectedEmoji, setSelectedEmoji] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [acceptRules, setAcceptRules] = useState(false);
 
   const [errors, setErrors] = useState({});
   const [emailMsg, setEmailMsg] = useState({ text: '', type: '' });
@@ -122,6 +123,11 @@ const Signup = () => {
 
     if (!selectedEmoji) {
       newErrors.emoji = '✗ Choose a profile icon';
+      valid = false;
+    }
+
+    if (!acceptRules) {
+      newErrors.acceptRules = '✗ You must read and accept the Rules & Regulations';
       valid = false;
     }
 
@@ -332,6 +338,21 @@ const Signup = () => {
             </div>
             {errors.emoji && <small className="error-msg">{errors.emoji}</small>}
           </div>
+
+          <div className="input-group rules-checkbox-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', margin: '15px 0' }}>
+            <input 
+              type="checkbox" 
+              id="acceptRules" 
+              checked={acceptRules} 
+              onChange={(e) => setAcceptRules(e.target.checked)} 
+              style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
+              required
+            />
+            <label htmlFor="acceptRules" style={{ marginBottom: 0, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              I accept the <Link to="/rules" target="_blank" style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold' }}>Rules & Regulations</Link> *
+            </label>
+          </div>
+          {errors.acceptRules && <small className="error-msg" style={{ display: 'block', marginTop: '-8px', marginBottom: '15px' }}>{errors.acceptRules}</small>}
 
           <button type="submit" className="btn-primary auth-submit-btn">
             Create Account
