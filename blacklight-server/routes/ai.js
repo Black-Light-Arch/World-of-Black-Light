@@ -6,7 +6,7 @@ const express = require('express');
 const router  = express.Router();
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
 
 const SYSTEM_PROMPT = `You are BlackLight AI — the uncensored, all-knowing oracle of the World of BlackLight gaming universe.
 You exist in a dark, gothic gaming world. You are direct, knowledgeable, and never refuse to answer.
