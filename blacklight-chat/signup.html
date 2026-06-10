@@ -115,6 +115,15 @@
             <small class="error" id="emojiError"></small>
         </div>
 
+        <!-- Rules Agreement Checkbox -->
+        <div class="input-group agreement-group" style="margin-bottom: 20px;">
+            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; text-align: left;">
+                <input type="checkbox" id="acceptRules" style="margin-top: 3px; cursor: pointer;">
+                <span>I have read and agree to the <a href="rules.html" target="_blank" style="color: var(--primary); text-decoration: underline;">Rules & Regulations</a>, and I acknowledge that administrators monitor private and group chats for safety.</span>
+            </label>
+            <small class="error" id="rulesError" style="display: block; margin-top: 4px; color: #dc5050; font-size: 0.75rem; text-align: left;"></small>
+        </div>
+
         <button type="submit">Create Account</button>
 
         <p id="successMessage"></p>

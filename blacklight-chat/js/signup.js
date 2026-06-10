@@ -15,6 +15,8 @@ const emailMessage  = document.getElementById('emailMessage');
 const strengthFill  = document.getElementById('strengthFill');
 const confirmError  = document.getElementById('confirmError');
 const successMsg    = document.getElementById('successMessage');
+const acceptRules   = document.getElementById('acceptRules');
+const rulesError    = document.getElementById('rulesError');
 
 // ── Password Visibility Toggles ────────────────────────────────────
 const togglePassword = document.getElementById('togglePassword');
@@ -148,6 +150,13 @@ signupForm && signupForm.addEventListener('submit', async (e) => {
 
     if (!validateConfirm()) valid=false;
     if (!selectedEmoji.value) { if(emojiError) emojiError.textContent='✗ Choose a profile icon'; valid=false; }
+
+    if (acceptRules && !acceptRules.checked) {
+        if (rulesError) rulesError.textContent = '✗ You must read and accept the Rules & Regulations';
+        valid = false;
+    } else {
+        if (rulesError) rulesError.textContent = '';
+    }
 
     if (!valid) return;
 
