@@ -47,7 +47,7 @@ if (!fs.existsSync(path.join(FRONTEND, 'index.html'))) {
   try {
     const { execSync } = require('child_process');
     console.log(`📡 Installing frontend dependencies in: ${reactPath}`);
-    execSync('npm install', { cwd: reactPath, stdio: 'inherit' });
+    execSync('npm install --include=dev', { cwd: reactPath, stdio: 'inherit' });
     console.log('⚙️ Compiling Vite production assets...');
     execSync('npm run build', { cwd: reactPath, stdio: 'inherit' });
     console.log('✓ Dynamic compilation completed successfully!');
