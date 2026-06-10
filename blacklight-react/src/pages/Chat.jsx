@@ -1106,6 +1106,21 @@ const Chat = () => {
                   ) : (
                     <button className="new-room-btn" onClick={() => setShowNewPrivateModal(true)}>+ Start DM</button>
                   )}
+                  <button 
+                    className="new-room-btn" 
+                    onClick={() => navigate('/games')}
+                    style={{
+                      gridColumn: 'span 2',
+                      marginTop: '8px',
+                      background: 'rgba(0, 229, 255, 0.08)',
+                      border: '1px solid rgba(0, 229, 255, 0.3)',
+                      color: '#00e5ff',
+                      boxShadow: '0 0 10px rgba(0, 229, 255, 0.15)',
+                      textShadow: '0 0 5px rgba(0, 229, 255, 0.3)'
+                    }}
+                  >
+                    ⚔️ Play Simulation Games
+                  </button>
                 </div>
               </div>
             ) : (
