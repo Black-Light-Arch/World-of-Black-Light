@@ -34,13 +34,18 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // ── SERVE STATIC FRONTEND ────────────────────────────────────
 const fs = require('fs');
-const FRONTEND = path.join(__dirname, '..', 'World of Black Light', 'blacklight-react', 'dist');
+
+// Resolve React app path dynamically to support both local root and Render production folder structure
+let reactPath = path.join(__dirname, '..', 'blacklight-react');
+if (!fs.existsSync(reactPath)) {
+  reactPath = path.join(__dirname, '..', 'World of Black Light', 'blacklight-react');
+}
+const FRONTEND = path.join(reactPath, 'dist');
 
 if (!fs.existsSync(path.join(FRONTEND, 'index.html'))) {
   console.log('⚠️ Frontend build artifacts missing. Triggering dynamic compilation...');
   try {
     const { execSync } = require('child_process');
-    const reactPath = path.join(__dirname, '..', 'World of Black Light', 'blacklight-react');
     console.log(`📡 Installing frontend dependencies in: ${reactPath}`);
     execSync('npm install', { cwd: reactPath, stdio: 'inherit' });
     console.log('⚙️ Compiling Vite production assets...');
