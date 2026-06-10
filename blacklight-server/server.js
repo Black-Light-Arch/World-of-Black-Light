@@ -74,7 +74,30 @@ app.get('/api/health', (_, res) => res.json({
 }));
 
 // ── CATCH-ALL ────────────────────────────────────────────────
-app.get('*', (_, res) => res.sendFile(path.join(FRONTEND, 'index.html')));
+app.get('*', (_, res) => {
+  const indexFile = path.join(FRONTEND, 'index.html');
+  if (fs.existsSync(indexFile)) {
+    res.sendFile(indexFile);
+  } else {
+    res.status(200).send(`
+      <html>
+        <head>
+          <title>World of BlackLight</title>
+          <style>
+            body { background: #0A0A0A; color: #00E5FF; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+            h1 { font-size: 2.5rem; text-shadow: 0 0 10px rgba(0,229,255,0.4); margin-bottom: 10px; }
+            p { color: #8B5CF6; font-size: 1.1rem; }
+          </style>
+        </head>
+        <body>
+          <h1>World of BlackLight Terminal</h1>
+          <p>📡 Node backend is live and healthy on port 3000.</p>
+          <p>⚠️ Frontend React SPA is building in the background. Refresh in a few seconds...</p>
+        </body>
+      </html>
+    `);
+  }
+});
 
 // ── SOCKET.IO PRESENCE & REAL-TIME CHAT ───────────────────────
 const onlineUsers = new Map(); // username -> socket.id
