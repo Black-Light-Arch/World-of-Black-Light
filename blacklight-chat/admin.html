@@ -52,7 +52,7 @@
     <div class="table-scroll">
       <table class="admin-table" id="usersTable">
         <thead>
-          <tr><th>#</th><th>Username</th><th>Name</th><th>Email</th><th>Age</th><th>Theme</th><th>Admin</th><th>Joined</th><th>Actions</th></tr>
+          <tr><th>#</th><th>Username</th><th>Name</th><th>Email</th><th>Age</th><th>Theme</th><th>Admin</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
         </thead>
         <tbody id="usersBody">
           <tr><td colspan="9" class="tbl-loading">Loading...</td></tr>
@@ -159,6 +159,30 @@
       </div>
       <button type="submit" class="btn-submit">Save Changes</button>
       <p class="form-msg" id="editUserMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- BAN USER MODAL -->
+<div class="modal-overlay" id="banUserModal" style="display:none">
+  <div class="modal-box">
+    <button class="modal-close" id="closeBanUser">✕</button>
+    <h2>Ban Operator</h2>
+    <p class="modal-sub" id="banUserSub">Restrict clearance</p>
+    <form id="banUserForm">
+      <input type="hidden" id="banUserId">
+      <div class="input-group">
+        <label>Ban Duration</label>
+        <select id="banDuration">
+          <option value="10m">10 Minutes</option>
+          <option value="1h">1 Hour</option>
+          <option value="1d">1 Day</option>
+          <option value="1w">1 Week</option>
+          <option value="permanent">Permanent</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-submit" style="background:#ff3333;border-color:#ff3333">Confirm Ban</button>
+      <p class="form-msg" id="banUserMsg"></p>
     </form>
   </div>
 </div>

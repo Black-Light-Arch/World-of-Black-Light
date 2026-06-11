@@ -65,10 +65,23 @@ async function loadStats() {
 
 // ── USERS ────────────────────────────────────────────────────
 async function loadUsers() {
-  document.getElementById('usersBody').innerHTML = '<tr><td colspan="9" class="tbl-loading">Loading...</td></tr>';
+  document.getElementById('usersBody').innerHTML = '<tr><td colspan="10" class="tbl-loading">Loading...</td></tr>';
   try {
     const users = await apiFetch(`${API}/api/admin/users`);
-    document.getElementById('usersBody').innerHTML = users.map(u => `
+    const session = Auth.getSession();
+    document.getElementById('usersBody').innerHTML = users.map(u => {
+      const isBanned = u.banned_until && new Date(u.banned_until) > new Date();
+      const statusBadge = isBanned 
+        ? `<span class="badge" style="background:rgba(255,51,51,0.1);color:#ff3333" title="Until ${new Date(u.banned_until).toLocaleString()}">🚫 Banned</span>`
+        : `<span class="badge" style="background:rgba(80,200,120,0.1);color:#50c878">Active</span>`;
+        
+      const banBtn = u.id === session?.id 
+        ? '' 
+        : (isBanned 
+          ? `<button class="tbl-btn tbl-btn-edit" style="color:#50c878;border-color:#50c878" onclick="unbanUser(${u.id},'${u.username}')">Unban</button>`
+          : `<button class="tbl-btn tbl-btn-delete" onclick="openBanUser(${u.id},'${u.username}')">Ban</button>`);
+
+      return `
       <tr>
         <td>${u.id}</td>
         <td style="font-family:Cinzel,serif;font-size:0.8rem">${u.username}</td>
@@ -77,14 +90,17 @@ async function loadUsers() {
         <td>${u.age || '—'}</td>
         <td><span class="badge" style="background:rgba(159,115,255,0.1);color:#9F73FF">${u.theme}</span></td>
         <td><span class="badge ${u.is_admin ? 'badge-admin' : 'badge-user'}">${u.is_admin ? '✓ Admin' : 'User'}</span></td>
+        <td>${statusBadge}</td>
         <td style="font-size:0.8rem;opacity:0.6">${fmtDate(u.created_at)}</td>
         <td>
           <button class="tbl-btn tbl-btn-edit" onclick="openEditUser(${u.id})">Edit</button>
+          ${banBtn}
           <button class="tbl-btn tbl-btn-delete" onclick="deleteUser(${u.id},'${u.username}')">Delete</button>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
   } catch (err) {
-    document.getElementById('usersBody').innerHTML = `<tr><td colspan="9" class="tbl-loading">Error: ${err.message}</td></tr>`;
+    document.getElementById('usersBody').innerHTML = `<tr><td colspan="10" class="tbl-loading">Error: ${err.message}</td></tr>`;
   }
 }
 
@@ -324,7 +340,7 @@ async function deleteMessage(id) {
 }
 
 // ── MODAL CLOSE BUTTONS ──────────────────────────────────────
-['closeEditUser','closeEditPlayer','closeAddTournament'].forEach(id => {
+['closeEditUser','closeEditPlayer','closeAddTournament','closeBanUser'].forEach(id => {
   document.getElementById(id)?.addEventListener('click', () => {
     document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
   });
@@ -348,3 +364,64 @@ const loaders = {
 // ── INIT ─────────────────────────────────────────────────────
 loadStats();
 loadUsers(); // default tab
+
+// Ban user triggers
+let banningUserId = null;
+function openBanUser(id, username) {
+  banningUserId = id;
+  document.getElementById('banUserId').value = id;
+  document.getElementById('banUserSub').textContent = `Restrict clearance for @${username}`;
+  document.getElementById('banDuration').value = '10m';
+  document.getElementById('banUserMsg').textContent = '';
+  document.getElementById('banUserModal').style.display = 'flex';
+}
+
+document.getElementById('banUserForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('banUserMsg');
+  msg.textContent = 'Applying ban...';
+  msg.style.color = '#aaa';
+  const duration = document.getElementById('banDuration').value;
+  
+  let bannedUntil = null;
+  if (duration === 'permanent') {
+    bannedUntil = '9999-12-31T23:59:59.999Z';
+  } else {
+    const date = new Date();
+    if (duration === '10m') date.setMinutes(date.getMinutes() + 10);
+    else if (duration === '1h') date.setHours(date.getHours() + 1);
+    else if (duration === '1d') date.setDate(date.getDate() + 1);
+    else if (duration === '1w') date.setDate(date.getDate() + 7);
+    bannedUntil = date.toISOString();
+  }
+
+  try {
+    await apiFetch(`${API}/api/admin/users/${banningUserId}/ban`, {
+      method: 'POST',
+      body: JSON.stringify({ bannedUntil })
+    });
+    msg.textContent = '✅ Banned!'; msg.style.color = '#4ade80';
+    setTimeout(() => {
+      document.getElementById('banUserModal').style.display = 'none';
+      loadUsers();
+      loadStats();
+    }, 1000);
+  } catch (err) {
+    msg.textContent = '❌ ' + err.message; msg.style.color = '#ff6b6b';
+  }
+});
+
+async function unbanUser(id, username) {
+  if (!confirm(`Unban user "${username}"?`)) return;
+  try {
+    await apiFetch(`${API}/api/admin/users/${id}/ban`, {
+      method: 'POST',
+      body: JSON.stringify({ bannedUntil: null })
+    });
+    alert(`User "${username}" has been unbanned.`);
+    loadUsers();
+    loadStats();
+  } catch (err) {
+    alert('Error unbanning: ' + err.message);
+  }
+}

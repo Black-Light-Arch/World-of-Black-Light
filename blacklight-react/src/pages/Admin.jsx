@@ -34,6 +34,12 @@ const Admin = () => {
   const [epRank, setEpRank] = useState('Bronze');
   const [editPlayerMsg, setEditPlayerMsg] = useState({ text: '', type: '' });
 
+  // Ban User Modal State
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [banUser, setBanUser] = useState(null);
+  const [banDuration, setBanDuration] = useState('10m');
+  const [banMsg, setBanMsg] = useState({ text: '', type: '' });
+
   // Add Tournament Modal State
   const [showAddTournamentModal, setShowAddTournamentModal] = useState(false);
   const [atName, setAtName] = useState('');
@@ -157,6 +163,60 @@ const Admin = () => {
       loadTabData('users');
     } catch (err) {
       alert('Error deleting user: ' + err.message);
+    }
+  };
+
+  const handleOpenBanUser = (user) => {
+    setBanUser(user);
+    setBanDuration('10m');
+    setBanMsg({ text: '', type: '' });
+    setShowBanModal(true);
+  };
+
+  const handleBanSubmit = async (e) => {
+    e.preventDefault();
+    setBanMsg({ text: 'Applying ban...', type: 'info' });
+    
+    let bannedUntil = null;
+    if (banDuration === 'permanent') {
+      bannedUntil = '9999-12-31T23:59:59.999Z';
+    } else {
+      const date = new Date();
+      if (banDuration === '10m') date.setMinutes(date.getMinutes() + 10);
+      else if (banDuration === '1h') date.setHours(date.getHours() + 1);
+      else if (banDuration === '1d') date.setDate(date.getDate() + 1);
+      else if (banDuration === '1w') date.setDate(date.getDate() + 7);
+      bannedUntil = date.toISOString();
+    }
+
+    try {
+      await apiFetch(`/api/admin/users/${banUser.id}/ban`, {
+        method: 'POST',
+        body: JSON.stringify({ bannedUntil })
+      });
+      setBanMsg({ text: '✅ User banned successfully!', type: 'success' });
+      setTimeout(() => {
+        setShowBanModal(false);
+        loadStats();
+        loadTabData('users');
+      }, 1000);
+    } catch (err) {
+      setBanMsg({ text: '❌ ' + err.message, type: 'error' });
+    }
+  };
+
+  const handleUnbanUser = async (user) => {
+    if (!window.confirm(`Are you sure you want to unban user "${user.username}"?`)) return;
+    try {
+      await apiFetch(`/api/admin/users/${user.id}/ban`, {
+        method: 'POST',
+        body: JSON.stringify({ bannedUntil: null })
+      });
+      alert(`User "${user.username}" has been unbanned.`);
+      loadStats();
+      loadTabData('users');
+    } catch (err) {
+      alert('Error unbanning user: ' + err.message);
     }
   };
 
@@ -347,7 +407,7 @@ const Admin = () => {
                 {activeTab === 'users' && (
                   <>
                     <thead>
-                      <tr><th>#</th><th>Username</th><th>Name</th><th>Email</th><th>Age</th><th>Theme</th><th>Admin</th><th>Joined</th><th>Actions</th></tr>
+                      <tr><th>#</th><th>Username</th><th>Name</th><th>Email</th><th>Age</th><th>Theme</th><th>Admin</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                       {tabData.map((u) => (
@@ -363,9 +423,27 @@ const Admin = () => {
                               {u.is_admin ? '✓ Admin' : 'User'}
                             </span>
                           </td>
+                          <td>
+                            {u.banned_until && new Date(u.banned_until) > new Date() ? (
+                              <span className="admin-role-tag" style={{ color: '#ff3333', borderColor: 'rgba(255,51,51,0.3)', background: 'rgba(255,51,51,0.08)' }} title={`Until ${new Date(u.banned_until).toLocaleString()}`}>
+                                🚫 Banned
+                              </span>
+                            ) : (
+                              <span className="admin-role-tag role-admin">
+                                Active
+                              </span>
+                            )}
+                          </td>
                           <td className="opacity-50">{fmtDate(u.created_at)}</td>
                           <td>
                             <button className="tbl-action-btn edit" onClick={() => handleOpenEditUser(u)}>Edit</button>
+                            {u.id !== session?.id && (
+                              u.banned_until && new Date(u.banned_until) > new Date() ? (
+                                <button className="tbl-action-btn edit" style={{ color: '#50c878', borderColor: '#50c878' }} onClick={() => handleUnbanUser(u)}>Unban</button>
+                              ) : (
+                                <button className="tbl-action-btn delete" onClick={() => handleOpenBanUser(u)}>Ban</button>
+                              )
+                            )}
                             <button className="tbl-action-btn delete" onClick={() => handleDeleteUser(u.id, u.username)}>Delete</button>
                           </td>
                         </tr>
@@ -688,6 +766,43 @@ const Admin = () => {
                   marginTop: '12px', textAlign: 'center'
                 }}>
                   {addTournamentMsg.text}
+                </p>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* BAN USER MODAL */}
+      {showBanModal && (
+        <div className="modal-overlay" onClick={() => setShowBanModal(false)}>
+          <div className="modal-box glass-panel" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowBanModal(false)}>✕</button>
+            <h2>Ban Operator</h2>
+            <p className="modal-sub">Restrict clearance for @{banUser?.username}</p>
+            
+            <form onSubmit={handleBanSubmit}>
+              <div className="input-group">
+                <label>Ban Duration</label>
+                <select value={banDuration} onChange={(e) => setBanDuration(e.target.value)}>
+                  <option value="10m">10 Minutes</option>
+                  <option value="1h">1 Hour</option>
+                  <option value="1d">1 Day</option>
+                  <option value="1w">1 Week</option>
+                  <option value="permanent">Permanent</option>
+                </select>
+              </div>
+
+              <button type="submit" className="btn-submit" style={{ backgroundColor: '#ff3333', borderColor: '#ff3333' }}>
+                Confirm Ban
+              </button>
+              
+              {banMsg.text && (
+                <p className="form-msg" style={{ 
+                  color: banMsg.type === 'success' ? '#4ade80' : banMsg.type === 'error' ? '#ff6b6b' : '#aaa',
+                  marginTop: '12px', textAlign: 'center'
+                }}>
+                  {banMsg.text}
                 </p>
               )}
             </form>
