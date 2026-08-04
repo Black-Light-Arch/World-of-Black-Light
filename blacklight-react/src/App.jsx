@@ -25,6 +25,7 @@ import Admin from './pages/Admin';
 import Chat from './pages/Chat';
 import Donation from './pages/Donation';
 import Rules from './pages/Rules';
+import Courses from './pages/Courses';
 
 // Global Scroll Reset
 const ScrollToTop = () => {
@@ -80,6 +81,8 @@ function App() {
             <Route path="/chat" element={<Chat />} />
             <Route path="/donation" element={<Donation />} />
             <Route path="/rules" element={<Rules />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/bootcamp" element={<Courses />} />
           </Routes>
         </main>
 

@@ -5,6 +5,7 @@ const Footer = () => {
   return (
     <footer className="app-footer">
       <div className="app-footer-links">
+        <Link to="/courses">Courses & Bootcamp</Link>
         <Link to="/players">Players</Link>
         <Link to="/tournaments">Tournaments</Link>
         <Link to="/leaderboard">Leaderboard</Link>

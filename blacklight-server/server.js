@@ -66,6 +66,7 @@ app.use('/api/leaderboard', require('./routes/leaderboard'));
 app.use('/api/contact',     require('./routes/contact'));
 app.use('/api/admin',       require('./routes/admin'));
 app.use('/api',             require('./routes/chat'));
+app.use('/api/courses',     require('./routes/courses'));
 app.use('/api/ai',          require('./routes/ai'));
 
 // ── HEALTH ───────────────────────────────────────────────────

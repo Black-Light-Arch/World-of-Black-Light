@@ -92,6 +92,21 @@ db.exec(`
     expires_at TEXT NOT NULL,
     created_at TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS course_enrollments (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id        TEXT    NOT NULL DEFAULT 'ai-bootcamp',
+    full_name        TEXT    NOT NULL,
+    email            TEXT    NOT NULL,
+    phone            TEXT    NOT NULL,
+    whatsapp         TEXT    DEFAULT '',
+    experience_level TEXT    DEFAULT 'beginner',
+    payment_method   TEXT    DEFAULT 'jazzcash',
+    amount_paid      INTEGER DEFAULT 4500,
+    status           TEXT    DEFAULT 'confirmed',
+    notes            TEXT    DEFAULT '',
+    created_at       TEXT    DEFAULT (datetime('now'))
+  );
 `);
 
 // ── CHAT SCHEMA ───────────────────────────────────────────────
