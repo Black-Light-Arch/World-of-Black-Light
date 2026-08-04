@@ -1924,3 +1924,104 @@
   border-image: linear-gradient(90deg, #ff007f, #7f00ff, #00e5ff) 1 !important;
   box-shadow: 0 0 15px rgba(127, 0, 255, 0.3) !important;
 }
+
+/* ============================================================
+   MOBILE CHAT RESPONSIVE FIXES (<768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  .chat-viewport {
+    height: calc(100dvh - 70px) !important;
+    width: 100% !important;
+    overflow: hidden;
+  }
+
+  .chat-wrapper {
+    flex-direction: column !important;
+    position: relative !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  .chat-sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    background: #0d0c18 !important;
+  }
+
+  .chat-sidebar.closed-mobile {
+    display: none !important;
+  }
+
+  .chat-main-area {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .chat-main-header {
+    padding: 12px 15px !important;
+    min-height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: rgba(10, 10, 10, 0.95) !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.3) !important;
+  }
+
+  .chat-messages-scroll {
+    flex: 1 !important;
+    padding: 15px 12px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(100dvh - 180px) !important;
+  }
+
+  .message-composer {
+    padding: 10px 12px !important;
+    background: #0a0a0a !important;
+    border-top: 1px solid rgba(139, 92, 246, 0.3) !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 25 !important;
+  }
+
+  .composer-input-wrap {
+    gap: 8px !important;
+  }
+
+  .composer-input {
+    padding: 10px 12px !important;
+    font-size: 0.9rem !important;
+    border-radius: 20px !important;
+  }
+
+  .btn-send-msg {
+    padding: 10px 16px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+  }
+
+  .mobile-back-to-rooms-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: rgba(139, 92, 246, 0.2) !important;
+    color: var(--cyber-accent) !important;
+    border: 1px solid var(--cyber-border) !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    font-size: 0.8rem !important;
+    cursor: pointer !important;
+  }
+}

@@ -1,18 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Auth } from '../services/auth';
-import { Menu, X, LogOut, MessageSquare } from 'lucide-react';
+import { Menu, X, LogOut, Sun, Moon } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [session, setSession] = useState(Auth.getSession());
+  const [isLightMode, setIsLightMode] = useState(() => {
+    return localStorage.getItem('blacklight_color_mode') === 'light';
+  });
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     setSession(Auth.getSession());
   }, [location]);
+
+  useEffect(() => {
+    if (isLightMode) {
+      document.body.classList.add('light-mode');
+      localStorage.setItem('blacklight_color_mode', 'light');
+    } else {
+      document.body.classList.remove('light-mode');
+      localStorage.setItem('blacklight_color_mode', 'dark');
+    }
+  }, [isLightMode]);
+
+  const toggleLightMode = () => {
+    setIsLightMode(!isLightMode);
+  };
 
   const handleLogout = () => {
     Auth.logout();
@@ -36,11 +53,21 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
+  const isLearningArea = location.pathname.startsWith('/courses') || location.pathname.startsWith('/bootcamp');
+
   return (
     <>
       <header className="navbar-header">
         <Link to="/" className="nav-logo" onClick={() => setIsOpen(false)}>
-          BlackLight
+          {isLearningArea ? (
+            <img 
+              src="/assets/images/createskill_academy_logo.png" 
+              alt="CreateSkill Academy" 
+              style={{ height: '42px', width: 'auto', display: 'block' }}
+            />
+          ) : (
+            'BlackLight'
+          )}
         </Link>
 
         {/* Desktop Links */}
@@ -56,8 +83,18 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* Desktop Auth */}
+        {/* Desktop Auth & Theme Controls */}
         <div className="nav-auth-section">
+          {/* Light / Dark Mode Toggle */}
+          <button 
+            onClick={toggleLightMode} 
+            className="nav-logout-icon-btn" 
+            title={isLightMode ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            style={{ marginRight: '8px' }}
+          >
+            {isLightMode ? <Moon size={18} color="#7c3aed" /> : <Sun size={18} color="#ffaa00" />}
+          </button>
+
           {session ? (
             <>
               <Link to="/profile" className="nav-profile-badge" title="Profile">

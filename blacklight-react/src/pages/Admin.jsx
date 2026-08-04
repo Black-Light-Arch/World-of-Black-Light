@@ -90,6 +90,9 @@ const Admin = () => {
         data = await apiFetch('/api/admin/registrations');
       } else if (tab === 'messages') {
         data = await apiFetch('/api/admin/messages');
+      } else if (tab === 'bootcamp') {
+        const res = await apiFetch('/api/courses/enrollments');
+        data = res.enrollments || [];
       }
       setTabData(data);
     } catch (err) {
@@ -390,6 +393,7 @@ const Admin = () => {
           <button className={`admin-tab-btn ${activeTab === 'players' ? 'active' : ''}`} onClick={() => setActiveTab('players')}>⚔️ Players</button>
           <button className={`admin-tab-btn ${activeTab === 'tournaments' ? 'active' : ''}`} onClick={() => setActiveTab('tournaments')}>🏆 Tournaments</button>
           <button className={`admin-tab-btn ${activeTab === 'registrations' ? 'active' : ''}`} onClick={() => setActiveTab('registrations')}>📋 Registrations</button>
+          <button className={`admin-tab-btn ${activeTab === 'bootcamp' ? 'active' : ''}`} onClick={() => setActiveTab('bootcamp')}>🎓 Bootcamp Students</button>
           <button className={`admin-tab-btn ${activeTab === 'messages' ? 'active' : ''}`} onClick={() => setActiveTab('messages')}>📨 Messages</button>
         </div>
 
@@ -526,6 +530,48 @@ const Admin = () => {
                           <td className="opacity-50">{fmtDate(r.registered_at)}</td>
                           <td>
                             <button className="tbl-action-btn delete" onClick={() => handleDeleteRegistration(r.id)}>Remove</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                )}
+
+                {activeTab === 'bootcamp' && (
+                  <>
+                    <thead>
+                      <tr><th>#</th><th>Student</th><th>Email</th><th>Phone/WhatsApp</th><th>Level</th><th>Payment</th><th>Fee</th><th>Proof</th><th>Enrolled</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                      {tabData.map((e) => (
+                        <tr key={e.id}>
+                          <td>{e.id}</td>
+                          <td style={{ fontWeight: 'bold' }}>{e.full_name}</td>
+                          <td className="opacity-70">{e.email}</td>
+                          <td>{e.phone}</td>
+                          <td><span className="badge-theme-color">{e.experience_level}</span></td>
+                          <td><span className="badge-theme-color green">{e.payment_method}</span></td>
+                          <td>Rs. {e.amount_paid || 4500}</td>
+                          <td>
+                            {e.payment_proof ? (
+                              <a href={e.payment_proof} target="_blank" rel="noopener noreferrer" title="Click to view payment proof image">
+                                <img src={e.payment_proof} alt="Proof" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4, border: '1px solid #00e5ff' }} />
+                              </a>
+                            ) : (
+                              <span className="opacity-50">—</span>
+                            )}
+                          </td>
+                          <td className="opacity-50">{fmtDate(e.created_at)}</td>
+                          <td>
+                            <a
+                              href={`https://wa.me/${(e.whatsapp || e.phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${e.full_name}! Regarding your AI Creative Skills Bootcamp enrollment...`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="tbl-action-btn edit"
+                              style={{ background: '#25D366', color: '#000', textDecoration: 'none', fontWeight: 'bold', display: 'inline-block', padding: '4px 10px', borderRadius: '4px' }}
+                            >
+                              💬 WhatsApp
+                            </a>
                           </td>
                         </tr>
                       ))}

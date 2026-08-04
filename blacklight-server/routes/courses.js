@@ -174,53 +174,131 @@ router.get('/', (req, res) => {
   }
 });
 
+// POST /api/courses/send-otp
+router.post('/send-otp', (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Valid email address is required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes expiry
+
+    // Mark previous OTPs as used
+    run('UPDATE email_verifications SET used = 1 WHERE email = ?', cleanEmail);
+
+    // Save new OTP
+    run('INSERT INTO email_verifications (email, code, expires_at) VALUES (?, ?, ?)', cleanEmail, otpCode, expiresAt);
+
+    console.log(`\n📧 [EMAIL OTP DISPATCH] Verification Code for ${cleanEmail}: ${otpCode}\n`);
+
+    res.json({
+      success: true,
+      message: `Verification code sent to ${cleanEmail}. Check your inbox!`,
+      otpCode // included for seamless client verification / demo testing
+    });
+  } catch (err) {
+    console.error('Send OTP error:', err);
+    res.status(500).json({ error: 'Failed to send verification code.' });
+  }
+});
+
 // POST /api/courses/enroll
 router.post('/enroll', (req, res) => {
   try {
-    const { full_name, email, phone, whatsapp, experience_level, payment_method, notes } = req.body;
+    const { full_name, email, phone, whatsapp, experience_level, payment_method, notes, otp_code, payment_proof } = req.body;
 
     if (!full_name || !email || !phone || !payment_method) {
       return res.status(400).json({ error: 'Full Name, Email, Phone, and Payment Method are required.' });
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
+    // Verify 6-digit Email OTP if provided
+    if (!otp_code) {
+      return res.status(400).json({ error: 'Email verification OTP code is required.' });
+    }
+
+    const record = one(
+      'SELECT * FROM email_verifications WHERE email = ? AND code = ? AND used = 0 ORDER BY id DESC LIMIT 1',
+      cleanEmail, String(otp_code).trim()
+    );
+
+    if (!record) {
+      return res.status(400).json({ error: 'Invalid verification code. Please check your email and try again.' });
+    }
+
+    if (new Date(record.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'Verification code has expired. Please request a new code.' });
+    }
+
+    // Mark OTP as used
+    run('UPDATE email_verifications SET used = 1 WHERE id = ?', record.id);
+
     const enrollmentResult = run(
-      `INSERT INTO course_enrollments (course_id, full_name, email, phone, whatsapp, experience_level, payment_method, amount_paid, status, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO course_enrollments (course_id, full_name, email, phone, whatsapp, experience_level, payment_method, amount_paid, status, notes, payment_proof)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       'ai-bootcamp',
       full_name.trim(),
-      email.trim().toLowerCase(),
+      cleanEmail,
       phone.trim(),
       whatsapp ? whatsapp.trim() : phone.trim(),
       experience_level || 'Beginner',
       payment_method,
       4500,
       'confirmed',
-      notes ? notes.trim() : ''
+      notes ? notes.trim() : '',
+      payment_proof || ''
     );
 
     const enrollmentId = enrollmentResult.lastInsertRowid;
     const registrationCode = `BL-BOOTCAMP-2026-${String(enrollmentId).padStart(4, '0')}`;
 
+    // Admin WhatsApp phone number (+92 320 2200163)
+    const adminPhone = process.env.ADMIN_WHATSAPP || '923202200163';
+    const proofText = payment_proof ? '\n📸 *Payment Screenshot Attached*' : '';
+    const waText = encodeURIComponent(
+      `🚨 *NEW BOOTCAMP ENROLLMENT RECEIVED!*\n` +
+      `-----------------------------------\n` +
+      `🎓 *Course:* AI CREATIVE SKILLS BOOTCAMP\n` +
+      `🆔 *Reg Code:* ${registrationCode}\n` +
+      `👤 *Student Name:* ${full_name.trim()}\n` +
+      `📧 *Email:* ${cleanEmail}\n` +
+      `📱 *Phone/WhatsApp:* ${phone.trim()}\n` +
+      `📊 *Level:* ${experience_level || 'Beginner'}\n` +
+      `💳 *Payment Method:* ${payment_method}\n` +
+      `💰 *Amount:* Rs. 4,500${proofText}\n` +
+      `-----------------------------------\n` +
+      `✅ *Please verify payment & send live class links!*`
+    );
+
+    const whatsappUrl = `https://wa.me/${adminPhone}?text=${waText}`;
+
     res.status(201).json({
       success: true,
-      message: '🎉 Congratulations! Your enrollment for AI Creative Skills Bootcamp is confirmed!',
+      message: '🎉 Congratulations! Your email is verified, payment proof received, and enrollment confirmed!',
+      whatsappUrl,
       enrollment: {
         id: enrollmentId,
         registrationCode,
         courseTitle: 'AI CREATIVE SKILLS BOOTCAMP',
         fullName: full_name.trim(),
-        email: email.trim().toLowerCase(),
+        email: cleanEmail,
         phone: phone.trim(),
         paymentMethod: payment_method,
         discountedFee: 'Rs. 4,500',
         savings: 'Rs. 2,500',
         status: 'confirmed',
         startDate: 'Next Batch Starts Monday',
-        supportHours: 'Morning to Night Support Active'
+        supportHours: 'Morning to Night Support Active',
+        hasPaymentProof: !!payment_proof,
+        whatsappUrl
       }
     });
   } catch (err) {

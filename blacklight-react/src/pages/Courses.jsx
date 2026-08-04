@@ -29,11 +29,32 @@ const Courses = () => {
     notes: ''
   });
   
+  const [enrollStep, setEnrollStep] = useState(1); // 1: Details, 2: OTP
+  const [otpCode, setOtpCode] = useState('');
+  const [otpSentMsg, setOtpSentMsg] = useState('');
+  const [paymentProof, setPaymentProof] = useState('');
+  const [proofFileName, setProofFileName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [enrollmentSuccess, setEnrollmentSuccess] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Fetch course details from backend API
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        setErrorMessage('File size is too large (max 10MB).');
+        return;
+      }
+      setProofFileName(file.name);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPaymentProof(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Auto-fill logged-in user details if available, but open for guest users too
   useEffect(() => {
     fetch('/api/courses')
       .then(res => res.json())
@@ -47,27 +68,81 @@ const Courses = () => {
         console.error('Failed to load courses from API:', err);
         setLoading(false);
       });
+
+    // Check if user is logged in to prefill form
+    const session = Auth.getSession();
+    if (session) {
+      setFormData(prev => ({
+        ...prev,
+        full_name: `${session.firstName || ''} ${session.lastName || ''}`.trim() || prev.full_name,
+        email: session.email || prev.email
+      }));
+    }
   }, []);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleSendOtp = (e) => {
+    e.preventDefault();
+    if (!formData.full_name || !formData.email || !formData.phone || !formData.payment_method) {
+      setErrorMessage('Please fill in all required fields.');
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMessage('');
+
+    fetch('/api/courses/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email, full_name: formData.full_name })
+    })
+      .then(res => res.json())
+      .then(data => {
+        setSubmitting(false);
+        if (data.success) {
+          setEnrollStep(2);
+          setOtpSentMsg(data.message);
+          if (data.otpCode) {
+            setOtpSentMsg(`Code sent to ${formData.email}! (Verification Code: ${data.otpCode})`);
+          }
+        } else {
+          setErrorMessage(data.error || 'Failed to send verification code.');
+        }
+      })
+      .catch(() => {
+        setSubmitting(false);
+        setErrorMessage('Network error while sending verification code.');
+      });
+  };
+
   const handleEnrollSubmit = (e) => {
     e.preventDefault();
+    if (!otpCode || otpCode.trim().length !== 6) {
+      setErrorMessage('Please enter the valid 6-digit verification code.');
+      return;
+    }
+
     setSubmitting(true);
     setErrorMessage('');
 
     fetch('/api/courses/enroll', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify({ ...formData, otp_code: otpCode.trim(), payment_proof: paymentProof })
     })
       .then(res => res.json())
       .then(data => {
         setSubmitting(false);
         if (data.success) {
           setEnrollmentSuccess(data.enrollment);
+          // Auto-trigger WhatsApp notification send to Admin (+92 320 2200163)!
+          if (data.whatsappUrl || data.enrollment?.whatsappUrl) {
+            const url = data.whatsappUrl || data.enrollment.whatsappUrl;
+            window.open(url, '_blank');
+          }
         } else {
           setErrorMessage(data.error || 'Failed to submit enrollment.');
         }
@@ -572,16 +647,36 @@ const Courses = () => {
                   <div><strong>Status:</strong> <span style={{ color: '#00e5ff', fontWeight: 600 }}>Active / Verified</span></div>
                 </div>
 
-                <p style={{ fontSize: '0.85rem', color: '#aaa' }}>
-                  A confirmation SMS & WhatsApp message will be sent to your phone number shortly with live class join links!
+                <p style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: 15 }}>
+                  A confirmation SMS & WhatsApp message with live class join links is being dispatched. Click below if WhatsApp didn't open automatically:
                 </p>
 
-                <button className="btn-primary" style={{ marginTop: 15, width: '100%' }} onClick={() => setIsModalOpen(false)}>
-                  Done
+                {(enrollmentSuccess.whatsappUrl || true) && (
+                  <a
+                    href={enrollmentSuccess.whatsappUrl || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary"
+                    style={{
+                      background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+                      boxShadow: '0 0 20px rgba(37, 211, 102, 0.4)',
+                      width: '100%',
+                      marginBottom: 10,
+                      textAlign: 'center',
+                      fontSize: '0.85rem',
+                      display: 'block'
+                    }}
+                  >
+                    💬 SEND REGISTRATION DETAILS ON WHATSAPP &rarr;
+                  </a>
+                )}
+
+                <button className="btn-secondary" style={{ width: '100%', fontSize: '0.75rem' }} onClick={() => setIsModalOpen(false)}>
+                  Close
                 </button>
               </div>
-            ) : (
-              <form onSubmit={handleEnrollSubmit}>
+            ) : enrollStep === 1 ? (
+              <form onSubmit={handleSendOtp}>
                 <div className="modal-header">
                   <h3>Enroll in Bootcamp</h3>
                   <p>AI Creative Skills Bootcamp &mdash; <strong>Rs. 4,500</strong> (Save Rs. 2,500)</p>
@@ -607,7 +702,7 @@ const Courses = () => {
                 </div>
 
                 <div className="enroll-form-group">
-                  <label>Email Address *</label>
+                  <label>Email Address * (Verification Code Will Be Sent Here)</label>
                   <input 
                     type="email" 
                     name="email" 
@@ -625,7 +720,7 @@ const Courses = () => {
                     type="text" 
                     name="phone" 
                     required 
-                    placeholder="+92 300 1234567"
+                    placeholder="+92 320 2200163"
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="enroll-input"
@@ -639,7 +734,7 @@ const Courses = () => {
                     value={formData.experience_level}
                     onChange={handleInputChange}
                     className="enroll-input"
-                    style={{ background: '#111' }}
+                    style={{ background: '#111', color: '#fff' }}
                   >
                     <option value="Absolute Beginner">Absolute Beginner (No prior experience)</option>
                     <option value="Intermediate">Intermediate (Some basic skills)</option>
@@ -663,14 +758,122 @@ const Courses = () => {
                   </div>
                 </div>
 
+                {/* OFFICIAL PAYMENT ACCOUNT DETAILS BOX */}
+                <div style={{ background: 'rgba(255, 170, 0, 0.08)', border: '1px solid #ffaa00', padding: 15, borderRadius: 10, marginBottom: 18, fontSize: '0.85rem', lineHeight: 1.6 }}>
+                  <div style={{ color: '#ffaa00', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    💳 Official Payment Transfer Account Details (Rs. 4,500):
+                  </div>
+                  {formData.payment_method === 'JazzCash' && (
+                    <div>
+                      <div><strong>Account Type:</strong> JazzCash</div>
+                      <div><strong>Account Title:</strong> CreateSkill Academy</div>
+                      <div><strong>Account / Mobile #:</strong> <span style={{ color: '#00e5ff', fontWeight: 700, fontSize: '1rem' }}>0320 2200163</span></div>
+                    </div>
+                  )}
+                  {formData.payment_method === 'EasyPaisa' && (
+                    <div>
+                      <div><strong>Account Type:</strong> EasyPaisa</div>
+                      <div><strong>Account Title:</strong> CreateSkill Academy</div>
+                      <div><strong>Account / Mobile #:</strong> <span style={{ color: '#00e5ff', fontWeight: 700, fontSize: '1rem' }}>0320 2200163</span></div>
+                    </div>
+                  )}
+                  {formData.payment_method === 'Bank Transfer' && (
+                    <div>
+                      <div><strong>Bank Name:</strong> Meezan Bank / HBL</div>
+                      <div><strong>Account Title:</strong> CreateSkill Academy</div>
+                      <div><strong>IBAN / Acc #:</strong> <span style={{ color: '#00e5ff', fontWeight: 700, fontSize: '1rem' }}>0320 2200163</span></div>
+                    </div>
+                  )}
+                  {formData.payment_method === 'Crypto (ETH/USDT)' && (
+                    <div>
+                      <div><strong>Network:</strong> USDT (TRC20) / ETH</div>
+                      <div><strong>Wallet Address:</strong> <span style={{ color: '#00e5ff', fontSize: '0.8rem', fontFamily: 'monospace' }}>0x923202200163CreateSkillAcademyWallet</span></div>
+                    </div>
+                  )}
+                </div>
+
+                {/* PAYMENT PROOF SCREENSHOT UPLOAD */}
+                <div className="enroll-form-group">
+                  <label>📸 Upload Payment Receipt / Screenshot (Optional / Recommended)</label>
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="enroll-input"
+                    style={{ padding: '8px', cursor: 'pointer' }}
+                  />
+                  {proofFileName && (
+                    <div style={{ color: '#00e5ff', fontSize: '0.8rem', marginTop: 4, fontWeight: 600 }}>
+                      ✓ File Attached: {proofFileName}
+                    </div>
+                  )}
+                  {paymentProof && (
+                    <div style={{ marginTop: 8 }}>
+                      <img src={paymentProof} alt="Payment Receipt Preview" style={{ maxHeight: 90, borderRadius: 6, border: '1px solid #00e5ff' }} />
+                    </div>
+                  )}
+                </div>
+
                 <button 
                   type="submit" 
                   className="btn-primary" 
                   style={{ width: '100%', padding: '14px', marginTop: 15, fontSize: '0.85rem' }}
                   disabled={submitting}
                 >
-                  {submitting ? 'Processing Enrollment...' : 'CONFIRM ENROLLMENT &mdash; RS. 4,500'}
+                  {submitting ? 'Sending Verification Code...' : 'SEND VERIFICATION CODE & CONTINUE &rarr;'}
                 </button>
+              </form>
+            ) : (
+              <form onSubmit={handleEnrollSubmit}>
+                <div className="modal-header">
+                  <h3>📧 Verify Email Address</h3>
+                  <p>Step 2 of 2: Enter the 6-digit verification code sent to <strong>{formData.email}</strong></p>
+                </div>
+
+                {otpSentMsg && (
+                  <div style={{ background: 'rgba(0,229,255,0.1)', border: '1px solid #00e5ff', color: '#00e5ff', padding: 12, borderRadius: 8, marginBottom: 15, fontSize: '0.85rem', lineHeight: 1.5 }}>
+                    {otpSentMsg}
+                  </div>
+                )}
+
+                {errorMessage && (
+                  <div style={{ background: 'rgba(255,51,51,0.2)', border: '1px solid #ff3333', color: '#ff3333', padding: 10, borderRadius: 6, marginBottom: 15, fontSize: '0.85rem' }}>
+                    {errorMessage}
+                  </div>
+                )}
+
+                <div className="enroll-form-group">
+                  <label>6-Digit Verification Code *</label>
+                  <input 
+                    type="text" 
+                    maxLength="6"
+                    required 
+                    placeholder="e.g. 849201"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    className="enroll-input"
+                    style={{ fontSize: '1.4rem', letterSpacing: '6px', textAlign: 'center', fontWeight: 'bold' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                  <button 
+                    type="button" 
+                    className="btn-secondary" 
+                    style={{ flex: 1, fontSize: '0.75rem' }}
+                    onClick={() => { setEnrollStep(1); setErrorMessage(''); }}
+                  >
+                    ← Back / Edit
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-primary" 
+                    style={{ flex: 2, padding: '14px', fontSize: '0.85rem' }}
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Verifying...' : 'VERIFY CODE & ENROLL &rarr;'}
+                  </button>
+                </div>
               </form>
             )}
           </div>

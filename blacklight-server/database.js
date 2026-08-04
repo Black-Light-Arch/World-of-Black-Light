@@ -107,6 +107,15 @@ db.exec(`
     notes            TEXT    DEFAULT '',
     created_at       TEXT    DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS email_verifications (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    email      TEXT    NOT NULL,
+    code       TEXT    NOT NULL,
+    expires_at TEXT    NOT NULL,
+    used       INTEGER DEFAULT 0,
+    created_at TEXT    DEFAULT (datetime('now'))
+  );
 `);
 
 // ── CHAT SCHEMA ───────────────────────────────────────────────
@@ -163,6 +172,16 @@ db.exec(`
 
 try {
   db.exec("ALTER TABLE users ADD COLUMN skin TEXT DEFAULT 'default'");
+} catch (e) {
+  // column already exists
+}
+try {
+  db.exec("ALTER TABLE users ADD COLUMN banned_until TEXT DEFAULT NULL");
+} catch (e) {
+  // column already exists
+}
+try {
+  db.exec("ALTER TABLE course_enrollments ADD COLUMN payment_proof TEXT DEFAULT ''");
 } catch (e) {
   // column already exists
 }
