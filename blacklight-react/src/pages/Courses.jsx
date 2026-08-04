@@ -1,11 +1,128 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Sparkles, Clock, Award, Trophy, Users, Search, 
+  Sparkles, Clock, Award, Trophy, Medal, Users, Search, 
   ArrowRight, BookOpen, Download, CreditCard, X, 
-  CheckCircle, ShieldCheck, Flame, Gift, Video, Calendar,
-  HelpCircle, ChevronRight, Zap
+  CheckCircle2, ShieldCheck, Flame, Gift, Video, Calendar,
+  HelpCircle, ChevronRight, Zap, Cpu, Palette, Image, Box, 
+  Target, Keyboard, Globe, MessageSquare, FileCheck, Building2,
+  Smartphone, FileText, Languages
 } from 'lucide-react';
 import './Courses.css';
+
+const TRANSLATIONS = {
+  en: {
+    heroBadge: "1-MONTH LIVE MENTORSHIP",
+    certificateBadge: "OFFICIAL E-CERTIFICATE",
+    heroTitle: "AI CREATIVE SKILLS BOOTCAMP",
+    heroSubtitle: "Transform Your Skills. Build Your Future.",
+    heroDesc: "A complete skill-building program designed for students, beginners, freelancers, and aspiring creators to master today's most in-demand digital skills through live mentorship, practical projects, and daily guidance.",
+    originalFeeLabel: "Original Fee",
+    nowOnly: "Now Only",
+    saveLabel: "Save Rs. 2,500",
+    enrollNow: "🚀 ENROLL NOW",
+    viewSyllabus: "View Full Syllabus",
+    duration: "Duration",
+    durationVal: "1 Month (30 Days)",
+    learningMode: "Learning Mode",
+    modeVal: "Online Live Mentorship",
+    support: "Q&A Support",
+    supportVal: "Morning to Night Support",
+    certification: "Certification",
+    certVal: "E-Certificate Included",
+    whatYoullLearn: "What You'll Learn",
+    curriculumSub: "Master 6 high-demand skill modules with practical real-world exercises and mentor feedback.",
+    allModules: "All Modules (6)",
+    searchTopics: "Search topics...",
+    lessons: "Key Lessons",
+    learningExp: "Learning Experience",
+    learningExpSub: "Designed to give you seamless, flexible, and fully supported learning every step of the way.",
+    dailyRoutineTitle: "Daily Learning Routine",
+    dailyRoutineSub: "Consistency leads to mastery! Even on non-lecture days, keep growing through structured daily activities.",
+    prizesTitle: "Competition & Cash Prizes",
+    prizesSub: "Outstanding students will be rewarded at the end of the bootcamp based on performance!",
+    firstPlace: "1ST PLACE",
+    secondPlace: "2ND PLACE",
+    thirdPlace: "3RD PLACE",
+    evaluatedOn: "Evaluated On",
+    whoCanJoin: "Who Can Join?",
+    whoCanJoinSub: "This program is tailored for anyone looking to build high-value digital skills from scratch. No prior experience required!",
+    investmentTitle: "Investment in Your Future",
+    investmentSub: "Transparent summary of everything included in your enrollment.",
+    feature: "Feature",
+    bootcampDetails: "Bootcamp Details",
+    readyToStart: "Learn. Practice. Create. Grow.",
+    getStarted: "GET STARTED NOW — RS. 4,500",
+    selectPayment: "Select Payment Method *",
+    jazzcashDetails: "JazzCash Account",
+    bankDetails: "Bank Al Habib Account",
+    accTitle: "Account Title",
+    accNo: "Account / Mobile #",
+    iban: "IBAN / Acc #",
+    uploadScreenshot: "Upload Payment Receipt / Screenshot (Optional / Recommended)",
+    sendOtp: "SEND VERIFICATION CODE & CONTINUE →",
+    verifyOtpTitle: "Verify Email Address",
+    verifyOtpSub: "Step 2 of 2: Enter the 6-digit verification code sent to",
+    verifyBtn: "VERIFY CODE & ENROLL →",
+    backBtn: "← Back / Edit",
+    sendWhatsappBtn: "SEND REGISTRATION DETAILS ON WHATSAPP →"
+  },
+  ur: {
+    heroBadge: "1-ماہ لائیو مینٹورشپ",
+    certificateBadge: "سرکاری ای-سرٹیفکیٹ",
+    heroTitle: "اے آئی کریئیٹیو سکلز بوٹ کیمپ",
+    heroSubtitle: "اپنی مہارتیں بدلیں۔ اپنا مستقبل بنائیں۔",
+    heroDesc: "طلباء، شروعاتی سکھاروؤں، فری لانسرز اور ابھرتے ہوئے تخلیق کاروں کے لیے لائیو مینٹورشپ، پریکٹیکل پروجیکٹس اور روزانہ کی رہنمائی کے ذریعے جدید ترین ڈیجیٹل مہارتیں حاصل کرنے کا مکمل پروگرام۔",
+    originalFeeLabel: "اصل فیس",
+    nowOnly: "اب صرف",
+    saveLabel: "بچت: 2,500 روپے",
+    enrollNow: "🚀 ابھی داخلہ لیں",
+    viewSyllabus: "مکمل نصاب دیکھیں",
+    duration: "دورانیہ",
+    durationVal: "1 ماہ (30 دن)",
+    learningMode: "تدریسی طریقہ",
+    modeVal: "آن لائن لائیو مینٹورشپ",
+    support: "سوال و جواب سپورٹ",
+    supportVal: "صبح سے رات تک سپورٹ",
+    certification: "سرٹیفکیشن",
+    certVal: "ای-سرٹیفکیٹ شامل ہے",
+    whatYoullLearn: "آپ کیا سیکھیں گے",
+    curriculumSub: "عملی مشقوں اور رہنمائی کے ساتھ 6 اہم اور پُرطلب ڈیجیٹل ماڈیولز میں مہارت حاصل کریں۔",
+    allModules: "تمام ماڈیولز (6)",
+    searchTopics: "موضوعات تلاش کریں...",
+    lessons: "اہم اسباق",
+    learningExp: "تدریسی تجربہ",
+    learningExpSub: "ہر قدم پر آپ کو لچکدار اور مکمل طور پر سپورٹ شدہ سیکھنے کا ماحول فراہم کرنے کے لیے ڈیزائن کیا گیا ہے۔",
+    dailyRoutineTitle: "روزانہ کی تدریسی روٹین",
+    dailyRoutineSub: "مستقل مزاجی ہی مہارت کا راستہ ہے! لیکچر کے بغیر دنوں میں بھی ساختہ سرگرمیوں کے ذریعے آگے بڑھتے رہیں۔",
+    prizesTitle: "مقابلہ اور نقد انعامات",
+    prizesSub: "ماہ کے اختتام پر بہترین کارکردگی کا مظاہرہ کرنے والے طلباء کو نقد انعامات سے نوازا جائے گا!",
+    firstPlace: "پہلا مقام",
+    secondPlace: "دوسرا مقام",
+    thirdPlace: "تیسرا مقام",
+    evaluatedOn: "معیارِ اندازہ",
+    whoCanJoin: "کون شامل ہو سکتا ہے؟",
+    whoCanJoinSub: "یہ پروگرام ہر اس شخص کے لیے ہے جو صفر سے جدید مہارتیں سیکھنا چاہتا ہے۔ کسی سابقہ تجربے کی ضرورت نہیں!",
+    investmentTitle: "آپ کے مستقبل میں سرمایہ کاری",
+    investmentSub: "آپ کے داخلے میں شامل تمام سہولیات کا شفاف خلاصہ۔",
+    feature: "خصوصیت",
+    bootcampDetails: "بوٹ کیمپ کی تفصیلات",
+    readyToStart: "سیکھیں۔ مشق کریں۔ تخلیق کریں۔ آگے بڑھیں۔",
+    getStarted: "ابھی شروع کریں — 4,500 روپے",
+    selectPayment: "ادائیگی کا طریقہ منتخب کریں *",
+    jazzcashDetails: "جاز کیش اکاؤنٹ",
+    bankDetails: "بینک الحبیب اکاؤنٹ",
+    accTitle: "اکاؤنٹ کا نام",
+    accNo: "اکاؤنٹ / موبائل نمبر",
+    iban: "آئی بی اے این / اکاؤنٹ نمبر",
+    uploadScreenshot: "ادائیگی کی رسید / اسکرین شاٹ اپ لوڈ کریں",
+    sendOtp: "تصدیقی کوڈ بھیجیں اور آگے بڑھیں ←",
+    verifyOtpTitle: "ای میل ایڈریس کی تصدیق کریں",
+    verifyOtpSub: "مرحلہ 2: 6 ہندسوں کا تصدیقی کوڈ درج کریں جو اس ای میل پر بھیجا گیا ہے",
+    verifyBtn: "تصدیق کریں اور داخلہ مکمل کریں ←",
+    backBtn: "ترمیم / واپس →",
+    sendWhatsappBtn: "واٹس ایپ پر رجسٹریشن تفصیلات بھیجیں ←"
+  }
+};
 
 const Courses = () => {
   // Course Data State
@@ -14,6 +131,22 @@ const Courses = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Language Switch State (en / ur)
+  const [lang, setLang] = useState(() => {
+    return localStorage.getItem('blacklight_app_lang') || 'en';
+  });
+
+  useEffect(() => {
+    const handleLangChange = (e) => {
+      setLang(e.detail || localStorage.getItem('blacklight_app_lang') || 'en');
+    };
+    window.addEventListener('language_change', handleLangChange);
+    return () => window.removeEventListener('language_change', handleLangChange);
+  }, []);
+
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  const isRtl = lang === 'ur';
+
   // Enrollment Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
@@ -54,7 +187,7 @@ const Courses = () => {
     }
   };
 
-  // Auto-fill logged-in user details if available, but open for guest users too
+  // Fetch course details from backend API
   useEffect(() => {
     fetch('/api/courses')
       .then(res => res.json())
@@ -68,16 +201,6 @@ const Courses = () => {
         console.error('Failed to load courses from API:', err);
         setLoading(false);
       });
-
-    // Check if user is logged in to prefill form
-    const session = Auth.getSession();
-    if (session) {
-      setFormData(prev => ({
-        ...prev,
-        full_name: `${session.firstName || ''} ${session.lastName || ''}`.trim() || prev.full_name,
-        email: session.email || prev.email
-      }));
-    }
   }, []);
 
   const handleInputChange = (e) => {
@@ -106,7 +229,7 @@ const Courses = () => {
           setEnrollStep(2);
           setOtpSentMsg(data.message);
           if (data.otpCode) {
-            setOtpSentMsg(`Code sent to ${formData.email}! (Verification Code: ${data.otpCode})`);
+            setOtpSentMsg(`Verification Code sent to ${formData.email}! (Code: ${data.otpCode})`);
           }
         } else {
           setErrorMessage(data.error || 'Failed to send verification code.');
@@ -138,7 +261,7 @@ const Courses = () => {
         setSubmitting(false);
         if (data.success) {
           setEnrollmentSuccess(data.enrollment);
-          // Auto-trigger WhatsApp notification send to Admin (+92 320 2200163)!
+          // Auto-trigger WhatsApp notification send to Admin (+92 303 5081490)!
           if (data.whatsappUrl || data.enrollment?.whatsappUrl) {
             const url = data.whatsappUrl || data.enrollment.whatsappUrl;
             window.open(url, '_blank');
@@ -153,31 +276,30 @@ const Courses = () => {
       });
   };
 
-  // Static fallback metadata in case backend is loading/offline
   const activeCourse = course || {
     id: 'ai-bootcamp',
-    title: 'AI CREATIVE SKILLS BOOTCAMP',
+    title: t.heroTitle,
     subtitle: '1-Month Live Mentorship Program',
-    headline: 'Transform Your Skills. Build Your Future.',
-    description: "A complete skill-building program designed for students, beginners, freelancers, and aspiring creators to master today's most in-demand digital skills through live mentorship, practical projects, and daily guidance.",
-    duration: '1 Month (30 Days)',
-    mode: 'Online Live Mentorship',
-    support: 'Morning to Night Support',
-    certificate: 'E-Certificate Included',
+    headline: t.heroSubtitle,
+    description: t.heroDesc,
+    duration: t.durationVal,
+    mode: t.modeVal,
+    support: t.supportVal,
+    certificate: t.certVal,
     pricing: {
       formattedOriginal: 'Rs. 7,000',
       formattedDiscounted: 'Rs. 4,500',
       formattedSavings: 'Save Rs. 2,500'
     },
     cashPrizes: [
-      { rank: '1st Place', prize: 'Rs. 5,000', icon: '🥇' },
-      { rank: '2nd Place', prize: 'Rs. 3,000', icon: '🥈' },
-      { rank: '3rd Place', prize: 'Rs. 1,000', icon: '🥉' }
+      { rank: t.firstPlace, prize: 'Rs. 5,000', icon: <Trophy size={36} color="#ffaa00" /> },
+      { rank: t.secondPlace, prize: 'Rs. 3,000', icon: <Award size={36} color="#c0c0c0" /> },
+      { rank: t.thirdPlace, prize: 'Rs. 1,000', icon: <Medal size={36} color="#cd7f32" /> }
     ],
     modules: [
       {
         id: 'ai-automation',
-        icon: '🤖',
+        icon: <Cpu size={26} color="#00e5ff" />,
         title: 'AI Automation',
         topics: [
           'Introduction to Artificial Intelligence',
@@ -193,7 +315,7 @@ const Courses = () => {
       },
       {
         id: 'photoshop',
-        icon: '🎨',
+        icon: <Palette size={26} color="#9F73FF" />,
         title: 'Adobe Photoshop',
         topics: [
           'Photoshop Interface',
@@ -207,7 +329,7 @@ const Courses = () => {
       },
       {
         id: 'poster-design',
-        icon: '🖼',
+        icon: <Image size={26} color="#00e5ff" />,
         title: 'Poster Designing',
         topics: [
           'Design Principles',
@@ -221,7 +343,7 @@ const Courses = () => {
       },
       {
         id: '3d-character',
-        icon: '🎭',
+        icon: <Box size={26} color="#ffaa00" />,
         title: '3D Character Creation',
         topics: [
           'Introduction to 3D',
@@ -234,7 +356,7 @@ const Courses = () => {
       },
       {
         id: 'canva-masterclass',
-        icon: '🎯',
+        icon: <Target size={26} color="#9F73FF" />,
         title: 'Canva Masterclass',
         topics: [
           'Canva Basics',
@@ -248,7 +370,7 @@ const Courses = () => {
       },
       {
         id: 'typing-bonus',
-        icon: '⌨',
+        icon: <Keyboard size={26} color="#ffaa00" />,
         title: 'Bonus Surprise: Typing Practice',
         isBonus: true,
         topics: [
@@ -260,21 +382,20 @@ const Courses = () => {
       }
     ],
     whoCanJoin: [
-      'Beginners',
-      'School Students',
-      'College Students',
+      'Beginners with zero prior experience',
+      'School & College Students',
       'University Students',
-      'Freelancers',
+      'Freelancers looking to upscale services',
       'Job Seekers',
-      'Content Creators',
-      'Graphic Designers',
+      'Content Creators & Streamers',
+      'Graphic Designers & Digital Artists',
       'Anyone interested in modern digital skills'
     ],
     learningExperience: [
-      { icon: '✅', title: 'Live Interactive Classes', desc: 'Learn directly from the instructor with live sessions.' },
-      { icon: '✅', title: 'Recorded Video Lectures', desc: 'Replay every lecture anytime for revision.' },
-      { icon: '✅', title: 'Live Mentorship', desc: 'Receive personal guidance throughout the entire course.' },
-      { icon: '✅', title: 'Morning to Night Question Support', desc: 'Ask your questions throughout the day and receive assistance whenever needed.' }
+      { icon: <Video size={24} color="#00e5ff" />, title: 'Live Interactive Classes', desc: 'Learn directly from the instructor with live sessions.' },
+      { icon: <FileCheck size={24} color="#9F73FF" />, title: 'Recorded Video Lectures', desc: 'Replay every lecture anytime for revision.' },
+      { icon: <ShieldCheck size={24} color="#ffaa00" />, title: 'Live Mentorship', desc: 'Receive personal guidance throughout the entire course.' },
+      { icon: <MessageSquare size={24} color="#00e5ff" />, title: 'Morning to Night Question Support', desc: 'Ask your questions throughout the day and receive assistance whenever needed.' }
     ],
     dailyRoutine: [
       'AI Exploration Tasks',
@@ -289,7 +410,6 @@ const Courses = () => {
     ]
   };
 
-  // Filter modules based on tab or search
   const filteredModules = activeCourse.modules.filter(mod => {
     const matchesTab = activeTab === 'all' || mod.id === activeTab;
     const matchesSearch = searchQuery === '' || 
@@ -299,12 +419,30 @@ const Courses = () => {
   });
 
   return (
-    <div className="page-container courses-page fade-in">
+    <div className={`page-container courses-page fade-in ${isRtl ? 'rtl-layout' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
       {/* PROMO TOPBAR */}
       <div className="courses-promo-topbar">
-        <span className="courses-promo-tag">⚡ LIMITED TIME OFFER</span>
-        <span>Enroll today in <strong>AI Creative Skills Bootcamp</strong> & Save <strong>Rs. 2,500</strong>!</span>
-        <span className="countdown-pill">🔥 Seats Closing Soon</span>
+        <span className="courses-promo-tag">
+          <Zap size={14} style={{ marginRight: 4 }} /> LIMITED TIME OFFER
+        </span>
+        <span>Enroll today in <strong>{t.heroTitle}</strong> & {t.saveLabel}!</span>
+        <span className="countdown-pill">
+          <Clock size={12} style={{ marginRight: 4 }} /> Seats Closing Soon
+        </span>
+
+        {/* Language Switch Button in Bar */}
+        <button 
+          onClick={() => {
+            const next = lang === 'en' ? 'ur' : 'en';
+            setLang(next);
+            localStorage.setItem('blacklight_app_lang', next);
+            window.dispatchEvent(new CustomEvent('language_change', { detail: next }));
+          }}
+          className="btn-secondary"
+          style={{ padding: '2px 10px', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+        >
+          <Languages size={14} color="#00e5ff" /> {lang === 'en' ? 'اردو میں دیکھیں' : 'English View'}
+        </button>
       </div>
 
       <div className="content-section">
@@ -313,35 +451,35 @@ const Courses = () => {
           <div className="bootcamp-hero-content">
             <div className="bootcamp-badge-row">
               <span className="badge-live-mentorship">
-                <Sparkles size={14} /> 1-MONTH LIVE MENTORSHIP
+                <Sparkles size={14} /> {t.heroBadge}
               </span>
               <span className="badge-certified">
-                <Award size={14} /> OFFICIAL E-CERTIFICATE
+                <Award size={14} /> {t.certificateBadge}
               </span>
             </div>
 
-            <h1 className="bootcamp-title">{activeCourse.title}</h1>
-            <h3 className="bootcamp-subtitle">{activeCourse.headline}</h3>
-            <p className="bootcamp-desc">{activeCourse.description}</p>
+            <h1 className="bootcamp-title">{t.heroTitle}</h1>
+            <h3 className="bootcamp-subtitle">{t.heroSubtitle}</h3>
+            <p className="bootcamp-desc">{t.heroDesc}</p>
 
             {/* PRICING HERO BOX */}
             <div className="pricing-hero-box">
               <div>
-                <div className="price-strike">Original Fee: {activeCourse.pricing?.formattedOriginal || 'Rs. 7,000'}</div>
-                <div className="price-current">{activeCourse.pricing?.formattedDiscounted || 'Rs. 4,500'}</div>
+                <div className="price-strike">{t.originalFeeLabel}: {activeCourse.pricing?.formattedOriginal || 'Rs. 7,000'}</div>
+                <div className="price-current">{t.nowOnly}: {activeCourse.pricing?.formattedDiscounted || 'Rs. 4,500'}</div>
               </div>
               <div className="price-save-badge">
-                🎉 {activeCourse.pricing?.formattedSavings || 'Save Rs. 2,500'}
+                🎉 {t.saveLabel}
               </div>
             </div>
 
             {/* HERO CTA BUTTONS */}
             <div className="hero-actions-row">
               <button className="btn-primary btn-enroll-now" onClick={() => setIsModalOpen(true)}>
-                🚀 ENROLL NOW &rarr;
+                {t.enrollNow}
               </button>
               <button className="btn-secondary btn-syllabus" onClick={() => setIsSyllabusModalOpen(true)}>
-                <BookOpen size={16} style={{ marginRight: 6 }} /> View Full Syllabus
+                <BookOpen size={16} style={{ marginRight: 6 }} /> {t.viewSyllabus}
               </button>
             </div>
           </div>
@@ -359,9 +497,9 @@ const Courses = () => {
             <div className="bootcamp-media-overlay"></div>
             
             <div className="hero-stats-badge">
-              <div className="stat-icon">🏆</div>
+              <Trophy size={28} color="#ffaa00" />
               <div className="stat-info">
-                <h4>Cash Prizes Included</h4>
+                <h4>{t.prizesTitle}</h4>
                 <p>Rs. 5,000 • Rs. 3,000 • Rs. 1,000</p>
               </div>
             </div>
@@ -371,32 +509,32 @@ const Courses = () => {
         {/* QUICK SPECS SUMMARY CARDS */}
         <div className="course-specs-grid">
           <div className="spec-card glass-panel glow-hover">
-            <div className="spec-icon">📅</div>
-            <h3>Duration</h3>
-            <p>{activeCourse.duration}</p>
+            <div className="spec-icon"><Calendar size={32} color="#00e5ff" /></div>
+            <h3>{t.duration}</h3>
+            <p>{t.durationVal}</p>
           </div>
           <div className="spec-card glass-panel glow-hover">
-            <div className="spec-icon">🌐</div>
-            <h3>Learning Mode</h3>
-            <p>{activeCourse.mode}</p>
+            <div className="spec-icon"><Globe size={32} color="#9F73FF" /></div>
+            <h3>{t.learningMode}</h3>
+            <p>{t.modeVal}</p>
           </div>
           <div className="spec-card glass-panel glow-hover">
-            <div className="spec-icon">💬</div>
-            <h3>Q&A Support</h3>
-            <p>{activeCourse.support}</p>
+            <div className="spec-icon"><MessageSquare size={32} color="#ffaa00" /></div>
+            <h3>{t.support}</h3>
+            <p>{t.supportVal}</p>
           </div>
           <div className="spec-card glass-panel glow-hover">
-            <div className="spec-icon">📜</div>
-            <h3>Certification</h3>
-            <p>{activeCourse.certificate}</p>
+            <div className="spec-icon"><Award size={32} color="#00e5ff" /></div>
+            <h3>{t.certification}</h3>
+            <p>{t.certVal}</p>
           </div>
         </div>
 
         {/* WHAT YOU'LL LEARN - CURRICULUM SECTION */}
         <div className="curriculum-container">
           <div className="section-header-box">
-            <h2>📚 What You'll Learn</h2>
-            <p>Master 6 high-demand skill modules with practical real-world exercises and mentor feedback.</p>
+            <h2><BookOpen size={28} style={{ marginRight: 8, verticalAlign: 'middle' }} color="#00e5ff" /> {t.whatYoullLearn}</h2>
+            <p>{t.curriculumSub}</p>
           </div>
 
           {/* SEARCH & TABS NAV */}
@@ -406,7 +544,7 @@ const Courses = () => {
                 className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
                 onClick={() => setActiveTab('all')}
               >
-                ⚡ All Modules (6)
+                <Zap size={14} /> {t.allModules}
               </button>
               {activeCourse.modules.map(mod => (
                 <button
@@ -414,7 +552,7 @@ const Courses = () => {
                   className={`tab-btn ${mod.isBonus ? 'bonus-tab' : ''} ${activeTab === mod.id ? 'active' : ''}`}
                   onClick={() => setActiveTab(mod.id)}
                 >
-                  <span>{mod.icon}</span> {mod.title}
+                  {mod.icon} <span>{mod.title}</span>
                 </button>
               ))}
             </div>
@@ -424,7 +562,7 @@ const Courses = () => {
               <Search size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#888' }} />
               <input 
                 type="text" 
-                placeholder="Search topics..."
+                placeholder={t.searchTopics}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="enroll-input"
@@ -438,19 +576,19 @@ const Courses = () => {
             <div key={mod.id} className="curriculum-module-card glass-panel glow-hover fade-in">
               <div className="module-header">
                 <div className="module-title-wrap">
-                  <span className="module-icon-large">{mod.icon}</span>
+                  <div className="module-icon-large">{mod.icon}</div>
                   <div>
                     <h3>{mod.title}</h3>
                     {mod.isBonus && <span className="courses-promo-tag" style={{ marginTop: 4, display: 'inline-block' }}>🎁 Bonus Lecture</span>}
                   </div>
                 </div>
-                <span className="module-topic-count">{mod.topics.length} Key Lessons</span>
+                <span className="module-topic-count">{mod.topics.length} {t.lessons}</span>
               </div>
 
               <div className="topics-grid">
                 {mod.topics.map((topic, idx) => (
                   <div key={idx} className="topic-item">
-                    <span className="topic-bullet">✦</span>
+                    <CheckCircle2 size={16} color="#00e5ff" style={{ minWidth: 16 }} />
                     <span>{topic}</span>
                   </div>
                 ))}
@@ -461,8 +599,8 @@ const Courses = () => {
 
         {/* LEARNING EXPERIENCE */}
         <div className="section-header-box">
-          <h2>🎓 Learning Experience</h2>
-          <p>Designed to give you seamless, flexible, and fully supported learning every step of the way.</p>
+          <h2><ShieldCheck size={28} style={{ marginRight: 8, verticalAlign: 'middle' }} color="#9F73FF" /> {t.learningExp}</h2>
+          <p>{t.learningExpSub}</p>
         </div>
 
         <div className="learning-exp-grid">
@@ -478,14 +616,14 @@ const Courses = () => {
         {/* DAILY LEARNING ROUTINE */}
         <div className="routine-timeline-box glass-panel glow-hover">
           <div className="section-header-box" style={{ marginBottom: 20 }}>
-            <h2>📖 Daily Learning Routine</h2>
-            <p>Consistency leads to mastery! Even on non-lecture days, keep growing through structured daily activities.</p>
+            <h2><Calendar size={28} style={{ marginRight: 8, verticalAlign: 'middle' }} color="#ffaa00" /> {t.dailyRoutineTitle}</h2>
+            <p>{t.dailyRoutineSub}</p>
           </div>
 
           <div className="routine-grid">
             {activeCourse.dailyRoutine.map((activity, idx) => (
               <div key={idx} className="routine-chip">
-                <span className="routine-chip-icon">⚡</span>
+                <Zap size={16} color="#ffaa00" />
                 <span>{activity}</span>
               </div>
             ))}
@@ -495,52 +633,52 @@ const Courses = () => {
         {/* CASH PRIZES COMPETITION SHOWCASE */}
         <div className="prizes-section glow-hover">
           <div className="prizes-header">
-            <h2>🏆 Competition & Cash Prizes</h2>
+            <h2><Trophy size={32} style={{ marginRight: 8, verticalAlign: 'middle' }} color="#ffaa00" /> {t.prizesTitle}</h2>
             <p style={{ color: '#eaeaea', fontSize: '1.05rem' }}>
-              Outstanding students will be rewarded at the end of the bootcamp based on performance!
+              {t.prizesSub}
             </p>
           </div>
 
           <div className="prizes-cards-wrapper">
             <div className="prize-card gold">
-              <div className="prize-trophy">🥇</div>
-              <div className="prize-rank">1ST PLACE</div>
+              <div className="prize-trophy"><Trophy size={48} color="#ffaa00" /></div>
+              <div className="prize-rank">{t.firstPlace}</div>
               <div className="prize-amount">Rs. 5,000</div>
             </div>
             <div className="prize-card silver">
-              <div className="prize-trophy">🥈</div>
-              <div className="prize-rank">2ND PLACE</div>
+              <div className="prize-trophy"><Award size={48} color="#c0c0c0" /></div>
+              <div className="prize-rank">{t.secondPlace}</div>
               <div className="prize-amount">Rs. 3,000</div>
             </div>
             <div className="prize-card bronze">
-              <div className="prize-trophy">🥉</div>
-              <div className="prize-rank">3RD PLACE</div>
+              <div className="prize-trophy"><Medal size={48} color="#cd7f32" /></div>
+              <div className="prize-rank">{t.thirdPlace}</div>
               <div className="prize-amount">Rs. 1,000</div>
             </div>
           </div>
 
           <div className="prize-criteria-box">
-            <h4>Evaluated On</h4>
+            <h4>{t.evaluatedOn}</h4>
             <div className="criteria-pills">
-              <span className="criteria-pill">✓ Attendance</span>
-              <span className="criteria-pill">✓ Daily Tasks</span>
-              <span className="criteria-pill">✓ Consistency</span>
-              <span className="criteria-pill">✓ Creativity</span>
-              <span className="criteria-pill">✓ Final Challenge Project</span>
+              <span className="criteria-pill"><CheckCircle2 size={12} color="#00e5ff" /> Attendance</span>
+              <span className="criteria-pill"><CheckCircle2 size={12} color="#00e5ff" /> Daily Tasks</span>
+              <span className="criteria-pill"><CheckCircle2 size={12} color="#00e5ff" /> Consistency</span>
+              <span className="criteria-pill"><CheckCircle2 size={12} color="#00e5ff" /> Creativity</span>
+              <span className="criteria-pill"><CheckCircle2 size={12} color="#00e5ff" /> Final Challenge Project</span>
             </div>
           </div>
         </div>
 
         {/* WHO CAN JOIN */}
         <div className="section-header-box">
-          <h2>👥 Who Can Join?</h2>
-          <p>This program is tailored for anyone looking to build high-value digital skills from scratch. <strong>No prior experience required!</strong></p>
+          <h2><Users size={28} style={{ marginRight: 8, verticalAlign: 'middle' }} color="#00e5ff" /> {t.whoCanJoin}</h2>
+          <p>{t.whoCanJoinSub}</p>
         </div>
 
         <div className="audience-grid">
           {activeCourse.whoCanJoin.map((person, idx) => (
             <div key={idx} className="audience-card">
-              <span style={{ color: '#00e5ff' }}>✔</span>
+              <CheckCircle2 size={18} color="#00e5ff" />
               <span>{person}</span>
             </div>
           ))}
@@ -548,42 +686,42 @@ const Courses = () => {
 
         {/* INVESTMENT SUMMARY TABLE */}
         <div className="section-header-box">
-          <h2>📦 Investment in Your Future</h2>
-          <p>Transparent summary of everything included in your enrollment.</p>
+          <h2><FileText size={28} style={{ marginRight: 8, verticalAlign: 'middle' }} color="#9F73FF" /> {t.investmentTitle}</h2>
+          <p>{t.investmentSub}</p>
         </div>
 
         <div className="table-wrapper">
           <table className="investment-table">
             <thead>
               <tr>
-                <th>Feature</th>
-                <th>Bootcamp Details</th>
+                <th>{t.feature}</th>
+                <th>{t.bootcampDetails}</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><strong>Duration</strong></td>
-                <td>1 Month (30 Days)</td>
+                <td><strong>{t.duration}</strong></td>
+                <td>{t.durationVal}</td>
               </tr>
               <tr>
-                <td><strong>Learning Mode</strong></td>
-                <td>Online Live Mentorship</td>
+                <td><strong>{t.learningMode}</strong></td>
+                <td>{t.modeVal}</td>
               </tr>
               <tr>
-                <td><strong>Original Fee</strong></td>
+                <td><strong>{t.originalFeeLabel}</strong></td>
                 <td><span style={{ textDecoration: 'line-through', color: '#888' }}>Rs. 7,000</span></td>
               </tr>
               <tr>
-                <td><strong>Discounted Fee</strong></td>
+                <td><strong>{t.nowOnly}</strong></td>
                 <td><strong style={{ color: '#00e5ff', fontSize: '1.1rem' }}>Rs. 4,500</strong></td>
               </tr>
               <tr>
-                <td><strong>Discount Savings</strong></td>
+                <td><strong>{t.saveLabel}</strong></td>
                 <td><span style={{ color: '#ffaa00', fontWeight: 600 }}>Save Rs. 2,500</span></td>
               </tr>
               <tr>
-                <td><strong>Support</strong></td>
-                <td>Morning to Night Dedicated Mentorship</td>
+                <td><strong>{t.support}</strong></td>
+                <td>{t.supportVal}</td>
               </tr>
               <tr>
                 <td><strong>Live Classes & Video Replays</strong></td>
@@ -607,15 +745,15 @@ const Courses = () => {
 
         {/* CALL TO ACTION BANNER */}
         <div className="cta-bottom-banner">
-          <h2>🚀 ENROLL NOW!</h2>
-          <p><strong>Learn. Practice. Create. Grow.</strong></p>
-          <p style={{ color: '#aaa', fontSize: '0.95rem', marginBottom: 30 }}>
+          <h2>{t.enrollNow}</h2>
+          <p><strong>{t.readyToStart}</strong></p>
+          <p style={{ color: '#aaa', fontSize: '0.95rem', marginBottom: 25 }}>
             Turn your creativity into real-world skills and begin your journey toward freelancing, content creation, and digital success.
             <br /><strong style={{ color: '#ffaa00' }}>Limited Seats Available!</strong>
           </p>
 
           <button className="btn-primary btn-enroll-now" onClick={() => setIsModalOpen(true)}>
-            GET STARTED NOW &mdash; RS. 4,500
+            {t.getStarted}
           </button>
         </div>
       </div>
@@ -667,7 +805,7 @@ const Courses = () => {
                       display: 'block'
                     }}
                   >
-                    💬 SEND REGISTRATION DETAILS ON WHATSAPP &rarr;
+                    💬 {t.sendWhatsappBtn}
                   </a>
                 )}
 
@@ -720,7 +858,7 @@ const Courses = () => {
                     type="text" 
                     name="phone" 
                     required 
-                    placeholder="+92 320 2200163"
+                    placeholder="+92 303 5081490"
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="enroll-input"
@@ -742,59 +880,47 @@ const Courses = () => {
                   </select>
                 </div>
 
+                {/* OFFICIAL PAYMENT SELECTION (ONLY JAZZCASH & BANK TRANSFER) */}
                 <div className="enroll-form-group">
-                  <label>Select Payment Method *</label>
+                  <label>{t.selectPayment}</label>
                   <div className="payment-methods-grid">
-                    {['JazzCash', 'EasyPaisa', 'Bank Transfer', 'Crypto (ETH/USDT)'].map(method => (
+                    {['JazzCash', 'Bank Transfer (Bank Al Habib)'].map(method => (
                       <button
                         type="button"
                         key={method}
                         className={`payment-option-btn ${formData.payment_method === method ? 'selected' : ''}`}
                         onClick={() => setFormData({ ...formData, payment_method: method })}
                       >
+                        {method === 'JazzCash' ? <Smartphone size={16} style={{ marginRight: 6 }} /> : <Building2 size={16} style={{ marginRight: 6 }} />}
                         {method}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* OFFICIAL PAYMENT ACCOUNT DETAILS BOX */}
+                {/* OFFICIAL PAYMENT ACCOUNT DETAILS CARD */}
                 <div style={{ background: 'rgba(255, 170, 0, 0.08)', border: '1px solid #ffaa00', padding: 15, borderRadius: 10, marginBottom: 18, fontSize: '0.85rem', lineHeight: 1.6 }}>
                   <div style={{ color: '#ffaa00', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    💳 Official Payment Transfer Account Details (Rs. 4,500):
+                    💳 Official Payment Account Details (Rs. 4,500):
                   </div>
-                  {formData.payment_method === 'JazzCash' && (
+                  {formData.payment_method === 'JazzCash' ? (
                     <div>
-                      <div><strong>Account Type:</strong> JazzCash</div>
-                      <div><strong>Account Title:</strong> CreateSkill Academy</div>
-                      <div><strong>Account / Mobile #:</strong> <span style={{ color: '#00e5ff', fontWeight: 700, fontSize: '1rem' }}>0320 2200163</span></div>
+                      <div><strong>Account Type:</strong> JAZZ CASH</div>
+                      <div><strong>Account Title:</strong> ANESH ODD</div>
+                      <div><strong>Mobile Number:</strong> <span style={{ color: '#00e5ff', fontWeight: 700, fontSize: '1rem' }}>+92 303 5081490</span></div>
                     </div>
-                  )}
-                  {formData.payment_method === 'EasyPaisa' && (
+                  ) : (
                     <div>
-                      <div><strong>Account Type:</strong> EasyPaisa</div>
-                      <div><strong>Account Title:</strong> CreateSkill Academy</div>
-                      <div><strong>Account / Mobile #:</strong> <span style={{ color: '#00e5ff', fontWeight: 700, fontSize: '1rem' }}>0320 2200163</span></div>
-                    </div>
-                  )}
-                  {formData.payment_method === 'Bank Transfer' && (
-                    <div>
-                      <div><strong>Bank Name:</strong> Meezan Bank / HBL</div>
-                      <div><strong>Account Title:</strong> CreateSkill Academy</div>
-                      <div><strong>IBAN / Acc #:</strong> <span style={{ color: '#00e5ff', fontWeight: 700, fontSize: '1rem' }}>0320 2200163</span></div>
-                    </div>
-                  )}
-                  {formData.payment_method === 'Crypto (ETH/USDT)' && (
-                    <div>
-                      <div><strong>Network:</strong> USDT (TRC20) / ETH</div>
-                      <div><strong>Wallet Address:</strong> <span style={{ color: '#00e5ff', fontSize: '0.8rem', fontFamily: 'monospace' }}>0x923202200163CreateSkillAcademyWallet</span></div>
+                      <div><strong>Bank Name:</strong> Bank Al Habib</div>
+                      <div><strong>Account Title:</strong> ANISH OAD</div>
+                      <div><strong>IBAN / Acc #:</strong> <span style={{ color: '#00e5ff', fontWeight: 700, fontSize: '0.95rem' }}>PK17BAHL0174009500403301</span></div>
                     </div>
                   )}
                 </div>
 
                 {/* PAYMENT PROOF SCREENSHOT UPLOAD */}
                 <div className="enroll-form-group">
-                  <label>📸 Upload Payment Receipt / Screenshot (Optional / Recommended)</label>
+                  <label>{t.uploadScreenshot}</label>
                   <input 
                     type="file" 
                     accept="image/*"
@@ -820,14 +946,14 @@ const Courses = () => {
                   style={{ width: '100%', padding: '14px', marginTop: 15, fontSize: '0.85rem' }}
                   disabled={submitting}
                 >
-                  {submitting ? 'Sending Verification Code...' : 'SEND VERIFICATION CODE & CONTINUE &rarr;'}
+                  {submitting ? 'Sending Verification Code...' : t.sendOtp}
                 </button>
               </form>
             ) : (
               <form onSubmit={handleEnrollSubmit}>
                 <div className="modal-header">
-                  <h3>📧 Verify Email Address</h3>
-                  <p>Step 2 of 2: Enter the 6-digit verification code sent to <strong>{formData.email}</strong></p>
+                  <h3>📧 {t.verifyOtpTitle}</h3>
+                  <p>{t.verifyOtpSub} <strong>{formData.email}</strong></p>
                 </div>
 
                 {otpSentMsg && (
@@ -863,7 +989,7 @@ const Courses = () => {
                     style={{ flex: 1, fontSize: '0.75rem' }}
                     onClick={() => { setEnrollStep(1); setErrorMessage(''); }}
                   >
-                    ← Back / Edit
+                    {t.backBtn}
                   </button>
                   <button 
                     type="submit" 
@@ -871,7 +997,7 @@ const Courses = () => {
                     style={{ flex: 2, padding: '14px', fontSize: '0.85rem' }}
                     disabled={submitting}
                   >
-                    {submitting ? 'Verifying...' : 'VERIFY CODE & ENROLL &rarr;'}
+                    {submitting ? 'Verifying...' : t.verifyBtn}
                   </button>
                 </div>
               </form>

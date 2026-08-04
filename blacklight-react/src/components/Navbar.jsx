@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Auth } from '../services/auth';
-import { Menu, X, LogOut, Sun, Moon } from 'lucide-react';
+import { Menu, X, LogOut, Sun, Moon, Languages } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -9,6 +9,9 @@ const Navbar = () => {
   const [session, setSession] = useState(Auth.getSession());
   const [isLightMode, setIsLightMode] = useState(() => {
     return localStorage.getItem('blacklight_color_mode') === 'light';
+  });
+  const [currentLang, setCurrentLang] = useState(() => {
+    return localStorage.getItem('blacklight_app_lang') || 'en';
   });
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,6 +32,13 @@ const Navbar = () => {
 
   const toggleLightMode = () => {
     setIsLightMode(!isLightMode);
+  };
+
+  const toggleLanguage = () => {
+    const nextLang = currentLang === 'en' ? 'ur' : 'en';
+    setCurrentLang(nextLang);
+    localStorage.setItem('blacklight_app_lang', nextLang);
+    window.dispatchEvent(new CustomEvent('language_change', { detail: nextLang }));
   };
 
   const handleLogout = () => {
@@ -83,8 +93,21 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* Desktop Auth & Theme Controls */}
+        {/* Desktop Auth & Controls */}
         <div className="nav-auth-section">
+          {/* Language Switcher (EN / UR) */}
+          <button 
+            onClick={toggleLanguage}
+            className="nav-logout-icon-btn"
+            title="Switch Language (English / اردو)"
+            style={{ marginRight: '6px', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0,229,255,0.1)', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(0,229,255,0.3)' }}
+          >
+            <Languages size={15} color="#00e5ff" />
+            <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#00e5ff' }}>
+              {currentLang === 'en' ? 'EN | اردو' : 'اردو | EN'}
+            </span>
+          </button>
+
           {/* Light / Dark Mode Toggle */}
           <button 
             onClick={toggleLightMode} 

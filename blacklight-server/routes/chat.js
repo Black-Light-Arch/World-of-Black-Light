@@ -244,7 +244,7 @@ router.get('/messages/:room', (req, res) => {
     SELECT m.*, u.skin FROM chat_messages m
     LEFT JOIN users u ON m.sender = u.username
     WHERE m.room = ?
-    ORDER BY m.id ASC LIMIT 200
+    ORDER BY m.id ASC LIMIT 10000
   `, roomName);
 
   // For non-admins, hide deleted message content

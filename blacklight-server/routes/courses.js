@@ -260,8 +260,8 @@ router.post('/enroll', (req, res) => {
     const enrollmentId = enrollmentResult.lastInsertRowid;
     const registrationCode = `BL-BOOTCAMP-2026-${String(enrollmentId).padStart(4, '0')}`;
 
-    // Admin WhatsApp phone number (+92 320 2200163)
-    const adminPhone = process.env.ADMIN_WHATSAPP || '923202200163';
+    // Admin WhatsApp phone number (+92 303 5081490)
+    const adminPhone = process.env.ADMIN_WHATSAPP || '923035081490';
     const proofText = payment_proof ? '\n📸 *Payment Screenshot Attached*' : '';
     const waText = encodeURIComponent(
       `🚨 *NEW BOOTCAMP ENROLLMENT RECEIVED!*\n` +
